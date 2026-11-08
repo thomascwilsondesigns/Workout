@@ -117,6 +117,62 @@
   .section-toggle .sec-count{font-weight:500; text-transform:none; letter-spacing:0; opacity:.8;}
   .set-num.tappable{cursor:pointer; border-radius:6px;}
   .set-num.is-warm{color:var(--sage-dark); font-weight:800;}
+  /* check-off, previous, PR */
+  .set-row{grid-template-columns:24px 1fr 1fr 36px !important;}
+  .set-check{
+    width:34px; height:34px; border-radius:50%; border:1.8px solid var(--line); background:#faf9f5; color:#c9c5b8;
+    font-size:17px; font-weight:800; cursor:pointer; margin-bottom:21px; padding:0; line-height:1; align-self:end;
+  }
+  .set-check.on{background:var(--sage); border-color:var(--sage); color:#fff;}
+  .set-num.has-pr{color:var(--rust); font-weight:800;}
+  .prev-line{padding:0 15px 8px; font-size:12.5px; color:var(--muted); line-height:1.45;}
+  .prev-line b{color:var(--sage-dark); font-weight:700;}
+  .pr-badge{display:inline-flex; align-items:center; gap:3px; background:#f6e7dd; color:var(--rust); font-size:11px; font-weight:800; padding:2px 7px; border-radius:20px; margin-left:6px; vertical-align:middle;}
+  .pr-list{padding:0 15px 8px; display:flex; flex-wrap:wrap; gap:6px;}
+  .pr-chip{display:inline-flex; align-items:center; gap:4px; background:#f6e7dd; color:var(--rust); font-size:12px; font-weight:700; padding:4px 9px; border-radius:20px;}
+  .e1rm-line{padding:0 15px 10px; font-size:12.5px; color:var(--muted);}
+  .e1rm-line b{color:var(--sage-dark);}
+  /* history */
+  .metric-chips{display:flex; flex-wrap:wrap; gap:6px; margin-bottom:8px;}
+  .metric-chip{padding:5px 10px; border-radius:16px; font-size:12px; font-weight:600; border:1px solid var(--line); background:#fff; color:var(--muted); cursor:pointer;}
+  .metric-chip.active{background:var(--sage-dark); color:#fff; border-color:var(--sage-dark);}
+  .chart-wrap svg{width:100%; height:auto; display:block;}
+  .ch-grid{stroke:var(--line); stroke-width:1;}
+  .ch-axis{fill:var(--muted); font-size:9.5px;}
+  .ch-line{stroke:var(--sage); stroke-width:2.2; fill:none; stroke-linejoin:round; stroke-linecap:round;}
+  .ch-dot{fill:#fff; stroke:var(--sage); stroke-width:2;}
+  .ch-dot.pr{fill:var(--rust); stroke:var(--rust);}
+  .ch-bar{fill:var(--sage); opacity:.55;}
+  .ch-bar.cur{opacity:1;}
+  .ch-hit{fill:transparent; cursor:pointer;}
+  .chart-readout{font-size:12.5px; color:var(--sage-dark); font-weight:600; min-height:18px; margin:2px 0 8px;}
+  .rec-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 10px;}
+  .rec-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
+  .rec-card .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:700;}
+  .rec-card .v{font-size:16px; font-weight:800; color:var(--sage-dark);}
+  .rec-card .d{font-size:11px; color:var(--muted);}
+  .hist-h{font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted); font-weight:700; margin:10px 0 6px;}
+  .hist-row{background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 10px; margin-bottom:6px;}
+  .hist-row .hd{font-size:12.5px; font-weight:700; color:var(--sage-dark); display:flex; justify-content:space-between; gap:6px;}
+  .hist-row .sets{font-size:12.5px; color:var(--ink); margin-top:3px; line-height:1.5;}
+  .raw-table{width:100%; font-size:12.5px; border-collapse:collapse;}
+  .raw-table td{padding:3px 0; border-bottom:1px solid var(--line);}
+  /* stats */
+  .stat-cards{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:12px;}
+  .stat-card{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:10px;}
+  .stat-card .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:700;}
+  .stat-card .v{font-size:21px; font-weight:800; color:var(--sage-dark); margin-top:2px;}
+  .stat-card .d{font-size:11px; color:var(--muted);}
+  .stat-panel{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px; margin-bottom:12px;}
+  .stat-panel h3{margin:0 0 8px; font-size:13px; text-transform:uppercase; letter-spacing:.5px; color:var(--muted);}
+  .cal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
+  .cal-head .t{font-weight:700; font-size:15px;}
+  .cal-nav{background:none; border:none; font-size:22px; color:var(--sage-dark); padding:2px 10px; cursor:pointer;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; text-align:center;}
+  .cal-dow{font-size:10.5px; color:var(--muted); font-weight:700;}
+  .cal-day{aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; font-size:13px; border-radius:50%; background:none; border:none; color:var(--ink); padding:0;}
+  .cal-day.has{background:var(--sage); color:#fff; font-weight:700; cursor:pointer;}
+  .cal-day.today{box-shadow:inset 0 0 0 2px var(--rust);}
   .exercise-card{
     background:var(--card); border-radius:var(--radius); margin-bottom:10px; border:1px solid var(--line); overflow:hidden;
   }
@@ -427,6 +483,9 @@
 <header>
   <span class="back hidden" id="backBtn">←</span>
   <h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1>
+  <div class="header-actions" id="landingActions">
+    <span class="header-action-icon" title="Stats" onclick="showStats()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>
+  </div>
   <div class="header-actions hidden" id="headerActions">
     <span class="header-action-icon" title="Edit date" onclick="openDateEditSheet()">✎</span>
     <span class="header-action-icon" title="Copy to today" onclick="copyWorkout(currentWorkoutId)">⧉</span>
@@ -438,6 +497,9 @@
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
 </div>
+
+<!-- STATS -->
+<div class="screen hidden" id="statsScreen"></div>
 
 <!-- WORKOUT DETAIL -->
 <div class="screen hidden" id="workoutScreen">
@@ -1232,6 +1294,8 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 /* ---------------- Navigation ---------------- */
 function showLanding(){
   currentWorkoutId = null;
+  document.getElementById('statsScreen').classList.add('hidden');
+  document.getElementById('landingActions').classList.remove('hidden');
   document.getElementById('landingScreen').classList.remove('hidden');
   document.getElementById('workoutScreen').classList.add('hidden');
   document.getElementById('backBtn').classList.add('hidden');
@@ -1246,6 +1310,8 @@ function showWorkout(workoutId){
   openSwipeCard = null; // stale reference once we leave the landing screen
   lastEditedInstId = null; // fresh collapse-on-edit tracking for this workout view
   currentWorkoutId = workoutId;
+  document.getElementById('statsScreen').classList.add('hidden');
+  document.getElementById('landingActions').classList.add('hidden');
   document.getElementById('landingScreen').classList.add('hidden');
   document.getElementById('workoutScreen').classList.remove('hidden');
   document.getElementById('backBtn').classList.remove('hidden');
@@ -1290,7 +1356,7 @@ function openDateEditSheet(){
 function cloneExerciseInstance(inst){
   const copy = { ...inst, id: uid() };
   if(Array.isArray(inst.sets)){
-    copy.sets = inst.sets.map(s=> ({ ...s })); // fresh set objects, no shared refs
+    copy.sets = blankSetsFrom(inst); // copied workouts start with blank, unchecked sets
   }
   return copy;
 }
@@ -1458,6 +1524,275 @@ function initSwipeCards(){
       decided = null;
     });
   });
+}
+
+
+/* ---------------- Charts ---------------- */
+function chartTap(el, readoutId){
+  const r = document.getElementById(readoutId);
+  if(r) r.textContent = el.getAttribute('data-txt') || '';
+}
+function lineChartSvg(points, readoutId){
+  // points: [{value, txt, pr, axis}] evenly spaced, oldest first
+  const W=320, H=150, L=40, R=12, T=12, B=24;
+  const vals = points.map(p=>p.value);
+  let min = Math.min(...vals), max = Math.max(...vals);
+  if(min===max){ min -= 1; max += 1; }
+  const pad = (max-min)*0.12; min = Math.max(0, min-pad); max = max+pad;
+  const x = i => points.length===1 ? L+(W-L-R)/2 : L+(W-L-R)*i/(points.length-1);
+  const y = v => T+(H-T-B)*(1-(v-min)/(max-min));
+  const fmtAxis = points[0].axis;
+  let g = '';
+  [min, (min+max)/2, max].forEach(v=>{
+    g += `<line class="ch-grid" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text class="ch-axis" x="${L-5}" y="${y(v)+3}" text-anchor="end">${escapeHtml(fmtAxis(v))}</text>`;
+  });
+  const path = points.map((p,i)=>`${i?'L':'M'}${x(i).toFixed(1)} ${y(p.value).toFixed(1)}`).join(' ');
+  const dots = points.map((p,i)=>`<circle class="ch-dot ${p.pr?'pr':''}" cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="4"/>`).join('');
+  const hits = points.map((p,i)=>`<circle class="ch-hit" cx="${x(i).toFixed(1)}" cy="${y(p.value).toFixed(1)}" r="14" data-txt="${escapeHtml(p.txt)}" onclick="chartTap(this,'${readoutId}')"/>`).join('');
+  const first = points[0].label, last = points[points.length-1].label;
+  const xl = `<text class="ch-axis" x="${x(0)}" y="${H-6}" text-anchor="${points.length===1?'middle':'start'}">${escapeHtml(first)}</text>` +
+             (points.length>1 ? `<text class="ch-axis" x="${x(points.length-1)}" y="${H-6}" text-anchor="end">${escapeHtml(last)}</text>` : '');
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${g}${points.length>1?`<path class="ch-line" d="${path}"/>`:''}${dots}${xl}${hits}</svg>`;
+}
+function barChartSvg(bars, readoutId){
+  // bars: [{value, label, txt, cur}]
+  const W=320, H=140, L=8, R=8, T=14, B=22;
+  const max = Math.max(1, ...bars.map(b=>b.value));
+  const slot = (W-L-R)/bars.length, bw = slot*0.62;
+  let out = '';
+  bars.forEach((b,i)=>{
+    const h = (H-T-B)*(b.value/max);
+    const bx = L+slot*i+(slot-bw)/2, by = H-B-h;
+    out += `<rect class="ch-bar ${b.cur?'cur':''}" x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(h,b.value>0?2:0).toFixed(1)}" rx="3"/>`;
+    if(b.label) out += `<text class="ch-axis" x="${(bx+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" style="font-size:8.5px">${escapeHtml(b.label)}</text>`;
+    out += `<rect class="ch-hit" x="${(L+slot*i).toFixed(1)}" y="0" width="${slot.toFixed(1)}" height="${H-B}" data-txt="${escapeHtml(b.txt)}" onclick="chartTap(this,'${readoutId}')"/>`;
+  });
+  out += `<line class="ch-grid" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img">${out}</svg>`;
+}
+
+/* ---------------- Per-exercise history ---------------- */
+const HIST_METRICS = [
+  {k:'e1rm',   label:'Est. 1RM',   fmt:v=>Math.round(v)+' lb'},
+  {k:'weight', label:'Top weight', fmt:v=>v+' lb'},
+  {k:'volume', label:'Volume',     fmt:v=>Math.round(v).toLocaleString()+' lb'},
+  {k:'reps',   label:'Top reps',   fmt:v=>v+' reps'},
+  {k:'time',   label:'Best time',  fmt:v=>formatTimeValue(v)}
+];
+function sessionMetrics(ses){
+  const t = ses.inst.secondaryType || 'weight';
+  const cs = ses.inst.sets.filter(isCounted);
+  const out = {};
+  if(t==='weight'){
+    let e=0, wt=0, vol=0;
+    cs.forEach(x=>{
+      if(x.reps>0){ e = Math.max(e, e1rmOf(x.weight, x.reps)); if(x.weight>0) wt = Math.max(wt, x.weight); }
+      vol += (x.reps||0)*(x.weight||0);
+    });
+    if(e>0) out.e1rm = e; if(wt>0) out.weight = wt; if(vol>0) out.volume = vol;
+  }
+  let r = 0; cs.forEach(x=>{ if(x.reps>0) r = Math.max(r, x.reps); });
+  if(r>0) out.reps = r;
+  if(t==='time'){ let tm=0; cs.forEach(x=>{ tm = Math.max(tm, x.time||0); }); if(tm>0) out.time = tm; }
+  return out;
+}
+function setHistMetric(instId, k){
+  const cur = openExerciseDetail[instId] || {open:true, tab:'history'};
+  openExerciseDetail[instId] = { ...cur, metric:k };
+  renderWorkout();
+}
+function toggleHistAll(instId){
+  const cur = openExerciseDetail[instId] || {open:true, tab:'history'};
+  openExerciseDetail[instId] = { ...cur, showAll: !cur.showAll };
+  renderWorkout();
+}
+function renderHistoryPane(inst, def, state){
+  const sessions = getExerciseSessions(def.id);
+  if(sessions.length===0) return `<div style="color:var(--muted);">No history yet. Check off some sets and they will show up here.</div>`;
+  const mets = sessions.map(sessionMetrics);
+  const avail = HIST_METRICS.filter(m=> mets.some(x=>x[m.k]!=null));
+  let metric = avail.find(m=>m.k===state.metric) || avail[0];
+  let chartHtml = '';
+  if(metric){
+    const pts = []; let runMax = 0, seen = 0;
+    sessions.forEach((ses,i)=>{
+      const v = mets[i][metric.k]; if(v==null) return;
+      const pr = seen>0 && v>runMax; seen++; runMax = Math.max(runMax, v);
+      const d = new Date(ses.workout.date+'T00:00:00');
+      pts.push({value:v, pr, axis:(a)=>metric.k==='time'?formatTimeValue(Math.round(a)):String(Math.round(a)),
+        label:d.toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+        txt: fmtDateY(ses.workout.date)+' · '+metric.fmt(v)+(pr?' · record':'')});
+    });
+    const rid = 'chartReadout-'+inst.id;
+    chartHtml = `
+      <div class="metric-chips">${avail.map(m=>`<span class="metric-chip ${m.k===metric.k?'active':''}" onclick="setHistMetric('${inst.id}','${m.k}')">${m.label}</span>`).join('')}</div>
+      <div class="chart-wrap">${lineChartSvg(pts, rid)}</div>
+      <div class="chart-readout" id="${rid}">${escapeHtml(pts[pts.length-1].txt)}</div>`;
+  }
+  // records
+  let recHtml = '';
+  const wSes = sessions.filter(x=>(x.inst.secondaryType||'weight')==='weight');
+  if(wSes.length){
+    let bestE={v:0,d:''}, bestW={v:0,d:''}, bestV={v:0,d:'',desc:''}; const repsAt = {};
+    wSes.forEach(ses=>ses.inst.sets.forEach(x=>{
+      if(!isCounted(x) || !(x.reps>0)) return;
+      const w = x.weight||0, e = e1rmOf(w,x.reps), vol = x.reps*w;
+      if(e>bestE.v) bestE={v:e,d:ses.workout.date};
+      if(w>bestW.v) bestW={v:w,d:ses.workout.date};
+      if(vol>bestV.v) bestV={v:vol,d:ses.workout.date,desc:x.reps+'×'+w};
+      if(!repsAt[w] || x.reps>repsAt[w].r) repsAt[w]={r:x.reps,d:ses.workout.date};
+    }));
+    const card=(k,v,d)=>`<div class="rec-card"><div class="k">${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+    recHtml = `<div class="hist-h">Records</div><div class="rec-grid">
+      ${bestW.v?card('Heaviest',bestW.v+' lb',fmtDateY(bestW.d)):''}
+      ${bestE.v?card('Est. 1RM',Math.round(bestE.v)+' lb',fmtDateY(bestE.d)):''}
+      ${bestV.v?card('Best set volume',Math.round(bestV.v).toLocaleString()+' lb',bestV.desc+' · '+fmtDateY(bestV.d)):''}
+    </div>`;
+    const ws = Object.keys(repsAt).map(Number).sort((a,b)=>b-a).slice(0,6);
+    if(ws.length) recHtml += `<div class="hist-h">Best reps at weight</div><table class="raw-table">${ws.map(w=>`<tr><td>${w>0?w+' lb':'Bodyweight'}</td><td><b>${repsAt[w].r} reps</b></td><td style="color:var(--muted);text-align:right">${fmtDateY(repsAt[w].d)}</td></tr>`).join('')}</table>`;
+  }
+  const tSes = sessions.filter(x=>x.inst.secondaryType==='time');
+  if(tSes.length){
+    let bt=0, bd='';
+    tSes.forEach(ses=>ses.inst.sets.forEach(x=>{ if(isCounted(x) && (x.time||0)>bt){ bt=x.time; bd=ses.workout.date; } }));
+    if(bt>0) recHtml += `<div class="rec-grid"><div class="rec-card"><div class="k">Longest hold</div><div class="v">${formatTimeValue(bt)}</div><div class="d">${fmtDateY(bd)}</div></div></div>`;
+  }
+  // past sessions
+  const desc = [...sessions].reverse();
+  const shown = state.showAll ? desc : desc.slice(0,8);
+  const rows = shown.map(ses=>{
+    const prs = computePRsForInstance(ses.inst, ses.workout, sessions);
+    const t = ses.inst.secondaryType || 'weight';
+    const sets = ses.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSet(x,t)).join(' · ');
+    return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${Object.keys(prs).length?`<span class="pr-badge">${TROPHY_SVG} PR</span>`:''}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${escapeHtml(sets)}</div></div>`;
+  }).join('');
+  const more = desc.length>8 ? `<button class="btn-text" onclick="toggleHistAll('${inst.id}')">${state.showAll?'Show fewer':'Show all '+desc.length+' sessions'}</button>` : '';
+  return `${chartHtml}${recHtml}<div class="hist-h">All sessions</div>${rows}${more}`;
+}
+
+/* ---------------- Stats screen ---------------- */
+let statsMetric = 'volume';
+let statsMonth = null;
+function weekStartStr(dateStr){
+  const d = new Date(dateStr+'T00:00:00');
+  d.setDate(d.getDate() - ((d.getDay()+6)%7)); // Monday start
+  return localDateStr(d);
+}
+function workoutCounts(w){
+  const all = [...(w.warmup||[]), ...(w.main||[])];
+  return all.length===0 || all.some(hasLoggedSets);
+}
+function workoutTotals(w){
+  let sets=0, vol=0;
+  (w.main||[]).forEach(inst=>{
+    const t = inst.secondaryType || 'weight';
+    inst.sets.forEach(x=>{
+      if(!isCounted(x) || !(x.reps>0 || x.time>0)) return;
+      sets++;
+      if(t==='weight') vol += (x.reps||0)*(x.weight||0);
+    });
+  });
+  return {sets, vol};
+}
+function fmtVol(v){ return v>=10000 ? (v/1000).toFixed(1)+'k' : Math.round(v).toLocaleString(); }
+
+function showStats(){
+  currentWorkoutId = null;
+  document.getElementById('landingScreen').classList.add('hidden');
+  document.getElementById('workoutScreen').classList.add('hidden');
+  document.getElementById('statsScreen').classList.remove('hidden');
+  document.getElementById('backBtn').classList.remove('hidden');
+  document.getElementById('fabAdd').classList.add('hidden');
+  document.getElementById('headerActions').classList.add('hidden');
+  document.getElementById('landingActions').classList.add('hidden');
+  const h1 = document.getElementById('headerTitle');
+  h1.textContent = 'Stats'; h1.classList.remove('editable');
+  if(!statsMonth){ const n = new Date(); statsMonth = {y:n.getFullYear(), m:n.getMonth()}; }
+  renderStats();
+}
+function setStatsMetric(k){ statsMetric = k; renderStats(); }
+function shiftStatsMonth(delta){
+  let {y,m} = statsMonth; m += delta;
+  if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
+  statsMonth = {y,m}; renderStats();
+}
+function calTap(dateStr){
+  const list = db.workouts.filter(w=>w.date===dateStr && workoutCounts(w));
+  if(list.length===1){ showWorkout(list[0].id); return; }
+  if(list.length===0) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'sheet-overlay';
+  overlay.innerHTML = `<div class="sheet"><h2>${formatDateLong(dateStr)}</h2>
+    ${list.map(w=>`<button class="btn-secondary" data-id="${w.id}">${escapeHtml(w.types.join(', ')||'Workout')}</button>`).join('')}
+    <button class="btn-secondary" onclick="this.closest('.sheet-overlay').remove()">Close</button></div>`;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelectorAll('[data-id]').forEach(b=> b.onclick = ()=>{ overlay.remove(); showWorkout(b.dataset.id); });
+}
+function renderStats(){
+  const el = document.getElementById('statsScreen');
+  const counted = db.workouts.filter(workoutCounts);
+  const byWeek = {};
+  counted.forEach(w=>{
+    const k = weekStartStr(w.date); const t = workoutTotals(w);
+    const o = byWeek[k] || (byWeek[k] = {workouts:0, sets:0, vol:0});
+    o.workouts++; o.sets += t.sets; o.vol += t.vol;
+  });
+  // last 12 weeks, oldest first
+  const thisWeek = weekStartStr(localDateStr());
+  const keys = [];
+  { const d = new Date(thisWeek+'T00:00:00'); for(let i=11;i>=0;i--){ const x = new Date(d); x.setDate(x.getDate()-7*i); keys.push(localDateStr(x)); } }
+  const zero = {workouts:0, sets:0, vol:0};
+  const cur = byWeek[keys[11]] || zero, prev = byWeek[keys[10]] || zero;
+  const dlt = (a,b)=> b>0 ? ((a-b)>=0?'+':'')+Math.round((a-b)/b*100)+'% vs last wk' : 'last wk: 0';
+  const mdef = {
+    volume:{label:'Volume', get:o=>o.vol, fmt:v=>fmtVol(v)+' lb'},
+    workouts:{label:'Workouts', get:o=>o.workouts, fmt:v=>v+(v===1?' workout':' workouts')},
+    sets:{label:'Sets', get:o=>o.sets, fmt:v=>v+(v===1?' set':' sets')}
+  };
+  const md = mdef[statsMetric];
+  const bars = keys.map((k,i)=>{
+    const o = byWeek[k] || zero; const d = new Date(k+'T00:00:00');
+    return {value:md.get(o), cur:i===11, label:((11-i)%3===0)?(d.getMonth()+1)+'/'+d.getDate():'',
+      txt:'Week of '+d.toLocaleDateString('en-US',{month:'short',day:'numeric'})+' · '+md.fmt(md.get(o))};
+  });
+  const rid = 'statsReadout';
+  // calendar
+  const {y,m} = statsMonth;
+  const first = new Date(y,m,1), offset = (first.getDay()+6)%7, dim = new Date(y,m+1,0).getDate();
+  const days = {}; counted.forEach(w=>{ days[w.date] = (days[w.date]||0)+1; });
+  const todayStr = localDateStr();
+  let cells = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
+  for(let i=0;i<offset;i++) cells += '<div></div>';
+  let monthCount = 0;
+  for(let d=1; d<=dim; d++){
+    const ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const has = days[ds]; if(has) monthCount += has;
+    cells += `<button class="cal-day ${has?'has':''} ${ds===todayStr?'today':''}" ${has?`onclick="calTap('${ds}')"`:'disabled'}>${d}</button>`;
+  }
+  const monthName = first.toLocaleDateString('en-US',{month:'long', year:'numeric'});
+  const sorted = counted.map(w=>w.date).sort();
+  el.innerHTML = `
+    <div class="stat-cards">
+      <div class="stat-card"><div class="k">Workouts</div><div class="v">${cur.workouts}</div><div class="d">this week</div></div>
+      <div class="stat-card"><div class="k">Sets</div><div class="v">${cur.sets}</div><div class="d">${dlt(cur.sets, prev.sets)}</div></div>
+      <div class="stat-card"><div class="k">Volume</div><div class="v">${fmtVol(cur.vol)}</div><div class="d">${dlt(cur.vol, prev.vol)}</div></div>
+    </div>
+    <div class="stat-panel">
+      <h3>Last 12 weeks</h3>
+      <div class="metric-chips">${Object.keys(mdef).map(k=>`<span class="metric-chip ${k===statsMetric?'active':''}" onclick="setStatsMetric('${k}')">${mdef[k].label}</span>`).join('')}</div>
+      <div class="chart-wrap">${barChartSvg(bars, rid)}</div>
+      <div class="chart-readout" id="${rid}">${escapeHtml(bars[11].txt)}</div>
+    </div>
+    <div class="stat-panel">
+      <div class="cal-head"><button class="cal-nav" onclick="shiftStatsMonth(-1)" aria-label="Previous month">‹</button><div class="t">${monthName}</div><button class="cal-nav" onclick="shiftStatsMonth(1)" aria-label="Next month">›</button></div>
+      <div class="cal-grid">${cells}</div>
+      <div class="chart-readout" style="margin-top:8px">${monthCount} workout${monthCount===1?'':'s'} this month</div>
+    </div>
+    <div class="stat-panel"><h3>All time</h3>
+      <div style="font-size:14px">${counted.length} workouts${sorted.length?` since ${fmtDateY(sorted[0])}`:''}</div>
+      <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Volume counts checked working sets in the Workout section (warmup sets and the Warmup section are excluded).</div>
+    </div>`;
 }
 
 /* ---------------- New workout flow ---------------- */
@@ -1637,15 +1972,98 @@ function ensureExerciseDef(name){
   return def;
 }
 
-function findLastInstance(exId, excludeWorkoutId){
-  const sorted = [...db.workouts].filter(w=>w.id!==excludeWorkoutId).sort((a,b)=> b.date.localeCompare(a.date) || b.createdAt-a.createdAt);
+/* ---------------- Set logic: counted sets, e1RM, history ---------------- */
+// A set "counts" toward progress/PRs/volume if it is not a warmup (W) set and has not been
+// explicitly left unchecked. Sets saved before check-off existed have no flag and count.
+function isCounted(s){ return !s.warm && s.done!==false; }
+function e1rmOf(w, r){ if(!(w>0) || !(r>0) || r>15) return 0; return r===1 ? w : w*(1+r/30); } // Epley
+function hasLoggedSets(inst){ return (inst.sets||[]).some(s=> s.done!==false && ((s.reps>0) || (s.time>0))); }
+function blankSet(warm){ const o={reps:null,weight:null,band:null,time:null,done:false}; if(warm) o.warm=true; return o; }
+function blankSetsFrom(inst){
+  const src = inst && Array.isArray(inst.sets) ? inst.sets.filter(x=>x.done!==false) : [];
+  return src.length ? src.map(x=>blankSet(x.warm)) : [blankSet()];
+}
+function fmtDateY(d){ return new Date(d+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+const TROPHY_SVG = '<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4zM7 6H4v1a3 3 0 0 0 3 3M17 6h3v1a3 3 0 0 1-3 3"/></svg>';
+
+function fmtSet(s, type){
+  const reps = s.reps ?? '–';
+  let sec;
+  if(type==='band') sec = s.band || '–';
+  else if(type==='time') sec = formatTimeValue(s.time);
+  else sec = (s.weight ?? '–') + (s.weight!=null ? 'lb' : '');
+  return (s.warm?'W ':'') + reps + '×' + sec;
+}
+
+function sessionsBefore(a, b){ // is workout a before workout b
+  return a.date < b.date || (a.date===b.date && (a.createdAt||0) < (b.createdAt||0));
+}
+// Every logged appearance of an exercise, oldest first.
+function getExerciseSessions(exId){
+  const out = [];
+  db.workouts.forEach(w=>{
+    [['warmup',w.warmup],['main',w.main]].forEach(([bk,arr])=>{
+      (arr||[]).forEach(inst=>{ if(inst.exerciseId===exId && hasLoggedSets(inst)) out.push({workout:w, inst, bucket:bk}); });
+    });
+  });
+  out.sort((a,b)=> a.workout.date.localeCompare(b.workout.date) || (a.workout.createdAt||0)-(b.workout.createdAt||0));
+  return out;
+}
+function findLastSession(exId, excludeWorkoutId){
+  const sorted = [...db.workouts].filter(w=>w.id!==excludeWorkoutId).sort((a,b)=> b.date.localeCompare(a.date) || (b.createdAt||0)-(a.createdAt||0));
   for(const w of sorted){
     for(const bucket of [w.warmup, w.main]){
-      const inst = bucket.find(i=>i.exerciseId===exId);
-      if(inst) return inst;
+      const inst = (bucket||[]).find(i=>i.exerciseId===exId && hasLoggedSets(i));
+      if(inst) return {inst, workout:w};
     }
   }
   return null;
+}
+function findLastInstance(exId, excludeWorkoutId){
+  const r = findLastSession(exId, excludeWorkoutId);
+  return r ? r.inst : null;
+}
+
+/* ---------------- Personal records ---------------- */
+function prBestsEmpty(){ return {weight:{n:0,maxW:0,maxVol:0,maxE:0,repsAt:{}}, time:{n:0,max:0}, band:{n:0,repsAt:{}}}; }
+function prAbsorb(b, s, type){
+  if(type==='time'){ if(!(s.time>0)) return; b.time.n++; b.time.max = Math.max(b.time.max, s.time); return; }
+  if(!(s.reps>0)) return;
+  if(type==='band'){ const k = s.band || '–'; b.band.n++; b.band.repsAt[k] = Math.max(b.band.repsAt[k]||0, s.reps); return; }
+  const w = s.weight||0, bw = b.weight;
+  bw.n++; bw.maxW = Math.max(bw.maxW, w); bw.maxVol = Math.max(bw.maxVol, s.reps*w);
+  bw.maxE = Math.max(bw.maxE, e1rmOf(w, s.reps)); bw.repsAt[w] = Math.max(bw.repsAt[w]||0, s.reps);
+}
+function prCheck(b, s, type){
+  const out = [];
+  if(type==='time'){ if(s.time>0 && b.time.n>0 && s.time>b.time.max) out.push('Time'); return out; }
+  if(!(s.reps>0)) return out;
+  if(type==='band'){ const k = s.band || '–'; if(b.band.n>0 && k in b.band.repsAt && s.reps>b.band.repsAt[k]) out.push('Reps with '+k+' band'); return out; }
+  const w = s.weight||0, bw = b.weight;
+  if(bw.n===0) return out; // nothing to beat yet
+  if(w>0 && w>bw.maxW) out.push('Weight');
+  if(s.reps*w>bw.maxVol && w>0) out.push('Volume');
+  if(e1rmOf(w,s.reps)>bw.maxE) out.push('Est. 1RM');
+  if(w in bw.repsAt && s.reps>bw.repsAt[w]) out.push(w>0 ? 'Reps at '+w+' lb' : 'Reps (bodyweight)');
+  return out;
+}
+// Returns {setIndex: [labels]} for sets in this instance that beat everything logged before it.
+function computePRsForInstance(inst, workout, sessions){
+  const b = prBestsEmpty();
+  (sessions || getExerciseSessions(inst.exerciseId)).forEach(ses=>{
+    if(ses.workout.id===workout.id || !sessionsBefore(ses.workout, workout)) return;
+    const t = ses.inst.secondaryType || 'weight';
+    ses.inst.sets.forEach(x=>{ if(isCounted(x)) prAbsorb(b, x, t); });
+  });
+  const type = inst.secondaryType || 'weight';
+  const bySet = {};
+  (inst.sets||[]).forEach((x,i)=>{
+    if(!isCounted(x)) return;
+    const labels = prCheck(b, x, type);
+    if(labels.length) bySet[i] = labels;
+    prAbsorb(b, x, type);
+  });
+  return bySet;
 }
 
 function calcSetLoad(set, secondaryType){
@@ -1655,7 +2073,7 @@ function calcSetLoad(set, secondaryType){
   if(secondaryType==='band') return set.reps || 0;
   return (set.reps || 0) * (set.weight || 0);
 }
-function workingSets(sets){ return (sets||[]).filter(s=>!s.warm); }
+function workingSets(sets){ return (sets||[]).filter(isCounted); }
 
 function calcTotalLoad(sets, secondaryType, upToCount){
   const slice = upToCount!=null ? sets.slice(0, upToCount) : sets;
@@ -1909,6 +2327,27 @@ function renderExerciseCard(inst, bucketKey){
     time:   {label:'Time'}
   };
 
+  const curW = getWorkout();
+  const prs = curW ? computePRsForInstance(inst, curW) : {};
+  const prKeys = Object.keys(prs);
+  const lastSes = findLastSession(def.id, currentWorkoutId);
+  let prevHtml = '';
+  if(lastSes){
+    const lt = lastSes.inst.secondaryType || 'weight';
+    const txt = lastSes.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSet(x, lt)).join(' · ');
+    prevHtml = `<div class="prev-line"><b>Last · ${fmtDateY(lastSes.workout.date)}</b><br>${escapeHtml(txt)}</div>`;
+  }
+  const prHtml = prKeys.length ? `<div class="pr-list">${prKeys.map(i=>{
+    const n = inst.sets.slice(0,Number(i)).filter(x=>!x.warm).length+1;
+    return `<span class="pr-chip">${TROPHY_SVG} Set ${n} · ${escapeHtml(prs[i].join(', '))}</span>`;
+  }).join('')}</div>` : '';
+  let e1Html = '';
+  if(secondaryType==='weight'){
+    let best = 0, bestSet = null;
+    inst.sets.forEach(x=>{ if(isCounted(x)){ const e = e1rmOf(x.weight, x.reps); if(e>best){ best=e; bestSet=x; } } });
+    if(best>0) e1Html = `<div class="e1rm-line">Est. 1RM <b>${Math.round(best)} lb</b> · from ${bestSet.reps}×${bestSet.weight}</div>`;
+  }
+
   let bodyHtml = '';
   if(!collapsed){
     bodyHtml = `
@@ -1919,27 +2358,31 @@ function renderExerciseCard(inst, bucketKey){
           <option value="time" ${secondaryType==='time'?'selected':''}>Time</option>
         </select>
       </div>
+      ${prevHtml}
       <div class="sets-list">
         ${inst.sets.map((s,i)=>`
           <div class="set-row">
-            <div class="set-num tappable ${s.warm?'is-warm':''}" onclick="toggleWarmSet('${inst.id}',${i})">${s.warm ? 'W' : (inst.sets.slice(0,i).filter(x=>!x.warm).length+1)}</div>
+            <div class="set-num tappable ${s.warm?'is-warm':''} ${prs[i]?'has-pr':''}" onclick="toggleWarmSet('${inst.id}',${i})">${s.warm ? 'W' : (inst.sets.slice(0,i).filter(x=>!x.warm).length+1)}</div>
             ${renderWheel(inst.id, i, 'reps', s.reps, false, 0, 20, 1, 'Reps', i===0)}
             ${secondaryType==='band'
               ? renderBandWheel(inst.id, i, s.band, false, i===0)
               : secondaryType==='time'
                 ? renderTimeWheel(inst.id, i, s.time, false, i===0)
                 : renderWheel(inst.id, i, 'weight', s.weight, false, 0, 260, 2.5, 'Lbs', i===0)}
+            <button class="set-check ${s.done!==false?'on':''}" onclick="toggleSetDone('${inst.id}',${i})" aria-label="Mark set done">✓</button>
           </div>
         `).join('')}
         <div class="set-actions">
           <button class="add-set-btn" onclick="addSet('${inst.id}')">+ Add set</button>
           ${inst.sets.length>0 ? `<button class="remove-set-btn" onclick="removeSet('${inst.id}')">− Remove set</button>` : ''}
         </div>
-      </div>`;
+      </div>
+      ${prHtml}
+      ${e1Html}`;
   }
 
-  const tabs = ['cues','links','notes'];
-  const tabLabels = {cues:'Cues', links:'Video', notes:'Notes'};
+  const tabs = ['cues','links','notes','history'];
+  const tabLabels = {cues:'Cues', links:'Video', notes:'Notes', history:'History'};
 
   let paneHtml = '';
   if(state.tab==='cues'){
@@ -1968,6 +2411,8 @@ function renderExerciseCard(inst, bucketKey){
         <button class="add-exercise-btn video-add-btn" onclick="addLink('${inst.id}','${def.id}')">+ Add video — saves to this exercise for future workouts</button>
       </div>
     `;
+  } else if(state.tab==='history'){
+    paneHtml = renderHistoryPane(inst, def, state);
   } else if(state.tab==='notes'){
     paneHtml = `
       <textarea class="notes-area" id="notes-${inst.id}" onchange="updateNotes('${def.id}',this.value)">${escapeHtml(def.notes||'')}</textarea>
@@ -1990,7 +2435,7 @@ function renderExerciseCard(inst, bucketKey){
         <div class="exercise-head-left" onclick="toggleCollapse('${inst.id}')">
           <span class="exercise-icon">${getExerciseIcon(def.name)}</span>
           <div class="exercise-head-text">
-            <span class="name">${escapeHtml(def.name)}</span>
+            <span class="name">${escapeHtml(def.name)}${prKeys.length ? `<span class="pr-badge">${TROPHY_SVG} PR</span>` : ''}</span>
             ${collapsed ? `<span class="set-summary">${setSummaryText(inst, secondaryType, bucketKey)}</span>` : ''}
           </div>
         </div>
@@ -2005,14 +2450,9 @@ function renderExerciseCard(inst, bucketKey){
 
 function setSummaryText(inst, secondaryType, bucketKey){
   if(!inst.sets || inst.sets.length===0) return 'No sets logged';
-  const parts = inst.sets.map(s=>{
-    const reps = s.reps ?? '–';
-    let secondary;
-    if(secondaryType==='band') secondary = s.band || '–';
-    else if(secondaryType==='time') secondary = formatTimeValue(s.time);
-    else secondary = (s.weight ?? '–') + (s.weight!=null ? 'lb' : '');
-    return `${s.warm?'W ':''}${reps}×${secondary}`;
-  });
+  const shown = inst.sets.filter(x=>x.done!==false);
+  if(shown.length===0) return `Not started · ${inst.sets.length} set${inst.sets.length===1?'':'s'}`;
+  const parts = shown.map(x=>fmtSet(x, secondaryType));
   // Progress delta is only meaningful for main-lift progressive overload — warmups/PT
   // work isn't tracked for "improvement" the same way, so skip it there.
   if(bucketKey==='warmup') return parts.join(', ');
@@ -2260,11 +2700,12 @@ function commitWheelValue(instId, idx, field, value){
 /* ---------------- Exercise card interactions ---------------- */
 function toggleExerciseDetail(instId){
   const cur = openExerciseDetail[instId] || {open:false, tab:'cues'};
-  openExerciseDetail[instId] = { open: !cur.open, tab: cur.tab };
+  openExerciseDetail[instId] = { ...cur, open: !cur.open };
   renderWorkout();
 }
 function setDetailTab(instId, tab){
-  openExerciseDetail[instId] = { open:true, tab };
+  const cur = openExerciseDetail[instId] || {};
+  openExerciseDetail[instId] = { ...cur, open:true, tab };
   renderWorkout();
 }
 
@@ -2306,8 +2747,33 @@ function updateSet(instId, idx, field, value){
 function addSet(instId){
   const {inst} = findInstAndBucket(instId);
   const last = inst.sets[inst.sets.length-1];
-  inst.sets.push({ reps: last?last.reps:null, weight: last?last.weight:null, band: last?last.band:null, time: last?last.time:null });
+  inst.sets.push({ reps: last?last.reps:null, weight: last?last.weight:null, band: last?last.band:null, time: last?last.time:null, done:false });
   saveDB();
+  renderWorkout();
+}
+function toggleSetDone(instId, idx){
+  const {inst} = findInstAndBucket(instId);
+  const x = inst && inst.sets[idx];
+  if(!x) return;
+  const turningOn = (x.done===false);
+  x.done = turningOn;
+  if(turningOn){
+    // Checking an untouched set fills it from last session's matching set (or the set above).
+    const empty = x.reps==null && x.weight==null && x.band==null && x.time==null;
+    if(empty){
+      const ls = findLastSession(inst.exerciseId, currentWorkoutId);
+      let src = null;
+      if(ls){ const arr = ls.inst.sets.filter(y=>y.done!==false); src = arr[idx] || arr[arr.length-1]; }
+      if(!src && idx>0) src = inst.sets[idx-1];
+      if(src){ x.reps = src.reps ?? null; x.weight = src.weight ?? null; x.band = src.band ?? null; x.time = src.time ?? null; }
+    }
+  }
+  saveDB();
+  if(turningOn){
+    const w = getWorkout();
+    const prs = w ? computePRsForInstance(inst, w) : {};
+    if(prs[idx]) showToast('New PR: ' + prs[idx].join(', '));
+  }
   renderWorkout();
 }
 function toggleWarmSet(instId, idx){
@@ -2625,9 +3091,7 @@ function createAndAddExercise(bucketKey){
 function addInstanceToWorkout(w, bucketKey, def){
   const last = findLastInstance(def.id, w.id);
   const secondaryType = last?.secondaryType || 'weight';
-  const prevSets = last && Array.isArray(last.sets)
-    ? last.sets.map(s=>({reps:s.reps, weight:s.weight, band:s.band, time:s.time, ...(s.warm?{warm:true}:{})}))
-    : [{reps:null,weight:null,band:null,time:null}];
+  const prevSets = blankSetsFrom(last); // same set count as last time, values blank; last numbers show beside the exercise
   const inst = { id: uid(), exerciseId: def.id, secondaryType, sets: prevSets };
   w[bucketKey].push(inst);
   // Newly added exercise opens expanded; collapse every other exercise in this workout.
