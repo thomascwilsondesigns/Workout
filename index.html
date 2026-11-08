@@ -660,8 +660,8 @@ const EXERCISE_ICONS = {
 "wall scapular push-up": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M36.35 3L36.35 44.98" stroke-width="1.6"/><path d="M16.67 26.27L21.31 13.51" stroke-width="4.27"/><path d="M21.31 13.51L28.57 12.23L35.44 11.02" stroke-width="2.91"/><path d="M16.67 26.27L14.16 35.63L11.65 45L14.75 45" stroke-width="2.91"/><circle cx="22.67" cy="9.78" r="3.3" fill="currentColor" stroke="none"/><path d="M9.71 44.98L38.29 44.98" stroke-width="1.16" opacity="0.55"/></svg>`,
 
-"seated cable scapular retraction": `
-<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.31 35.17L19.2 35.17" stroke-width="2.55"/><path d="M6.7 35.17L6.7 39.79" stroke-width="1.62"/><path d="M17.81 35.17L17.81 39.79" stroke-width="1.62"/><path d="M30.54 16.88L41.18 19.2" stroke-width="1.16"/><circle cx="41.18" cy="19.2" r="1.39" stroke-width="1.62"/><path d="M42.69 12.26L42.69 39.79" stroke-width="1.8"/><path d="M37.94 28.45L37.94 36.55" stroke-width="1.85"/><path d="M13.41 33.08L13.41 16.88" stroke-width="5.09"/><path d="M13.41 16.88L22.21 16.88L30.54 16.88" stroke-width="3.47"/><path d="M13.41 33.08L24.81 35.09L36.2 33.08L36.2 29.38" stroke-width="3.47"/><circle cx="13.41" cy="12.14" r="3.93" fill="currentColor" stroke="none"/><path d="M3 39.79L45 39.79" stroke-width="1.39" opacity="0.55"/></svg>`,
+"cable scapular retraction": `
+<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.36" cy="15.33" r="3.29" fill="currentColor" stroke="none" opacity="0.22"/><path d="M28.7 13.96L36.65 14.32" stroke-width="0.91"/><circle cx="36.65" cy="14.32" r="1.1" stroke-width="1.28"/><path d="M37.93 3L37.93 45" stroke-width="1.8"/><path d="M14.74 26.74L13.47 35.78L13.15 44.91L16.07 44.91" stroke-width="2.74" opacity="0.42"/><path d="M14.74 26.74L15.18 13.96" stroke-width="4.02"/><path d="M15.18 13.96L22.12 13.96L28.7 13.96" stroke-width="2.74"/><path d="M14.74 26.74L16.32 35.73L15.69 44.84L18.61 44.84" stroke-width="2.74"/><circle cx="15.31" cy="10.22" r="3.1" fill="currentColor" stroke="none"/><path d="M17.47 10.77Q14.73 10.77 11.99 10.77M14.19 9.45L11.99 10.77L14.19 12.09" stroke-width="1.2" opacity="0.9"/><path d="M8.24 45L39.76 45" stroke-width="1.1" opacity="0.55"/></svg>`,
 
 
 
@@ -1005,13 +1005,17 @@ removeUnusedExercises(["scap Y's", "scap Y\u2019s", "scap ys"], 'workoutLogClean
    sets move to Copenhagen plank; cues, links and notes are combined. */
 applyExerciseRenames([["Short-lever Copenhagen plank","Copenhagen plank"]], 'workoutLogCleanup_2026_11g', 'workoutLogDB_v1_backup_pre_cleanup_2026_11g');
 
+/* Seventh cleanup (Nov 2026): "Seated cable scapular retraction" is done standing,
+   so it becomes "Cable scapular retraction" (history kept). */
+applyExerciseRenames([["Seated cable scapular retraction","Cable scapular retraction"]], 'workoutLogCleanup_2026_11h', 'workoutLogDB_v1_backup_pre_cleanup_2026_11h');
+
 const SEED_EXERCISES = [
   "Conventional deadlift","Dumbbell bench press","Dumbbell floor press","Standing cable chest press",
   "Half-kneeling landmine press","Seated cable row","Chest-supported rear delt fly","Barbell back squat",
   "Split squat","Single-leg RDL",
   "Banded standing hip internal rotation",
   "Wall sit with ball squeeze","Copenhagen plank","Wall scapular push-up",
-  "Seated cable scapular retraction"
+  "Cable scapular retraction"
 ];
 if(db.exercises.length===0){
   SEED_EXERCISES.forEach(name=>{
