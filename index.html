@@ -327,6 +327,7 @@
   .picker-item-left{display:flex; align-items:center; flex:1; min-width:0; cursor:pointer;}
   .picker-icon{width:26px; height:26px; flex-shrink:0; color:var(--sage-dark); margin-right:10px;}
   .picker-icon svg{width:100%; height:100%; display:block;}
+  .ptags{display:block; font-size:12.5px; font-weight:400; color:var(--muted); margin-top:1px;}
   .picker-item .pname{font-size:14.5px; cursor:pointer; flex:1;}
   .picker-checkbox{
     width:22px; height:22px; border-radius:6px; border:1.5px solid var(--line); background:#fff;
@@ -824,6 +825,77 @@ const EXERCISE_ICONS = {
 function getExerciseIcon(name){
   const key = (name||'').trim().toLowerCase();
   return EXERCISE_ICONS[key] || EXERCISE_ICONS['_default'];
+}
+/* ---------------- Search tags ----------------
+   Extra words each built-in exercise can be found by in the add-exercise and
+   circuit-timer searches (e.g. "thoracic" finds Thread the needle). Keyed by
+   lowercase exercise name, like EXERCISE_ICONS. Words already in the name are
+   left out. Exercises you create yourself have no tags until added here. */
+const EXERCISE_TAGS = {
+  "45° back extension": ["lower back", "glutes", "hamstrings", "posterior chain", "hinge"],
+  "back squat": ["quads", "glutes", "legs", "barbell"],
+  "bench press": ["chest", "pecs", "triceps", "shoulder", "push", "dumbbell"],
+  "biceps curl": ["arms"],
+  "child's pose": ["lower back", "lats", "hips", "thoracic", "stretch", "mobility"],
+  "copenhagen plank": ["adductors", "groin", "core", "obliques", "isometric", "bench"],
+  "couch stretch": ["hip flexors", "quads", "hips", "wall", "mobility"],
+  "cupping": ["soft tissue", "release", "back"],
+  "deadlift": ["hamstrings", "glutes", "lower back", "posterior chain", "hinge", "barbell"],
+  "deep squat hold": ["hips", "ankles", "adductors", "warmup", "mobility"],
+  "doorway pec stretch": ["chest", "pecs", "shoulder", "posture", "warmup", "mobility"],
+  "floor press": ["chest", "pecs", "triceps", "push", "dumbbell"],
+  "front raise": ["shoulder", "front delts", "dumbbell", "serratus", "scapula"],
+  "glute release": ["glutes", "hips", "soft tissue", "lacrosse ball", "lacrosse"],
+  "half-kneeling landmine press": ["shoulder", "chest", "triceps", "core", "push", "barbell"],
+  "happy baby": ["hips", "lower back", "adductors", "groin", "stretch", "mobility"],
+  "hip thrust": ["glutes", "hamstrings", "hip extension", "barbell", "bench"],
+  "inchworm to lizard stretch": ["hips", "hip flexors", "hamstrings", "groin", "thoracic", "warmup", "mobility"],
+  "kettlebell swing": ["glutes", "hamstrings", "posterior chain", "hinge", "power", "conditioning"],
+  "kickstand rdl": ["hamstrings", "glutes", "posterior chain", "hinge", "single leg", "dumbbell"],
+  "lying strap hamstring stretch": ["hamstrings", "legs", "mobility", "warmup"],
+  "overhead triceps extension": ["arms", "push", "cable"],
+  "pec release": ["chest", "pecs", "shoulder", "soft tissue", "lacrosse ball", "wall", "lacrosse"],
+  "prone y raise": ["shoulder", "lower traps", "scapula", "upper back", "posture", "prehab"],
+  "prone frog kick": ["glutes", "hip extension", "hips", "bench"],
+  "pull-through": ["glutes", "hamstrings", "posterior chain", "hinge", "cable"],
+  "reclined butterfly stretch": ["adductors", "groin", "hips", "mobility"],
+  "reverse curl": ["forearms", "biceps", "brachialis", "arms", "grip", "barbell"],
+  "reverse fly": ["shoulder", "rear delts", "upper back", "posture", "pull", "dumbbell", "bench"],
+  "reverse wrist curl": ["forearms", "wrist extensors", "grip", "elbow", "cable"],
+  "scapular cars": ["shoulder", "scapula", "warmup", "prehab", "mobility"],
+  "scapular plank": ["shoulder", "scapula", "serratus", "core", "prehab"],
+  "scapular retraction": ["shoulder", "scapula", "upper back", "posture", "prehab", "cable"],
+  "seated cable row": ["back", "lats", "upper back", "biceps", "pull"],
+  "shoulder external rotation": ["rotator cuff", "prehab", "rehab", "cable"],
+  "shoulder internal rotation": ["rotator cuff", "prehab", "rehab", "cable"],
+  "single leg hip thrust": ["glutes", "hamstrings", "hip extension", "bench"],
+  "single-leg rdl": ["hamstrings", "glutes", "balance", "hinge", "dumbbell"],
+  "ski pull": ["lats", "back", "triceps", "core", "cardio", "conditioning", "band"],
+  "split squat": ["quads", "glutes", "legs", "single leg", "dumbbell"],
+  "standing calf raise": ["calves", "ankle", "achilles", "dumbbell"],
+  "standing chest press": ["pecs", "triceps", "shoulder", "push", "cable"],
+  "standing hip internal rotation": ["glutes", "prehab", "band", "mobility"],
+  "standing leg curl": ["hamstrings", "legs", "knee", "cable"],
+  "step up": ["quads", "glutes", "legs", "single leg", "box"],
+  "subscapularis release": ["shoulder", "rotator cuff", "soft tissue", "lacrosse ball", "wall"],
+  "tall-kneeling hip hinge": ["glutes", "hamstrings", "hip extension", "activation", "band"],
+  "thoracic extension": ["upper back", "spine", "posture", "foam roller", "mobility"],
+  "thread the needle": ["thoracic", "upper back", "spine", "rotation", "warmup", "mobility"],
+  "tibialis raise": ["shins", "ankle", "knee", "prehab", "wall"],
+  "treadmill run": ["cardio", "running", "conditioning", "legs"],
+  "triceps pushdown": ["arms", "push", "cable"],
+  "wall calf stretch": ["calves", "ankle", "achilles"],
+  "wall drive march": ["hip flexors", "core", "sprint", "activation", "warmup"],
+  "wall scapular push-up": ["shoulder", "scapula", "serratus", "prehab"],
+  "wall sit with ball squeeze": ["quads", "adductors", "groin", "isometric", "legs"],
+  "wall slides": ["shoulder", "scapula", "serratus", "overhead mobility", "posture", "foam roller"],
+  "wrist curl": ["forearms", "wrist flexors", "grip", "elbow", "cable"]
+};
+function getExerciseTags(name){ return EXERCISE_TAGS[(name||'').trim().toLowerCase()] || []; }
+// Every search term must appear in the name or in one of the tags.
+function exerciseMatchesTerms(name, terms){
+  const n = (name||'').toLowerCase(), tags = getExerciseTags(name);
+  return terms.every(t=> n.includes(t) || tags.some(tag=> tag.includes(t)));
 }
 /* ---------------- Storage ---------------- */
 const DB_KEY = 'workoutLogDB_v1';
@@ -2739,6 +2811,7 @@ function addSelectedExercises(){
 function renderPickerList(query){
   const listEl = document.getElementById('pickerListScroll');
   const q = query.trim().toLowerCase();
+  const tagHitsById = new Map(); // exercise id -> tags that matched (display only; never saved)
 
   let matches;
   if(q===''){
@@ -2749,17 +2822,18 @@ function renderPickerList(query){
     matches = db.exercises
       .map(e=>{
         const name = e.name.toLowerCase();
-        const allTermsMatch = terms.every(t=> name.includes(t));
-        if(!allTermsMatch) return null;
+        if(!exerciseMatchesTerms(e.name, terms)) return null;
         let score = 3;
         if(name === q) score = 0;
         else if(name.startsWith(q)) score = 1;
         else if(new RegExp('\\b'+escapeRegex(q)).test(name)) score = 2;
-        return { e, score };
+        else if(!terms.every(t=> name.includes(t))) score = 4; // found via tags: list after name matches
+        const tagHits = score===4 ? getExerciseTags(e.name).filter(tag=> terms.some(t=> tag.includes(t))) : [];
+        return { e, score, tagHits };
       })
       .filter(Boolean)
       .sort((a,b)=> a.score - b.score || a.e.name.localeCompare(b.e.name))
-      .map(x=>x.e);
+      .map(x=>{ tagHitsById.set(x.e.id, x.tagHits); return x.e; });
   }
 
   const exactNameExists = q!=='' && db.exercises.some(e=> e.name.toLowerCase()===q);
@@ -2778,7 +2852,7 @@ function renderPickerList(query){
           <div class="picker-item-left">
             ${checkbox}
             <span class="picker-icon">${getExerciseIcon(e.name)}</span>
-            <span class="pname">${escapeHtml(e.name)}</span>
+            <span class="pname">${escapeHtml(e.name)}${(tagHitsById.get(e.id)||[]).length ? `<span class="ptags">${escapeHtml(tagHitsById.get(e.id).join(', '))}</span>` : ''}</span>
           </div>
           ${window.pickerMultiSelect ? '' : `<span class="pdel" onclick="deleteExerciseDef('${e.id}', event)">delete</span>`}
         </div>
@@ -3027,10 +3101,7 @@ function ctRenderPickerList(query){
   const terms = q.split(/\s+/).filter(Boolean);
   let matches = db.exercises;
   if(terms.length){
-    matches = db.exercises.filter(e=>{
-      const n = e.name.toLowerCase();
-      return terms.every(t=> n.includes(t));
-    });
+    matches = db.exercises.filter(e=> exerciseMatchesTerms(e.name, terms));
   }
   matches = [...matches].sort((a,b)=> a.name.localeCompare(b.name));
   if(matches.length===0){
