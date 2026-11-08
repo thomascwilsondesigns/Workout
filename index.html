@@ -2889,7 +2889,6 @@ function renderPickerList(query){
             <span class="picker-icon">${getExerciseIcon(e.name)}</span>
             <span class="pname">${escapeHtml(e.name)}${(tagHitsById.get(e.id)||[]).length ? `<span class="ptags">${escapeHtml(tagHitsById.get(e.id).join(', '))}</span>` : ''}</span>
           </div>
-          ${window.pickerMultiSelect ? '' : `<span class="pdel" onclick="deleteExerciseDef('${e.id}', event)">delete</span>`}
         </div>
       `;
     }).join('');
