@@ -1,10 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="theme-midnight">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>Workout Log</title>
-<meta name="theme-color" content="#2f4a35">
+<meta name="theme-color" content="#0b0e12">
+<meta name="apple-mobile-web-app-title" content="Workout Log">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <style>
   :root{
     --bg:#f3f1ea; --card:#ffffff; --ink:#2c2c28; --muted:#8a8a80;
@@ -498,6 +501,44 @@ header{background:linear-gradient(135deg,#2f4a35,#4f7a55)}
 /* band colour dots on the band wheel */
 .wheel-option[data-value="red"]::before,.wheel-option[data-value="yellow"]::before,.wheel-option[data-value="black"]::before,.wheel-option[data-value="green"]::before,.wheel-option[data-value="orange"]::before,.wheel-option[data-value="purple"]::before,.wheel-option[data-value="blue"]::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
 .wheel-option[data-value="red"]::before{background:#e0433a}.wheel-option[data-value="yellow"]::before{background:#f2c230}.wheel-option[data-value="black"]::before{background:#222}.wheel-option[data-value="green"]::before{background:#2fa35a}.wheel-option[data-value="orange"]::before{background:#f08a24}.wheel-option[data-value="purple"]::before{background:#8a4fd8}.wheel-option[data-value="blue"]::before{background:#2f7be0}
+
+/* ---------------- Midnight theme (Nov 2026) ----------------
+   Active while <html> has class "theme-midnight". Remove that class to go back to
+   Sage & Ember. Near-black surfaces, lime accent (dark text on lime), coral PRs,
+   yellow warm-up. */
+html.theme-midnight{--bg:#0f1318;--card:#1a2028;--ink:#e9eef3;--muted:#8e99a6;--sage:#b8f03e;--sage-dark:#d4ff7a;--rust:#ff7a59;--line:#2a323d;--danger:#ff6b5b;--ember:#ffd166;--ember-soft:rgba(255,209,102,.14);--ember-dark:#ffd166;--sage-tint:rgba(184,240,62,.12);--panel:#141a21;--on-accent:#0f1318;color-scheme:dark}
+.theme-midnight header,.theme-midnight .ct-header{background:#0b0e12;border-bottom:1px solid #222a33}
+.theme-midnight .day-card,.theme-midnight .exercise-card,.theme-midnight .stat-card,.theme-midnight .stat-panel,.theme-midnight .ct-section,.theme-midnight .ct-exercise-display{background:var(--card);border-color:var(--line);box-shadow:none}
+.theme-midnight .day-card,.theme-midnight #mainSection .exercise-card{border-left-color:var(--sage)}
+.theme-midnight .type-chip,.theme-midnight .metric-chip,.theme-midnight .detail-tab,.theme-midnight .rec-card,.theme-midnight .hist-row,.theme-midnight .cue-item,.theme-midnight .link-item,.theme-midnight textarea.notes-area,.theme-midnight .inline-add input,.theme-midnight .video-add-form input,.theme-midnight .picker-search,.theme-midnight .autocomplete-dropdown,.theme-midnight .picker-checkbox{background:var(--card);color:var(--ink);border-color:var(--line)}
+.theme-midnight .set-check,.theme-midnight .type-select,.theme-midnight .wheel-viewport,.theme-midnight .exercise-detail,.theme-midnight .ct-stepper button,.theme-midnight .ct-picked-row,.theme-midnight .autocomplete-add-new:hover{background:var(--panel);border-color:var(--line)}
+.theme-midnight .set-check{color:#3a4552}
+.theme-midnight .wheel-viewport-mask{background:linear-gradient(to bottom,var(--panel) 0%,transparent 30%,transparent 70%,var(--panel) 100%)}
+.theme-midnight .wheel-viewport.wheel-disabled,.theme-midnight .set-row input:disabled{background:#11161c}
+.theme-midnight .wheel-option{color:#5d6876}
+.theme-midnight .wheel-option.wheel-center{color:#fff}
+.theme-midnight .picker-item.selected{background:var(--sage-tint)}
+.theme-midnight .btn-primary,.theme-midnight .type-chip.selected,.theme-midnight .inline-add button,.theme-midnight .picker-add-selected-btn,.theme-midnight .set-check.on,.theme-midnight .cal-day.has,.theme-midnight .ct-start-btn,.theme-midnight .picker-checkbox.checked,.theme-midnight .fab,.theme-midnight .day-card-action-btn.copy-btn,.theme-midnight .ct-run-phase-band.work,.theme-midnight .ct-picked-row .pos,.theme-midnight .metric-chip.active,.theme-midnight .detail-tab.active{background:var(--sage);border-color:var(--sage);color:var(--on-accent)}
+.theme-midnight .set-check.on{box-shadow:0 0 12px rgba(184,240,62,.35)}
+.theme-midnight .fab{box-shadow:0 4px 18px rgba(184,240,62,.3)}
+.theme-midnight .btn-primary:disabled,.theme-midnight .picker-add-selected-btn:disabled,.theme-midnight .ct-start-btn:disabled{background:#2a323d;border-color:#2a323d;color:#5d6876}
+.theme-midnight .toast{background:#e9eef3;color:#0f1318}
+.theme-midnight .ct-run-phase-band.end,.theme-midnight .ct-pause-btn,.theme-midnight #ctPreStartOverlay,.theme-midnight #ctCompletionOverlay{background:#222a33;color:#e9eef3}
+.theme-midnight .ct-session-progress .seg.done{background:var(--sage)}
+.theme-midnight #ctCompletionOverlay button{background:var(--sage);color:var(--on-accent)}
+.theme-midnight .circuit-timer-btn{background:linear-gradient(135deg,#1a2028,#26331a);border:1px solid #3a4a22;color:#e9eef3;box-shadow:none}
+.theme-midnight .pr-badge,.theme-midnight .pr-chip{background:rgba(255,122,89,.16);color:#ff9473}
+.theme-midnight .set-num.has-pr{color:#ff7a59}
+.theme-midnight .set-num.is-warm,.theme-midnight #warmupLabel{color:var(--ember)}
+.theme-midnight #mainLabel{color:var(--sage)}
+.theme-midnight .stat-card .v,.theme-midnight .rec-card .v{color:var(--sage-dark)}
+.theme-midnight .ch-dot{fill:var(--card)}
+.theme-midnight .cal-day{color:var(--ink)}
+.theme-midnight .delta-up{color:var(--sage)}
+.theme-midnight .header-action-icon.danger{color:#ff9473}
+.theme-midnight .sheet-overlay{background:rgba(0,0,0,.6)}
+.theme-midnight .drag-placeholder{background:rgba(184,240,62,.06)}
+.theme-midnight .wheel-option[data-value="black"]::before{background:#000;box-shadow:0 0 0 1px #5d6876}
 </style>
 </head>
 <body>
