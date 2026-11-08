@@ -544,6 +544,13 @@ html.theme-midnight{--bg:#0f1318;--card:#1a2028;--ink:#e9eef3;--muted:#8e99a6;--
 svg .eq{color:var(--muted)}
 .theme-midnight svg .fig{color:var(--sage)}
 .theme-midnight svg .eq{color:#7d8894}
+
+/* Search suggestion chips under the add-exercise search box */
+.search-chips{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.search-chips::-webkit-scrollbar{display:none}
+.search-chip{flex:none;font-size:13.5px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);white-space:nowrap;cursor:pointer;font-family:inherit}
+.search-chip .n{color:var(--muted);margin-left:6px;font-size:12px;font-variant-numeric:tabular-nums}
+.search-chip:active{background:var(--sage-tint)}
 </style>
 </head>
 <body>
@@ -986,9 +993,52 @@ function showsInPickerList(name, warmupBucket){
   return !warm || getExerciseTags(name).includes('main');
 }
 // Every search term must appear in the name or in one of the tags.
+// Search matches from the start of words: "sh" finds Shoulder… and the "shoulder" tag, not "pushdown".
+function searchWords(text){ return (text||'').toLowerCase().split(/[^a-z0-9°]+/).filter(Boolean); }
+function searchTerms(q){ return searchWords(q); }
+function wordsStartWith(words, t){ return words.some(w=> w.startsWith(t)); }
 function exerciseMatchesTerms(name, terms){
-  const n = (name||'').toLowerCase(), tags = getExerciseTags(name);
-  return terms.every(t=> n.includes(t) || tags.some(tag=> tag.includes(t)));
+  const nameWords = searchWords(name), tagWords = getExerciseTags(name).flatMap(searchWords);
+  return terms.every(t=> wordsStartWith(nameWords, t) || wordsStartWith(tagWords, t));
+}
+function matchingTags(name, terms){ return getExerciseTags(name).filter(tag=> terms.some(t=> wordsStartWith(searchWords(tag), t))); }
+// Suggestion chips. Browse (empty search): the section's most common tags. Typing: whole words from exercise
+// names and tags that start with the word being typed, each with how many exercises it would find.
+const SEARCH_CHIP_SKIP = new Set(['warmup','main','with','the','and','to','on','of','in']);
+function browseChips(warmupBucket){
+  const counts = new Map();
+  db.exercises.filter(e=> showsInPickerList(e.name, warmupBucket)).forEach(e=>
+    new Set(getExerciseTags(e.name)).forEach(t=>{ if(!SEARCH_CHIP_SKIP.has(t)) counts.set(t,(counts.get(t)||0)+1); }));
+  return [...counts.entries()].filter(([,n])=> n>=2).sort((a,b)=> b[1]-a[1] || a[0].localeCompare(b[0])).slice(0,10);
+}
+function typingChips(q){
+  const terms = searchTerms(q); if(!terms.length || /\s$/.test(q)) return [];
+  const last = terms[terms.length-1], before = terms.slice(0,-1);
+  const cands = new Set();
+  db.exercises.forEach(e=>{
+    searchWords(e.name).forEach(w=>{ if(w.length>=3 && w.startsWith(last) && !SEARCH_CHIP_SKIP.has(w)) cands.add(w); });
+    getExerciseTags(e.name).forEach(t=>{ if(!SEARCH_CHIP_SKIP.has(t) && wordsStartWith(searchWords(t), last)) cands.add(t); });
+  });
+  return [...cands].map(c=>[c, db.exercises.filter(e=> exerciseMatchesTerms(e.name, before.concat(searchWords(c)))).length])
+    .filter(([c,n])=> n>0 && c!==last)
+    // drop near-duplicates: a longer chip that finds the same exercises as a shorter one it starts with
+    .filter(([c,n],i,all)=> !all.some(([d,m])=> d!==c && m===n && c.startsWith(d)))
+    .sort((a,b)=> b[1]-a[1] || a[0].length-b[0].length).slice(0,8);
+}
+function renderSearchChips(query){
+  const el = document.getElementById('pickerChips'); if(!el) return;
+  const q = query.toLowerCase();
+  const chips = q.trim()==='' ? browseChips(window.currentPickerBucket==='warmup') : typingChips(q);
+  el.innerHTML = chips.map(([c,n])=> `<button type="button" class="search-chip" data-chip="${escapeHtml(c)}">${escapeHtml(c)}<span class="n">${n}</span></button>`).join('');
+  el.classList.toggle('hidden', chips.length===0);
+}
+function applySearchChip(chip){
+  const input = document.getElementById('pickerSearch'); if(!input) return;
+  const v = input.value; const m = v.match(/^(.*?)([^\s]*)$/);
+  // a browse chip replaces an empty box; a typing chip replaces the word being typed
+  input.value = (v.trim()==='' ? '' : m[1]) + chip + ' ';
+  renderPickerList(input.value); renderSearchChips(input.value);
+  input.focus();
 }
 /* ---------------- Storage ---------------- */
 const DB_KEY = 'workoutLogDB_v1';
@@ -2830,6 +2880,7 @@ function openPicker(bucketKey){
       <div class="picker-sheet-header">
         <h2>Add exercise</h2>
         <input type="text" class="picker-search" id="pickerSearch" placeholder="Search or scroll the list below..." autocomplete="off" style="margin-bottom:0;">
+        <div class="search-chips hidden" id="pickerChips"></div>
       </div>
       <div class="picker-list-scroll" id="pickerListScroll"></div>
       <div class="picker-sheet-footer" id="pickerSheetFooter">
@@ -2844,13 +2895,17 @@ function openPicker(bucketKey){
   window.pickerSuppressNextToggle = false;
 
   const input = document.getElementById('pickerSearch');
-  input.oninput = ()=> renderPickerList(input.value);
+  input.oninput = ()=>{ renderPickerList(input.value); renderSearchChips(input.value); };
+  document.getElementById('pickerChips').addEventListener('click', e=>{
+    const b = e.target.closest('.search-chip'); if(b) applySearchChip(b.dataset.chip);
+  });
 
   overlay.addEventListener('click', (e)=>{
     if(e.target===overlay) overlay.remove();
   });
 
   renderPickerList('');
+  renderSearchChips('');
 }
 
 function enterMultiSelect(firstExId){
@@ -2921,7 +2976,7 @@ function renderPickerList(query){
       .filter(e=> showsInPickerList(e.name, warmupBucket))
       .sort((a,b)=> a.name.localeCompare(b.name));
   } else {
-    const terms = q.split(/\s+/).filter(Boolean);
+    const terms = searchTerms(q);
     matches = db.exercises
       .map(e=>{
         const name = e.name.toLowerCase();
@@ -2930,8 +2985,8 @@ function renderPickerList(query){
         if(name === q) score = 0;
         else if(name.startsWith(q)) score = 1;
         else if(new RegExp('\\b'+escapeRegex(q)).test(name)) score = 2;
-        else if(!terms.every(t=> name.includes(t))) score = 4; // found via tags: list after name matches
-        const tagHits = score===4 ? getExerciseTags(e.name).filter(tag=> terms.some(t=> tag.includes(t))) : [];
+        else if(!terms.every(t=> wordsStartWith(searchWords(e.name), t))) score = 4; // found via tags: list after name matches
+        const tagHits = score===4 ? matchingTags(e.name, terms) : [];
         return { e, score, tagHits };
       })
       .filter(Boolean)
@@ -3203,7 +3258,7 @@ function ctOpenExercisePicker(){
 function ctRenderPickerList(query){
   const list = document.getElementById('ctPickerListScroll');
   const q = query.trim().toLowerCase();
-  const terms = q.split(/\s+/).filter(Boolean);
+  const terms = searchTerms(q);
   let matches = db.exercises;
   if(terms.length){
     matches = db.exercises.filter(e=> exerciseMatchesTerms(e.name, terms));
