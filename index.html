@@ -4,11 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>Workout Log</title>
-<meta name="theme-color" content="#3d4a3d">
+<meta name="theme-color" content="#2f4a35">
 <style>
   :root{
-    --bg:#f4f1ea; --card:#ffffff; --ink:#2c2c28; --muted:#8a8a80;
-    --sage:#5a6b52; --sage-dark:#3d4a3d; --rust:#a35d3a; --line:#e5e0d5;
+    --bg:#f3f1ea; --card:#ffffff; --ink:#2c2c28; --muted:#8a8a80;
+    --sage:#4f7a55; --sage-dark:#2f4a35; --rust:#d9772b; --line:#e3dfd3;
+    --ember:#e7a64c; --ember-soft:#fbeedb; --ember-dark:#b4651c; --sage-tint:#e7efe3;
     --danger:#b3492f; --radius:14px;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
@@ -477,6 +478,26 @@
   margin-top:24px; padding:14px 28px; border-radius:12px; border:none; background:#fff; color:var(--sage-dark);
   font-size:15px; font-weight:700; cursor:pointer;
 }
+
+/* ---------------- Sage & Ember theme (Nov 2026) ----------------
+   Brighter sage, amber for warm-up, gold PR badges, tinted icon tiles. */
+header{background:linear-gradient(135deg,#2f4a35,#4f7a55)}
+.pr-badge,.pr-chip{background:linear-gradient(135deg,#ffd98a,#ffb04a);color:#5a3200}
+.set-num.has-pr{color:#d9772b}
+.set-check.on{background:#4f7a55;border-color:#4f7a55;box-shadow:0 2px 6px rgba(79,122,85,.35)}
+.exercise-icon{background:var(--sage-tint);border-radius:10px;padding:3px;width:36px;height:36px}
+#warmupSection .exercise-card{border-left:4px solid var(--ember)}
+#mainSection .exercise-card{border-left:4px solid #4f7a55}
+#warmupSection .exercise-icon{background:var(--ember-soft);color:var(--ember-dark)}
+#warmupLabel{color:#c4762a}#mainLabel{color:#2f4a35}
+.set-num.is-warm{color:#d9772b}
+.day-card{border-left:4px solid #4f7a55}
+.fab{background:linear-gradient(135deg,#d9772b,#f0a24a)}
+.stat-card .v,.rec-card .v{color:#2f4a35}
+.cal-day.has{background:#4f7a55}
+/* band colour dots on the band wheel */
+.wheel-option[data-value="red"]::before,.wheel-option[data-value="yellow"]::before,.wheel-option[data-value="black"]::before,.wheel-option[data-value="green"]::before,.wheel-option[data-value="orange"]::before,.wheel-option[data-value="purple"]::before,.wheel-option[data-value="blue"]::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.wheel-option[data-value="red"]::before{background:#e0433a}.wheel-option[data-value="yellow"]::before{background:#f2c230}.wheel-option[data-value="black"]::before{background:#222}.wheel-option[data-value="green"]::before{background:#2fa35a}.wheel-option[data-value="orange"]::before{background:#f08a24}.wheel-option[data-value="purple"]::before{background:#8a4fd8}.wheel-option[data-value="blue"]::before{background:#2f7be0}
 </style>
 </head>
 <body>
