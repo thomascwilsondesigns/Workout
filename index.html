@@ -617,16 +617,16 @@
 /* ---------------- Exercise icon set ---------------- */
 const EXERCISE_ICONS = {
 
-"conventional deadlift": `
+"deadlift": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10.28 26.89L27.32 12.59" stroke-width="5.5"/><path d="M27.32 12.59L27.32 24.66L27.32 36.1" stroke-width="3.75"/><path d="M10.28 26.89L25.93 29.65L21.82 44.99L26.9 44.99" stroke-width="3.75"/><circle cx="32.31" cy="8.4" r="5.4" fill="currentColor" stroke="none"/><circle cx="27.32" cy="36.1" r="7.31" stroke-width="2"/><circle cx="27.32" cy="36.1" r="1.43" fill="currentColor" stroke="none"/><path d="M7.11 45L40.89 45" stroke-width="1.5" opacity="0.55"/></svg>`,
 
-"dumbbell bench press": `
+"bench press": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.93 27.2L33.92 27.2" stroke-width="2.47"/><path d="M8.28 27.2L8.28 41.59" stroke-width="1.57"/><path d="M32.57 27.2L32.57 41.59" stroke-width="1.57"/><path d="M29.42 24.73L13.68 24.73" stroke-width="4.95"/><path d="M13.68 24.73L13.68 16.19L13.68 8.09" stroke-width="3.37"/><path d="M29.42 24.73L39.15 30.35L39.15 41.59L42.75 41.59" stroke-width="3.37"/><circle cx="9.07" cy="24.73" r="3.82" fill="currentColor" stroke="none"/><path d="M11.43 8.09L15.93 8.09" stroke-width="1.8"/><circle cx="10.87" cy="8.09" r="1.69" fill="currentColor" stroke="none"/><circle cx="16.49" cy="8.09" r="1.69" fill="currentColor" stroke="none"/><path d="M3 41.59L45 41.59" stroke-width="1.35" opacity="0.55"/></svg>`,
 
-"dumbbell floor press": `
+"floor press": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M28.6 31.03L13.35 31.03" stroke-width="4.79"/><path d="M13.35 31.03L13.35 22.75L13.35 14.9" stroke-width="3.27"/><path d="M28.6 31.03L35.61 22.68L39.33 32.92L42.82 32.92" stroke-width="3.27"/><circle cx="8.88" cy="31.03" r="3.7" fill="currentColor" stroke="none"/><path d="M11.17 14.9L15.53 14.9" stroke-width="1.74"/><circle cx="10.63" cy="14.9" r="1.63" fill="currentColor" stroke="none"/><circle cx="16.07" cy="14.9" r="1.63" fill="currentColor" stroke="none"/><path d="M3 32.88L45 32.88" stroke-width="1.31" opacity="0.55"/></svg>`,
 
-"standing cable chest press": `
+"standing chest press": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M39.29 11.25L9.92 11.54" stroke-width="1"/><circle cx="9.92" cy="11.54" r="1.21" stroke-width="1.41"/><path d="M8.71 3L8.71 45" stroke-width="1.8"/><path d="M21.97 25.1L18.54 34.55L16.79 44.44L19.96 45" stroke-width="3.01" opacity="0.42"/><path d="M21.97 25.1L24.42 11.25" stroke-width="4.42"/><path d="M24.42 11.25L32.05 11.25L39.29 11.25" stroke-width="3.01"/><path d="M21.97 25.1L24.58 34.81L24.58 44.86L27.79 44.86" stroke-width="3.01"/><circle cx="25.13" cy="7.19" r="3.42" fill="currentColor" stroke="none"/><path d="M6.7 45L41.3 45" stroke-width="1.21" opacity="0.55"/></svg>`,
 
 "half-kneeling landmine press": `
@@ -635,10 +635,8 @@ const EXERCISE_ICONS = {
 "seated cable row": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5.31 35.17L19.2 35.17" stroke-width="2.55"/><path d="M6.7 35.17L6.7 39.79" stroke-width="1.62"/><path d="M17.81 35.17L17.81 39.79" stroke-width="1.62"/><path d="M16.09 23.62L41.18 29.61" stroke-width="1.16"/><circle cx="41.18" cy="29.61" r="1.39" stroke-width="1.62"/><path d="M42.69 19.2L42.69 39.79" stroke-width="1.8"/><path d="M37.94 28.45L37.94 36.55" stroke-width="1.85"/><path d="M13.41 33.08L13.41 16.88" stroke-width="5.09"/><path d="M13.41 16.88L7.76 23.62L16.09 23.62" stroke-width="3.47"/><path d="M13.41 33.08L24.81 35.09L36.2 33.08L36.2 29.38" stroke-width="3.47"/><circle cx="13.41" cy="12.14" r="3.93" fill="currentColor" stroke="none"/><path d="M3 39.79L45 39.79" stroke-width="1.39" opacity="0.55"/></svg>`,
 
-"chest-supported rear delt fly": `
-<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M13.66 24.87L32.27 11.84" stroke-width="4"/><path d="M22.14 20.82L22.14 45" stroke-width="1.75"/><path d="M15.18 20.44L29.7 10.28" stroke-width="5.5"/><path d="M29.7 10.28L29.7 19.9L29.7 29.01" stroke-width="3.75"/><path d="M15.18 20.44L10.85 32.34L9.75 44.95L13.8 44.95" stroke-width="3.75"/><circle cx="33.95" cy="7.3" r="4.3" fill="currentColor" stroke="none"/><path d="M27.17 29.01L32.23 29.01" stroke-width="2"/><circle cx="26.53" cy="29.01" r="1.9" fill="currentColor" stroke="none"/><circle cx="32.86" cy="29.01" r="1.9" fill="currentColor" stroke="none"/><path d="M7.22 45L40.78 45" stroke-width="1.5" opacity="0.55"/></svg>`,
 
-"barbell back squat": `
+"back squat": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="23" cy="23.33" r="3.44" stroke-width="1.62"/><circle cx="23" cy="23.33" r="0.91" fill="currentColor" stroke="none"/><circle cx="19.85" cy="9.17" r="3.44" stroke-width="1.62" opacity="0.3"/><circle cx="19.85" cy="9.17" r="0.91" fill="currentColor" stroke="none" opacity="0.3"/><path d="M22.48 24.75L22.48 10.59" stroke-width="4.45" opacity="0.22"/><path d="M22.48 10.59L19.23 17.55L21.11 10.52" stroke-width="3.03" opacity="0.22"/><path d="M22.48 24.75L22.48 34.86L22.48 44.98L25.71 44.98" stroke-width="3.03" opacity="0.22"/><circle cx="22.48" cy="6.44" r="3.44" fill="currentColor" stroke="none" opacity="0.22"/><path d="M16.15 35.27L25.63 24.74" stroke-width="4.45"/><path d="M25.63 24.74L20.69 30.63L24.33 24.33" stroke-width="3.03"/><path d="M16.15 35.27L26.26 35.62L22.47 45L25.71 45" stroke-width="3.03"/><circle cx="28.41" cy="21.66" r="3.44" fill="currentColor" stroke="none"/><path d="M14.13 44.98L33.87 44.98" stroke-width="1.21" opacity="0.55"/></svg>`,
 
 "split squat": `
@@ -647,7 +645,7 @@ const EXERCISE_ICONS = {
 "single-leg rdl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M23.39 17.78L14.13 16.97L4.86 16.15L4.86 19.13" stroke-width="2.79" opacity="0.42"/><path d="M23.39 17.78L36.22 15.51" stroke-width="4.09"/><path d="M36.22 15.51L36.22 22.58L36.22 29.28" stroke-width="2.79"/><path d="M23.39 17.78L24.21 27.04L23.39 36.31L26.37 36.31" stroke-width="2.79"/><circle cx="39.98" cy="14.85" r="3.16" fill="currentColor" stroke="none"/><path d="M34.36 29.28L38.08 29.28" stroke-width="1.49"/><circle cx="33.89" cy="29.28" r="1.4" fill="currentColor" stroke="none"/><circle cx="38.55" cy="29.28" r="1.4" fill="currentColor" stroke="none"/><path d="M3 36.29L45 36.29" stroke-width="1.12" opacity="0.55"/></svg>`,
 
-"banded standing hip internal rotation": `
+"standing hip internal rotation": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M32.43 36.05L13.33 36.9" stroke-width="1.32" stroke-dasharray="1.6 1.6"/><path d="M25.93 38.41L13.33 36.9" stroke-width="1.32" stroke-dasharray="1.6 1.6" opacity="0.3"/><path d="M27.5 24.76L27.5 10.59" stroke-width="4.45" opacity="0.22"/><path d="M31.35 10.59L23.66 10.59" stroke-width="3.64" opacity="0.22"/><path d="M29.32 24.76L25.68 24.76" stroke-width="3.64" opacity="0.22"/><path d="M31.35 10.59L30.01 18.17L31.28 25.34" stroke-width="3.04" opacity="0.22"/><path d="M23.66 10.59L24.99 18.17L23.73 25.34" stroke-width="3.04" opacity="0.22"/><path d="M29.32 24.76L28.97 34.87L28.97 44.99L26.74 44.6" stroke-width="3.04" opacity="0.22"/><path d="M25.68 24.76L25.93 28.29L25.93 38.41L28.16 38.02" stroke-width="3.04" opacity="0.22"/><circle cx="27.5" cy="6.44" r="3.44" fill="currentColor" stroke="none" opacity="0.22"/><path d="M27.5 24.76L27.5 10.59" stroke-width="4.45"/><path d="M31.35 10.59L23.66 10.59" stroke-width="3.64"/><path d="M29.32 24.76L25.68 24.76" stroke-width="3.64"/><path d="M31.35 10.59L30.01 18.17L31.28 25.34" stroke-width="3.04"/><path d="M23.66 10.59L24.99 18.17L23.73 25.34" stroke-width="3.04"/><path d="M29.32 24.76L28.97 34.87L28.97 44.99L26.74 44.6" stroke-width="3.04"/><path d="M25.68 24.76L25.93 28.29L32.43 36.05L34.67 35.65" stroke-width="3.04"/><circle cx="27.5" cy="6.44" r="3.44" fill="currentColor" stroke="none"/><path d="M11.31 45L36.69 45" stroke-width="1.21" opacity="0.55"/></svg>`,
 
 
@@ -660,7 +658,7 @@ const EXERCISE_ICONS = {
 "wall scapular push-up": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M36.35 3L36.35 44.98" stroke-width="1.6"/><path d="M16.67 26.27L21.31 13.51" stroke-width="4.27"/><path d="M21.31 13.51L28.57 12.23L35.44 11.02" stroke-width="2.91"/><path d="M16.67 26.27L14.16 35.63L11.65 45L14.75 45" stroke-width="2.91"/><circle cx="22.67" cy="9.78" r="3.3" fill="currentColor" stroke="none"/><path d="M9.71 44.98L38.29 44.98" stroke-width="1.16" opacity="0.55"/></svg>`,
 
-"cable scapular retraction": `
+"scapular retraction": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.36" cy="15.33" r="3.29" fill="currentColor" stroke="none" opacity="0.22"/><path d="M28.7 13.96L36.65 14.32" stroke-width="0.91"/><circle cx="36.65" cy="14.32" r="1.1" stroke-width="1.28"/><path d="M37.93 3L37.93 45" stroke-width="1.8"/><path d="M14.74 26.74L13.47 35.78L13.15 44.91L16.07 44.91" stroke-width="2.74" opacity="0.42"/><path d="M14.74 26.74L15.18 13.96" stroke-width="4.02"/><path d="M15.18 13.96L22.12 13.96L28.7 13.96" stroke-width="2.74"/><path d="M14.74 26.74L16.32 35.73L15.69 44.84L18.61 44.84" stroke-width="2.74"/><circle cx="15.31" cy="10.22" r="3.1" fill="currentColor" stroke="none"/><path d="M17.47 10.77Q14.73 10.77 11.99 10.77M14.19 9.45L11.99 10.77L14.19 12.09" stroke-width="1.2" opacity="0.9"/><path d="M8.24 45L39.76 45" stroke-width="1.1" opacity="0.55"/></svg>`,
 
 
@@ -677,7 +675,7 @@ const EXERCISE_ICONS = {
 "child's pose": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.7 25.48L25.63 22.67" stroke-width="5.08"/><path d="M25.63 22.67L34.37 21.9L42.69 21.9" stroke-width="3.47"/><path d="M9.7 25.48L20.56 29.43L9.01 29.43L5.31 29.43" stroke-width="3.47"/><circle cx="30.36" cy="22.5" r="3.93" fill="currentColor" stroke="none"/><path d="M3 29.4L45 29.4" stroke-width="1.39" opacity="0.55"/></svg>`,
 
-"tall-kneeling banded hip hinge": `
+"tall-kneeling hip hinge": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24.49 31.57L6.24 32.03" stroke-width="1.5" stroke-dasharray="1.6 1.6"/><path d="M5.31 19.78L5.31 42.2" stroke-width="1.8"/><path d="M29.93 30.88L6.24 32.03" stroke-width="1.5" stroke-dasharray="1.6 1.6" opacity="0.3"/><path d="M31.31 30.64L31.31 14.47" stroke-width="5.08" opacity="0.22"/><path d="M31.31 14.47L36.96 21.19L32.8 13.99" stroke-width="3.47" opacity="0.22"/><path d="M31.31 30.64L31.31 42.2L19.76 42.2L16.06 42.2" stroke-width="3.47" opacity="0.22"/><circle cx="31.31" cy="9.73" r="3.93" fill="currentColor" stroke="none" opacity="0.22"/><path d="M25.88 31.34L35.84 18.59" stroke-width="5.08"/><path d="M35.84 18.59L41.49 25.32L37.33 18.11" stroke-width="3.47"/><path d="M25.88 31.34L31.31 41.54L19.75 41.54L16.05 41.54" stroke-width="3.47"/><circle cx="38.76" cy="14.86" r="3.93" fill="currentColor" stroke="none"/><path d="M3 42.2L45 42.2" stroke-width="1.39" opacity="0.55"/></svg>`,
 
 "wall drive march": `
@@ -701,25 +699,25 @@ const EXERCISE_ICONS = {
 "standing calf raise": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M16.66 45L29.84 45L29.84 40.61Z" stroke-width="1.41"/><path d="M25.59 21.64L27.73 9.53" stroke-width="3.86"/><path d="M27.73 9.53L27.26 16.19L26.82 22.5" stroke-width="2.63"/><path d="M25.59 21.64L26.05 30.41L25.59 39.18L27.2 41.49" stroke-width="2.63"/><circle cx="28.35" cy="5.99" r="2.99" fill="currentColor" stroke="none"/><path d="M25.06 22.5L28.58 22.5" stroke-width="1.41"/><circle cx="24.62" cy="22.5" r="1.32" fill="currentColor" stroke="none"/><circle cx="29.01" cy="22.5" r="1.32" fill="currentColor" stroke="none"/><path d="M14.91 45L33.09 45" stroke-width="1.05" opacity="0.55"/></svg>`,
 
-"cable biceps curl": `
+"biceps curl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22.26 12.05L31.55 43.6" stroke-width="1"/><circle cx="31.55" cy="43.6" r="1.2" stroke-width="1.4"/><path d="M20.46 12.05L24.06 12.05" stroke-width="1.8"/><path d="M32.85 3L32.85 45" stroke-width="1.8"/><path d="M20.46 25.66L31.55 43.6" stroke-width="1" opacity="0.3"/><circle cx="31.55" cy="43.6" r="1.2" stroke-width="1.4" opacity="0.3"/><path d="M18.66 25.66L22.26 25.66" stroke-width="1.8" opacity="0.3"/><path d="M18.55 25L18.55 11" stroke-width="4.4" opacity="0.22"/><path d="M18.55 11L19.21 18.57L20.46 25.66" stroke-width="3" opacity="0.22"/><path d="M18.55 25L18.55 35L18.55 45L21.75 45" stroke-width="3" opacity="0.22"/><circle cx="18.55" cy="6.9" r="3.4" fill="currentColor" stroke="none" opacity="0.22"/><path d="M18.55 25L18.55 11" stroke-width="4.4"/><path d="M18.55 11L19.21 18.57L22.26 12.05" stroke-width="3"/><path d="M18.55 25L18.55 35L18.55 45L21.75 45" stroke-width="3"/><circle cx="18.55" cy="6.9" r="3.4" fill="currentColor" stroke="none"/><path d="M13.15 45L34.85 45" stroke-width="1.2" opacity="0.55"/></svg>`,
 
 "reverse curl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M21.74 24.76L21.74 10.59" stroke-width="4.45"/><path d="M21.74 10.59L22.81 18.21L26.46 11.9" stroke-width="3.04"/><path d="M21.74 24.76L21.74 34.88L21.74 45L24.98 45" stroke-width="3.04"/><circle cx="21.74" cy="6.44" r="3.44" fill="currentColor" stroke="none"/><circle cx="26.46" cy="11.9" r="3.24" stroke-width="1.62"/><circle cx="26.46" cy="11.9" r="0.91" fill="currentColor" stroke="none"/><path d="M16.28 45L31.72 45" stroke-width="1.21" opacity="0.55"/></svg>`,
 
-"cable triceps pushdown": `
+"triceps pushdown": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M22.92 28.15L28.61 4.05" stroke-width="0.87"/><circle cx="28.61" cy="4.05" r="1.05" stroke-width="1.22"/><path d="M21.36 28.15L24.49 28.15" stroke-width="1.57"/><path d="M29.74 3.17L29.74 45" stroke-width="1.8"/><path d="M19.02 27.57L20.72 15.49" stroke-width="3.83"/><path d="M20.72 15.49L21.3 22.09L22.92 28.15" stroke-width="2.61"/><path d="M19.02 27.57L19.02 36.29L19.02 45L21.81 45" stroke-width="2.61"/><circle cx="21.22" cy="11.95" r="2.96" fill="currentColor" stroke="none"/><path d="M16.51 45L31.49 45" stroke-width="1.05" opacity="0.55"/></svg>`,
 
-"cable overhead triceps extension": `
+"overhead triceps extension": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M36.39 6.77L12.7 20.71" stroke-width="0.85"/><circle cx="12.7" cy="20.71" r="1.01" stroke-width="1.19"/><path d="M11.61 3L11.61 45" stroke-width="1.8"/><path d="M25.35 28.3L22.47 36.23L21.01 44.53L23.66 45" stroke-width="2.55" opacity="0.42"/><path d="M25.35 28.3L29.78 17.35" stroke-width="3.74"/><path d="M29.78 17.35L33.17 11.92L36.39 6.77" stroke-width="2.55"/><path d="M25.35 28.3L27.54 36.45L27.54 44.88L30.24 44.88" stroke-width="2.55"/><circle cx="31.07" cy="14.15" r="2.87" fill="currentColor" stroke="none"/><path d="M9.92 45L38.08 45" stroke-width="1.02" opacity="0.55"/></svg>`,
 
-"cable reverse wrist curl": `
+"reverse wrist curl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17L29 17" stroke-width="6"/><path d="M6 24.5L27 24.5" stroke-width="2.6"/><path d="M10 25V40M23 25V40" stroke-width="1.6"/><path d="M4 40.5H44" stroke-width="1.2" opacity="0.55"/><path d="M29 17C34 18.2 36.2 22 36.3 26" stroke-width="5.6"/><path d="M36.3 26C36.4 29.6 34.8 31.8 32.2 32.6" stroke-width="3.4"/><circle cx="31" cy="32.2" r="1.6" fill="currentColor" stroke="none"/><path d="M31 32.2L32.5 37.5" stroke-width="1"/><circle cx="32.5" cy="38.6" r="1.2" stroke-width="1.4"/></svg>`,
 
-"cable wrist curl": `
+"wrist curl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17L29 17" stroke-width="6"/><path d="M6 24.5L27 24.5" stroke-width="2.6"/><path d="M10 25V40M23 25V40" stroke-width="1.6"/><path d="M4 40.5H44" stroke-width="1.2" opacity="0.55"/><path d="M29 17C29.4 22.6 30.4 26.4 32.6 28.8" stroke-width="5.6"/><path d="M32.6 28.8C34.4 30.6 36.4 31.2 38.4 30.8" stroke-width="3.4"/><circle cx="39.8" cy="30.4" r="1.6" fill="currentColor" stroke="none"/><path d="M39.8 30.4L41.3 37.5" stroke-width="1"/><circle cx="41.3" cy="38.6" r="1.2" stroke-width="1.4"/></svg>`,
 
-"banded ski": `
+"ski pull": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M26.31 30.38L32.44 3" stroke-width="1.11" stroke-dasharray="1.6 1.6"/><path d="M24.45 5.24L32.44 3" stroke-width="1.11" stroke-dasharray="1.6 1.6" opacity="0.3"/><path d="M17.11 28.03L18.15 16.16" stroke-width="3.75" opacity="0.22"/><path d="M18.15 16.16L21.39 10.55L24.45 5.24" stroke-width="2.55" opacity="0.22"/><path d="M17.11 28.03L17.85 36.52L17.11 45L19.84 45" stroke-width="2.55" opacity="0.22"/><circle cx="18.46" cy="12.68" r="2.9" fill="currentColor" stroke="none" opacity="0.22"/><path d="M17.11 28.55L23.07 18.22" stroke-width="3.75"/><path d="M23.07 18.22L24.42 24.55L26.31 30.38" stroke-width="2.55"/><path d="M17.11 28.55L20.3 36.44L17.67 44.54L20.4 44.54" stroke-width="2.55"/><circle cx="24.82" cy="15.2" r="2.9" fill="currentColor" stroke="none"/><path d="M13.86 44.89L34.14 44.89" stroke-width="1.02" opacity="0.55"/></svg>`,
 
 "step up": `
@@ -746,11 +744,11 @@ const EXERCISE_ICONS = {
   <path d="M18 26 L18 32" stroke-dasharray="2 2"/>
 </svg>`,
 
-"standing cable leg curl": `
+"standing leg curl": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14.69 27.15L33.19 43.57" stroke-width="0.95"/><circle cx="33.19" cy="43.57" r="1.15" stroke-width="1.34"/><path d="M34.43 3L34.43 45" stroke-width="1.8"/><path d="M20.3 25.91L20.3 35.45L20.3 45L23.35 45" stroke-width="2.86" opacity="0.42"/><path d="M20.3 25.91L22.16 12.68" stroke-width="4.2"/><path d="M22.16 12.68L29.3 13.94L36.18 13.94" stroke-width="2.86"/><path d="M20.3 25.91L19.47 35.42L14.69 27.15L11.82 28.2" stroke-width="2.86"/><circle cx="22.7" cy="8.8" r="3.25" fill="currentColor" stroke="none"/><path d="M9.91 45L38.09 45" stroke-width="1.15" opacity="0.55"/></svg>`,
 
 
-"cable pull-through": `
+"pull-through": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M30.89 27.66L6.52 38.75" stroke-width="1.07"/><circle cx="6.52" cy="38.75" r="1.28" stroke-width="1.49"/><path d="M5.13 13.68L5.13 41.2" stroke-width="1.8"/><path d="M22.52 20.08L35.45 12.61" stroke-width="4.69"/><path d="M35.45 12.61L33.77 20.54L30.89 27.66" stroke-width="3.2"/><path d="M22.52 20.08L25.46 30.33L22.88 40.68L26.29 40.68" stroke-width="3.2"/><circle cx="39.24" cy="10.43" r="3.63" fill="currentColor" stroke="none"/><path d="M3 41.2L45 41.2" stroke-width="1.28" opacity="0.55"/></svg>`,
 
 "45° back extension": `
@@ -775,13 +773,13 @@ const EXERCISE_ICONS = {
 "thread the needle": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M34.2 23.46L34.2 31.77L34.2 39.65" stroke-width="3.28" opacity="0.09"/><path d="M19.63 28.19L34.2 23.46" stroke-width="4.81" opacity="0.22"/><path d="M34.2 23.46L34.2 15.14L34.2 7.26" stroke-width="3.28" opacity="0.22"/><path d="M19.63 28.19L19.63 39.13L8.69 39.13L5.19 39.13" stroke-width="3.28" opacity="0.22"/><circle cx="38.47" cy="22.07" r="3.72" fill="currentColor" stroke="none" opacity="0.22"/><path d="M34.8 26.06L38.96 33.26L35.02 40.08" stroke-width="3.28" opacity="0.42"/><path d="M19.63 28.19L34.8 26.06" stroke-width="4.81"/><path d="M34.8 26.06L38.32 33.6L34.99 40.74" stroke-width="3.28"/><path d="M19.63 28.19L19.63 39.13L8.69 39.13L5.19 39.13" stroke-width="3.28"/><circle cx="39.09" cy="27.37" r="3.72" fill="currentColor" stroke="none"/><path d="M3 39.13L45 39.13" stroke-width="1.31" opacity="0.55"/></svg>`,
 
-"foam roller thoracic extension": `
+"thoracic extension": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="17.79" cy="28.62" r="2.76" stroke-width="1.84"/><path d="M27.69 29.54L12.55 24.03" stroke-width="5.06"/><path d="M12.55 24.03L8.18 16.46L13.5 22.81" stroke-width="3.45"/><path d="M27.69 29.54L35.08 20.73L39.02 31.54L42.7 31.54" stroke-width="3.45"/><circle cx="9.21" cy="20.7" r="3.91" fill="currentColor" stroke="none"/><path d="M3 31.38L45 31.38" stroke-width="1.38" opacity="0.55"/></svg>`,
 
-"lacrosse ball glute release": `
+"glute release": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="24.06" cy="26.82" r="3.24" fill="currentColor" stroke="none" opacity="0.22"/><path d="M24.06 24.84L29.85 17.94L32.93 26.4L35.81 26.4" stroke-width="2.7" opacity="0.42"/><path d="M24.06 24.84L11.53 23.52" stroke-width="3.96"/><path d="M11.53 23.52L14.95 29.44L8.47 29.44" stroke-width="2.7"/><path d="M24.06 24.84L32.52 21.76L40.32 26.26L43.2 26.26" stroke-width="2.7"/><circle cx="7.86" cy="23.13" r="3.06" fill="currentColor" stroke="none"/><circle cx="24.06" cy="27.18" r="1.35" fill="currentColor" stroke="none"/><path d="M3 28.53L45 28.53" stroke-width="1.08" opacity="0.55"/></svg>`,
 
-"subscapularis ball release": `
+"subscapularis release": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="21.78" cy="19.98" r="2.79" fill="currentColor" stroke="none" opacity="0.22"/><path d="M29.01 3L29.01 44.9" stroke-width="1.6"/><path d="M21.87 29.38L23.01 18.58" stroke-width="3.74"/><path d="M25.94 18.88L20.08 18.27" stroke-width="3.06"/><path d="M23.26 29.53L20.48 29.23" stroke-width="3.06"/><path d="M25.94 18.88L25.12 24.72L24.73 30.3" stroke-width="2.55"/><path d="M20.08 18.27L20.59 12.39L20.78 6.81" stroke-width="2.55"/><path d="M23.26 29.53L22.45 37.24L22.45 45L20.74 44.7" stroke-width="2.55"/><path d="M20.48 29.23L21.29 36.95L21.29 44.71L23.01 44.41" stroke-width="2.55"/><circle cx="23.34" cy="15.41" r="2.64" fill="currentColor" stroke="none"/><circle cx="21.78" cy="19.98" r="1.16" fill="currentColor" stroke="none"/><path d="M17.44 44.9L30.56 44.9" stroke-width="1.02" opacity="0.55"/></svg>`,
 
 "cupping": `
@@ -790,17 +788,17 @@ const EXERCISE_ICONS = {
 "happy baby": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M41.71 36.57L18.65 36.57" stroke-width="5.5"/><path d="M18.65 36.57L26.69 26.98L35.08 18.59" stroke-width="3.75"/><path d="M41.71 36.57L33.47 22.3L33.47 5.83L38.74 5.83" stroke-width="3.75"/><circle cx="11.89" cy="36.57" r="5.6" fill="currentColor" stroke="none"/><path d="M3 39.2L45 39.2" stroke-width="1.5" opacity="0.55"/></svg>`,
 
-"cable internal rotation": `
+"shoulder internal rotation": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.97 19.8L36.7 19.8" stroke-width="0.95"/><circle cx="36.7" cy="19.8" r="1.15" stroke-width="1.34"/><path d="M38.03 3L38.03 45" stroke-width="1.8"/><path d="M20.47 25.91L20.47 12.55" stroke-width="4.2"/><path d="M24.1 12.55L16.84 12.55" stroke-width="3.44"/><path d="M22.19 25.91L18.75 25.91" stroke-width="3.44"/><path d="M24.1 12.55L21.14 19.17L19.72 25.9" stroke-width="2.86"/><path d="M16.84 12.55L16.84 19.8L9.97 19.8" stroke-width="2.86"/><path d="M22.19 25.91L21.19 35.4L21.19 44.95L19.08 44.58" stroke-width="2.86"/><path d="M18.75 25.91L19.75 35.4L19.75 44.95L21.85 44.58" stroke-width="2.86"/><circle cx="20.47" cy="8.63" r="3.25" fill="currentColor" stroke="none"/><path d="M8.06 45L39.94 45" stroke-width="1.15" opacity="0.55"/></svg>`,
 
-"cable external rotation": `
+"shoulder external rotation": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M34.21 19.8L14.74 19.8" stroke-width="0.95"/><circle cx="14.74" cy="19.8" r="1.15" stroke-width="1.34"/><path d="M13.4 3L13.4 45" stroke-width="1.8"/><path d="M30.97 25.91L30.97 12.55" stroke-width="4.2"/><path d="M34.6 12.55L27.34 12.55" stroke-width="3.44"/><path d="M32.69 25.91L29.25 25.91" stroke-width="3.44"/><path d="M34.6 12.55L31.64 19.17L30.22 25.9" stroke-width="2.86"/><path d="M27.34 12.55L27.34 19.8L34.21 19.8" stroke-width="2.86"/><path d="M32.69 25.91L31.69 35.4L31.69 44.95L29.58 44.58" stroke-width="2.86"/><path d="M29.25 25.91L30.25 35.4L30.25 44.95L32.35 44.58" stroke-width="2.86"/><circle cx="30.97" cy="8.63" r="3.25" fill="currentColor" stroke="none"/><path d="M11.5 45L36.5 45" stroke-width="1.15" opacity="0.55"/></svg>`,
 
 
 
 "front raise": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M17.47 24.76L17.47 34.88L17.47 45L20.71 45" stroke-width="3.04" opacity="0.42"/><path d="M17.47 24.76L17.47 10.59" stroke-width="4.45"/><path d="M17.47 10.59L25.16 10.59L32.45 10.59" stroke-width="3.04"/><path d="M17.47 24.76L17.47 34.88L17.47 45L20.71 45" stroke-width="3.04"/><circle cx="17.47" cy="6.44" r="3.44" fill="currentColor" stroke="none"/><path d="M32.45 12.61L32.45 8.57" stroke-width="1.62"/><circle cx="32.45" cy="13.12" r="1.52" fill="currentColor" stroke="none"/><circle cx="32.45" cy="8.06" r="1.52" fill="currentColor" stroke="none"/><path d="M12.01 45L35.99 45" stroke-width="1.21" opacity="0.55"/></svg>`,
-"lacrosse ball pec release": `
+"pec release": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="26.6" cy="17.59" r="3.29" fill="currentColor" stroke="none" opacity="0.22"/><path d="M28.93 3L28.93 45" stroke-width="1.6"/><path d="M20.33 26.79L23.86 14.48" stroke-width="4.03"/><path d="M23.86 14.48L22.65 21.33L22.19 27.9" stroke-width="2.75"/><path d="M20.33 26.79L18.74 35.8L18.1 44.93L21.03 44.93" stroke-width="2.75"/><circle cx="24.89" cy="10.87" r="3.11" fill="currentColor" stroke="none"/><circle cx="26.6" cy="17.59" r="1.83" fill="currentColor" stroke="none"/><path d="M16.27 45L31.73 45" stroke-width="1.1" opacity="0.55"/></svg>`,
 "reverse fly": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11.62 20.92L27.54 14.49" stroke-width="5.4" opacity="0.22"/><path d="M27.54 14.49L27.54 23.81L27.54 32.64" stroke-width="3.68" opacity="0.22"/><path d="M11.62 20.92L14.17 32.92L12.04 45L15.97 45" stroke-width="3.68" opacity="0.22"/><circle cx="32.21" cy="12.6" r="4.17" fill="currentColor" stroke="none" opacity="0.22"/><path d="M25.09 32.64L30 32.64" stroke-width="1.96" opacity="0.3"/><circle cx="24.48" cy="32.64" r="1.84" fill="currentColor" stroke="none" opacity="0.3"/><circle cx="30.61" cy="32.64" r="1.84" fill="currentColor" stroke="none" opacity="0.3"/><path d="M11.62 20.92L27.54 14.49" stroke-width="5.4"/><path d="M27.54 14.49L26.22 9.53L24.96 4.84" stroke-width="3.68"/><path d="M11.62 20.92L14.17 32.92L12.04 45L15.97 45" stroke-width="3.68"/><circle cx="32.21" cy="12.6" r="4.17" fill="currentColor" stroke="none"/><path d="M22.51 4.84L27.41 4.84" stroke-width="1.96"/><circle cx="21.89" cy="4.84" r="1.84" fill="currentColor" stroke="none"/><circle cx="28.03" cy="4.84" r="1.84" fill="currentColor" stroke="none"/><path d="M9.17 44.96L38.83 44.96" stroke-width="1.47" opacity="0.55"/></svg>`,
@@ -1012,13 +1010,43 @@ applyExerciseRenames([["Seated cable scapular retraction","Cable scapular retrac
 /* Eighth cleanup (Nov 2026): "Banded ski pull" becomes "Banded ski" (history kept). */
 applyExerciseRenames([["Banded ski pull","Banded ski"]], 'workoutLogCleanup_2026_11i', 'workoutLogDB_v1_backup_pre_cleanup_2026_11i');
 
+/* Ninth cleanup (Nov 2026): equipment-free names (e.g. "Cable biceps curl" ->
+   "Biceps curl", "Barbell back squat" -> "Back squat"), and Chest-supported rear
+   delt fly merged into Reverse fly. Logged sets are kept; merges combine notes. */
+const EXERCISE_CLEANUP_9 = [
+  ["Cable biceps curl","Biceps curl"],
+  ["Cable triceps pushdown","Triceps pushdown"],
+  ["Cable overhead triceps extension","Overhead triceps extension"],
+  ["Cable pull-through","Pull-through"],
+  ["Cable wrist curl","Wrist curl"],
+  ["Cable reverse wrist curl","Reverse wrist curl"],
+  ["Cable scapular retraction","Scapular retraction"],
+  ["Cable internal rotation","Shoulder internal rotation"],
+  ["Cable external rotation","Shoulder external rotation"],
+  ["Standing cable chest press","Standing chest press"],
+  ["Standing cable leg curl","Standing leg curl"],
+  ["Barbell back squat","Back squat"],
+  ["Conventional deadlift","Deadlift"],
+  ["Dumbbell bench press","Bench press"],
+  ["Dumbbell floor press","Floor press"],
+  ["Banded standing hip internal rotation","Standing hip internal rotation"],
+  ["Tall-kneeling banded hip hinge","Tall-kneeling hip hinge"],
+  ["Banded ski","Ski pull"],
+  ["Lacrosse ball glute release","Glute release"],
+  ["Lacrosse ball pec release","Pec release"],
+  ["Subscapularis ball release","Subscapularis release"],
+  ["Foam roller thoracic extension","Thoracic extension"],
+  ["Chest-supported rear delt fly","Reverse fly"]
+];
+applyExerciseRenames(EXERCISE_CLEANUP_9, 'workoutLogCleanup_2026_11j', 'workoutLogDB_v1_backup_pre_cleanup_2026_11j');
+
 const SEED_EXERCISES = [
-  "Conventional deadlift","Dumbbell bench press","Dumbbell floor press","Standing cable chest press",
-  "Half-kneeling landmine press","Seated cable row","Chest-supported rear delt fly","Barbell back squat",
+  "Deadlift","Bench press","Floor press","Standing chest press",
+  "Half-kneeling landmine press","Seated cable row","Back squat",
   "Split squat","Single-leg RDL",
-  "Banded standing hip internal rotation",
+  "Standing hip internal rotation",
   "Wall sit with ball squeeze","Copenhagen plank","Wall scapular push-up",
-  "Cable scapular retraction"
+  "Scapular retraction"
 ];
 if(db.exercises.length===0){
   SEED_EXERCISES.forEach(name=>{
@@ -1031,19 +1059,19 @@ if(db.exercises.length===0){
 // people who already have a populated library (skipped: "Wall sit" and "Single leg RDL",
 // near-duplicates of existing "Wall sit with ball squeeze" / "Single-leg RDL").
 const ADDITIONAL_EXERCISES = [
-  "Prone frog kick","Inchworm to lizard stretch","Deep squat hold","Child's pose","Tall-kneeling banded hip hinge",
+  "Prone frog kick","Inchworm to lizard stretch","Deep squat hold","Child's pose","Tall-kneeling hip hinge",
   "Wall drive march","Scapular CARs","Wall slides",
-  "Tibialis raise","Standing calf raise","Cable biceps curl",
-  "Reverse curl","Cable triceps pushdown","Cable overhead triceps extension",
-  "Cable reverse wrist curl","Cable wrist curl","Banded ski","Step up",
+  "Tibialis raise","Standing calf raise","Biceps curl",
+  "Reverse curl","Triceps pushdown","Overhead triceps extension",
+  "Reverse wrist curl","Wrist curl","Ski pull","Step up",
   "Kettlebell swing","Single leg hip thrust","Hip thrust",
-  "Standing cable leg curl","Cable pull-through",
+  "Standing leg curl","Pull-through",
   "45° back extension",
   "Wall calf stretch","Reclined butterfly stretch","Lying strap hamstring stretch",
-  "Couch stretch","Doorway pec stretch","Thread the needle","Foam roller thoracic extension",
-  "Lacrosse ball glute release","Subscapularis ball release","Cupping","Happy baby",
-  "Cable internal rotation","Cable external rotation",
-  "Front raise","Kickstand RDL","Lacrosse ball pec release","Prone Y raise","Reverse fly",
+  "Couch stretch","Doorway pec stretch","Thread the needle","Thoracic extension",
+  "Glute release","Subscapularis release","Cupping","Happy baby",
+  "Shoulder internal rotation","Shoulder external rotation",
+  "Front raise","Kickstand RDL","Pec release","Prone Y raise","Reverse fly",
   "Scapular plank","Treadmill run"
 ];
 {
