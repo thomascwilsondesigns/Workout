@@ -10,7 +10,7 @@ Single-file vanilla JS/HTML app (`index.html`, ~3,500 lines). Hosted on GitHub P
 - Counted sets (`isCounted`) are checked, non-W sets. They feed progress deltas, PRs, history and stats.
 - Never change the storage key or data shape without a migration. This is real training history.
 - Exercise icons are looked up by lowercase exercise name (`EXERCISE_ICONS`). Renaming an exercise means renaming its icon key too.
-- Nov 2026: a one-time migration (`runExerciseRenames`) renamed built-in exercises to common names and merged "Child's pose stretch" into "Child's pose". It is guarded by the `workoutLogRenames_2026_11` flag and backs up the raw data to `workoutLogDB_v1_backup_pre_renames_2026_11` first.
+- Nov 2026: one-time migrations via `applyExerciseRenames` (rename, or merge into an existing exercise and repoint workouts). First: built-in exercises renamed to common names, "Child's pose stretch" merged into "Child's pose" (flag `workoutLogRenames_2026_11`, backup `workoutLogDB_v1_backup_pre_renames_2026_11`). Second: band shoulder rotations merged into the cable versions, Inchworm renamed "Inchworm to lizard stretch" (flag `workoutLogCleanup_2026_11b`, backup `workoutLogDB_v1_backup_pre_cleanup_2026_11b`). Each backs up the raw data first and changes nothing if the backup fails.
 
 ## Behavior that must be preserved
 - Dates use the local date (`localDateStr()`), never `toISOString()` (a UTC bug bit once).
