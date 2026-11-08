@@ -892,6 +892,8 @@ const EXERCISE_TAGS = {
   "wrist curl": ["forearms", "wrist flexors", "grip", "elbow", "cable"]
 };
 function getExerciseTags(name){ return EXERCISE_TAGS[(name||'').trim().toLowerCase()] || []; }
+// Warm-up exercises: tagged warmup or mobility. Used to split the unsearched add-exercise lists.
+function isWarmupExercise(name){ return getExerciseTags(name).some(t=> t==='warmup' || t==='mobility'); }
 // Every search term must appear in the name or in one of the tags.
 function exerciseMatchesTerms(name, terms){
   const n = (name||'').toLowerCase(), tags = getExerciseTags(name);
@@ -2814,9 +2816,14 @@ function renderPickerList(query){
   const tagHitsById = new Map(); // exercise id -> tags that matched (display only; never saved)
 
   let matches;
+  const warmupBucket = window.currentPickerBucket==='warmup';
   if(q===''){
-    // No search yet: show the full library, alphabetical, fully scrollable.
-    matches = [...db.exercises].sort((a,b)=> a.name.localeCompare(b.name));
+    // No search yet: show the list for this section, alphabetical. Warm-up shows
+    // exercises tagged warmup or mobility; the main section shows everything else.
+    // Searching always covers the whole library.
+    matches = db.exercises
+      .filter(e=> isWarmupExercise(e.name) === warmupBucket)
+      .sort((a,b)=> a.name.localeCompare(b.name));
   } else {
     const terms = q.split(/\s+/).filter(Boolean);
     matches = db.exercises
@@ -2863,6 +2870,9 @@ function renderPickerList(query){
     html += `<div class="autocomplete-add-new" onclick="createAndAddExercise('${window.currentPickerBucket}')">+ Add "${escapeHtml(query.trim())}" as a new exercise</div>`;
   }
 
+  if(q===''){
+    html += `<div class="autocomplete-empty">${warmupBucket ? 'Showing warm-up and mobility exercises.' : 'Warm-up and mobility exercises are hidden.'} Search to find any exercise.</div>`;
+  }
   listEl.innerHTML = html;
   wireUpPickerItemGestures();
 }
