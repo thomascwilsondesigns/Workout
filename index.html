@@ -650,8 +650,6 @@ const EXERCISE_ICONS = {
 "banded standing hip internal rotation": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M32.43 36.05L13.33 36.9" stroke-width="1.32" stroke-dasharray="1.6 1.6"/><path d="M25.93 38.41L13.33 36.9" stroke-width="1.32" stroke-dasharray="1.6 1.6" opacity="0.3"/><path d="M27.5 24.76L27.5 10.59" stroke-width="4.45" opacity="0.22"/><path d="M31.35 10.59L23.66 10.59" stroke-width="3.64" opacity="0.22"/><path d="M29.32 24.76L25.68 24.76" stroke-width="3.64" opacity="0.22"/><path d="M31.35 10.59L30.01 18.17L31.28 25.34" stroke-width="3.04" opacity="0.22"/><path d="M23.66 10.59L24.99 18.17L23.73 25.34" stroke-width="3.04" opacity="0.22"/><path d="M29.32 24.76L28.97 34.87L28.97 44.99L26.74 44.6" stroke-width="3.04" opacity="0.22"/><path d="M25.68 24.76L25.93 28.29L25.93 38.41L28.16 38.02" stroke-width="3.04" opacity="0.22"/><circle cx="27.5" cy="6.44" r="3.44" fill="currentColor" stroke="none" opacity="0.22"/><path d="M27.5 24.76L27.5 10.59" stroke-width="4.45"/><path d="M31.35 10.59L23.66 10.59" stroke-width="3.64"/><path d="M29.32 24.76L25.68 24.76" stroke-width="3.64"/><path d="M31.35 10.59L30.01 18.17L31.28 25.34" stroke-width="3.04"/><path d="M23.66 10.59L24.99 18.17L23.73 25.34" stroke-width="3.04"/><path d="M29.32 24.76L28.97 34.87L28.97 44.99L26.74 44.6" stroke-width="3.04"/><path d="M25.68 24.76L25.93 28.29L32.43 36.05L34.67 35.65" stroke-width="3.04"/><circle cx="27.5" cy="6.44" r="3.44" fill="currentColor" stroke="none"/><path d="M11.31 45L36.69 45" stroke-width="1.21" opacity="0.55"/></svg>`,
 
-"short-lever copenhagen plank": `
-<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M26.76 24.79L33.31 24.79" stroke-width="1.92"/><path d="M27.81 24.79L27.81 30.46" stroke-width="1.22"/><path d="M32.26 24.79L32.26 30.46" stroke-width="1.22"/><path d="M23.27 21.73L31.87 23.25L40.46 24.76L43.25 24.76" stroke-width="2.62" opacity="0.42"/><path d="M23.27 21.73L11.24 19.61" stroke-width="3.84"/><path d="M11.24 19.61L11.24 26.25L4.95 26.25" stroke-width="2.62"/><path d="M23.27 21.73L31.87 23.25L31.87 31.98L34.66 31.98" stroke-width="2.62"/><circle cx="7.71" cy="18.99" r="2.97" fill="currentColor" stroke="none"/><path d="M3 30.46L45 30.46" stroke-width="1.05" opacity="0.55"/></svg>`,
 
 "wall sit with ball squeeze": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15.47 3L15.47 45" stroke-width="1.6"/><circle cx="28.72" cy="31.35" r="3.02" stroke-width="2"/><path d="M17.57 31.88L17.57 13.5" stroke-width="5.5"/><path d="M17.57 13.5L17.57 23.48L17.57 32.92" stroke-width="3.75"/><path d="M17.57 31.88L30.69 31.88L30.69 45L34.89 45" stroke-width="3.75"/><circle cx="17.57" cy="8.12" r="4.46" fill="currentColor" stroke="none"/><path d="M10.48 45L37.52 45" stroke-width="1.5" opacity="0.55"/></svg>`,
@@ -1003,11 +1001,15 @@ const EXERCISE_CLEANUP_5 = [
 applyExerciseRenames(EXERCISE_CLEANUP_5, 'workoutLogCleanup_2026_11e', 'workoutLogDB_v1_backup_pre_cleanup_2026_11e');
 removeUnusedExercises(["scap Y's", "scap Y\u2019s", "scap ys"], 'workoutLogCleanup_2026_11f', 'workoutLogDB_v1_backup_pre_cleanup_2026_11f');
 
+/* Sixth cleanup (Nov 2026): Short-lever Copenhagen plank is removed. Any logged
+   sets move to Copenhagen plank; cues, links and notes are combined. */
+applyExerciseRenames([["Short-lever Copenhagen plank","Copenhagen plank"]], 'workoutLogCleanup_2026_11g', 'workoutLogDB_v1_backup_pre_cleanup_2026_11g');
+
 const SEED_EXERCISES = [
   "Conventional deadlift","Dumbbell bench press","Dumbbell floor press","Standing cable chest press",
   "Half-kneeling landmine press","Seated cable row","Chest-supported rear delt fly","Barbell back squat",
   "Split squat","Single-leg RDL",
-  "Banded standing hip internal rotation","Short-lever Copenhagen plank",
+  "Banded standing hip internal rotation",
   "Wall sit with ball squeeze","Copenhagen plank","Wall scapular push-up",
   "Seated cable scapular retraction"
 ];
