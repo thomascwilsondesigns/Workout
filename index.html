@@ -882,7 +882,7 @@ const EXERCISE_TAGS = {
   "thoracic extension": ["upper back", "spine", "posture", "foam roller", "mobility"],
   "thread the needle": ["thoracic", "upper back", "spine", "rotation", "warmup", "mobility"],
   "tibialis raise": ["shins", "ankle", "knee", "prehab", "wall", "warmup"],
-  "treadmill run": ["cardio", "running", "conditioning", "legs"],
+  "treadmill run": ["cardio", "running", "conditioning", "legs", "warmup", "main"],
   "triceps pushdown": ["arms", "push", "cable"],
   "wall calf stretch": ["calves", "ankle", "achilles", "warmup"],
   "wall drive march": ["hip flexors", "core", "sprint", "activation", "warmup"],
@@ -892,8 +892,15 @@ const EXERCISE_TAGS = {
   "wrist curl": ["forearms", "wrist flexors", "grip", "elbow", "cable"]
 };
 function getExerciseTags(name){ return EXERCISE_TAGS[(name||'').trim().toLowerCase()] || []; }
-// Warm-up exercises: tagged warmup or mobility. Used to split the unsearched add-exercise lists.
+// Which unsearched add-exercise list(s) an exercise appears in. Tagged warmup or
+// mobility -> warm-up list; untagged for those -> main list. Tagging "main" as well
+// puts a warm-up exercise in both lists (e.g. Treadmill run).
 function isWarmupExercise(name){ return getExerciseTags(name).some(t=> t==='warmup' || t==='mobility'); }
+function showsInPickerList(name, warmupBucket){
+  const warm = isWarmupExercise(name);
+  if(warmupBucket) return warm;
+  return !warm || getExerciseTags(name).includes('main');
+}
 // Every search term must appear in the name or in one of the tags.
 function exerciseMatchesTerms(name, terms){
   const n = (name||'').toLowerCase(), tags = getExerciseTags(name);
@@ -2822,7 +2829,7 @@ function renderPickerList(query){
     // exercises tagged warmup or mobility; the main section shows everything else.
     // Searching always covers the whole library.
     matches = db.exercises
-      .filter(e=> isWarmupExercise(e.name) === warmupBucket)
+      .filter(e=> showsInPickerList(e.name, warmupBucket))
       .sort((a,b)=> a.name.localeCompare(b.name));
   } else {
     const terms = q.split(/\s+/).filter(Boolean);
