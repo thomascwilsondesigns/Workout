@@ -881,6 +881,11 @@ const EXERCISE_ICONS = {
 "crossbody deadlift": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M26.62 10.55L26.93 19.44L27.81 27.82" stroke-width="3.51" opacity="0.42"/><path d="M15.65 22.73L20.04 33.58L14.19 43.72L17.71 45" stroke-width="3.51" opacity="0.42"/><path d="M15.65 22.73L26.62 10.55" stroke-width="5.15"/><path d="M26.62 10.55L26.62 19.44L26.62 27.87" stroke-width="3.51"/><path d="M15.65 22.73L24.08 30.86L21.64 42.31L25.39 42.31" stroke-width="3.51"/><circle cx="29.83" cy="6.98" r="3.98" fill="currentColor" stroke="none"/><path d="M26.06 30.98L25.71 29.46L26.53 28.06L29.1 28.06L29.92 29.46L29.57 30.98" stroke-width="1.17"/><circle cx="27.81" cy="32.74" r="2.58" fill="currentColor" stroke="none"/><path d="M11.85 42.31L36.15 42.31" stroke-width="1.4" opacity="0.55"/></svg>`,
 
+"eccentric sit-up": `
+<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M26.84 35.76L23.91 19.12" stroke-width="5.31" opacity="0.22"/><path d="M23.91 19.12L31.85 23.71L27.51 16.18" stroke-width="3.62" opacity="0.22"/><path d="M26.84 35.76L34.6 26.51L38.73 37.85L42.59 37.85" stroke-width="3.62" opacity="0.22"/><circle cx="23.05" cy="14.25" r="4.1" fill="currentColor" stroke="none" opacity="0.22"/><path d="M26.84 35.76L13.53 25.36" stroke-width="5.31"/><path d="M13.53 25.36L21.47 29.94L17.13 22.42" stroke-width="3.62"/><path d="M26.84 35.76L34.6 26.51L38.73 37.85L42.59 37.85" stroke-width="3.62"/><circle cx="9.64" cy="22.31" r="4.1" fill="currentColor" stroke="none"/><path d="M12.65 18.09Q6.85 19.81 5.41 25.69M4.65 23.24L5.41 25.69L7.22 23.87" stroke-width="1.2" opacity="0.9"/><path d="M3 37.81L45 37.81" stroke-width="1.45" opacity="0.55"/></svg>`,
+"bench leg raise": `
+<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.23 30.95L30.23 30.95" stroke-width="2.03"/><path d="M7.34 30.95L7.34 37.41" stroke-width="1.29"/><path d="M29.12 30.95L29.12 37.41" stroke-width="1.29"/><path d="M24.69 29.29L11.77 29.29" stroke-width="4.06" opacity="0.22"/><path d="M11.77 29.29L8.26 23.21L4.94 28.97" stroke-width="2.77" opacity="0.22"/><path d="M24.69 29.29L33.92 29.29L43.15 29.29L43.15 26.33" stroke-width="2.77" opacity="0.22"/><circle cx="7.98" cy="29.29" r="3.14" fill="currentColor" stroke="none" opacity="0.22"/><path d="M24.69 26.89L11.97 24.64" stroke-width="4.06"/><path d="M11.97 24.64L8.46 18.57L5.13 24.32" stroke-width="2.77"/><path d="M24.69 26.89L20.36 18.74L16.03 10.59L13.42 11.97" stroke-width="2.77"/><circle cx="8.24" cy="23.99" r="3.14" fill="currentColor" stroke="none"/><path d="M3 37.41L45 37.41" stroke-width="1.11" opacity="0.55"/></svg>`,
+
 "_default": `
 <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
   <circle cx="24" cy="12" r="3.4"/>
@@ -961,7 +966,9 @@ const EXERCISE_TAGS = {
   "wrist curl": ["forearms", "wrist flexors", "grip", "elbow", "cable"],
   "foot release": ["feet", "plantar fascia", "arch", "soft tissue", "lacrosse ball", "lacrosse", "warmup"],
   "kettlebell windmill": ["shoulder", "obliques", "core", "hips", "hamstrings", "thoracic", "mobility", "warmup", "main"],
-  "crossbody deadlift": ["hamstrings", "glutes", "posterior chain", "hinge", "single arm", "anti-rotation", "kettlebell", "dumbbell"]
+  "crossbody deadlift": ["hamstrings", "glutes", "posterior chain", "hinge", "single arm", "anti-rotation", "kettlebell", "dumbbell"],
+  "eccentric sit-up": ["abs", "core", "negative", "slow lowering", "tempo", "situp", "crunch"],
+  "bench leg raise": ["abs", "lower abs", "core", "hip flexors", "lying leg raise", "reverse crunch", "leg lift"]
 };
 function getExerciseTags(name){ return EXERCISE_TAGS[(name||'').trim().toLowerCase()] || []; }
 // Which unsearched add-exercise list(s) an exercise appears in. Tagged warmup or
@@ -1226,7 +1233,8 @@ const ADDITIONAL_EXERCISES = [
   "Shoulder internal rotation","Shoulder external rotation",
   "Front raise","Kickstand RDL","Pec release","Prone Y raise","Reverse fly",
   "Scapular plank","Treadmill run",
-  "Foot release","Kettlebell windmill","Crossbody deadlift"
+  "Foot release","Kettlebell windmill","Crossbody deadlift",
+  "Eccentric sit-up","Bench leg raise"
 ];
 {
   const existingNames = new Set(db.exercises.map(e=>e.name.trim().toLowerCase()));
