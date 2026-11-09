@@ -1058,7 +1058,11 @@ function applySearchChip(chip){
 /* ---------------- Keyboard-aware sheets (iOS) ---------------- */
 function syncVisualViewport(vv){
   const root = document.documentElement;
-  const kb = window.innerHeight - vv.height > 120; // keyboard (not just the toolbar) is up
+  const a = document.activeElement;
+  const typingInSheet = !!(a && a.matches && a.matches('input:not([type=checkbox]):not([type=radio]), textarea') && a.closest('.sheet-overlay'));
+  // Keyboard up: either a sheet's text box has focus, or the visible area is clearly shorter than the layout.
+  // (Focus alone is enough so the sheet moves up even before iOS reports the keyboard's size.)
+  const kb = typingInSheet || (root.clientHeight - vv.height > 120);
   root.classList.toggle('kb-open', kb);
   root.style.setProperty('--vv-h', vv.height + 'px');
   root.style.setProperty('--vv-top', vv.offsetTop + 'px');
@@ -1067,6 +1071,10 @@ if(window.visualViewport){
   const vvSync = ()=> syncVisualViewport(window.visualViewport);
   window.visualViewport.addEventListener('resize', vvSync);
   window.visualViewport.addEventListener('scroll', vvSync);
+  // iOS can report the keyboard's size late, so re-check while it animates in or out.
+  const vvSyncSoon = ()=> [0, 150, 350, 700].forEach(t=> setTimeout(vvSync, t));
+  document.addEventListener('focusin', vvSyncSoon);
+  document.addEventListener('focusout', vvSyncSoon);
 }
 /* ---------------- Storage ---------------- */
 const DB_KEY = 'workoutLogDB_v1';
