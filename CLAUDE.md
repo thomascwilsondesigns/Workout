@@ -25,7 +25,7 @@ Single-file vanilla JS/HTML app (`index.html`, ~3,500 lines). Hosted on GitHub P
 - Wheel pickers only save on real touch input. This fixes an iOS bug where backgrounding the app zeroed values. Do not remove that guard.
 - Copying a workout or adding an exercise gives blank, unchecked sets, with last session's numbers shown beside the exercise. Intentional.
 - PRs: weight, set volume, Epley est. 1RM, reps at a weight. A first-ever log is not a PR.
-- Circuit timer (4x4 and others) launches from the Cardio 4x4 workout. It uses Web Audio, wall-clock timing and a wake lock.
+- Circuit timer (4x4 and others) lives in the Workout (main) section of Cardio 4x4 workouts (`renderCircuitPanel`): rounds/work/rest steppers, the circuit exercise list and a Start button; the warm-up section is unchanged. Each such workout may hold an optional `circuit: {rounds, workSeconds, restSeconds, exercises:[exerciseId]}`, created only on first change, copied with the workout, and repointed/kept by exercise merges and removals. The timer uses Web Audio, wall-clock timing and a wake lock.
 - iOS Safari: 16px inputs to avoid zoom, no native confirm() (use in-app sheets), sheets sit above the timer overlays (z-index).
 
 ## Testing

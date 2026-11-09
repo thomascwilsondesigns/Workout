@@ -588,8 +588,9 @@ svg .eq{color:var(--muted)}
 
   <div class="section-label section-toggle" id="mainLabel" onclick="toggleSection('main')"></div>
   <div id="mainSection">
+    <div id="circuitPanel" class="hidden"></div>
     <div id="mainExercises"></div>
-    <button class="add-exercise-btn" onclick="openPicker('main')">+ Add exercise</button>
+    <button class="add-exercise-btn" id="mainAddBtn" onclick="openPicker('main')">+ Add exercise</button>
   </div>
 </div>
 
@@ -1126,6 +1127,7 @@ function mergeExerciseDefInto(keep, drop){
   keep.notes = (n1 && n2 && n1!==n2) ? n1 + '\n\n' + n2 : (n1 || n2);
   db.workouts.forEach(w=>{
     [w.warmup, w.main].forEach(arr=> (arr||[]).forEach(inst=>{ if(inst.exerciseId===drop.id) inst.exerciseId = keep.id; }));
+    if(w.circuit && Array.isArray(w.circuit.exercises)) w.circuit.exercises = w.circuit.exercises.map(id=> id===drop.id ? keep.id : id);
   });
   db.exercises = db.exercises.filter(e=> e!==drop);
 }
@@ -1183,7 +1185,7 @@ function removeUnusedExercises(names, flag, backupKey){
   if(done) return;
   const norm = s => (s||'').trim().toLowerCase();
   const used = new Set();
-  db.workouts.forEach(w=> [w.warmup, w.main].forEach(arr=> (arr||[]).forEach(inst=> used.add(inst.exerciseId))));
+  db.workouts.forEach(w=>{ [w.warmup, w.main].forEach(arr=> (arr||[]).forEach(inst=> used.add(inst.exerciseId))); ((w.circuit||{}).exercises||[]).forEach(id=> used.add(id)); });
   const drop = db.exercises.filter(e=> names.some(n=> norm(n)===norm(e.name)) && !used.has(e.id));
   if(drop.length){
     try {
@@ -1412,6 +1414,7 @@ function copyWorkout(workoutId, evt){
     warmup: source.warmup.map(cloneExerciseInstance),
     main: source.main.map(cloneExerciseInstance)
   };
+  if(source.circuit) newWorkout.circuit = JSON.parse(JSON.stringify(source.circuit));
   db.workouts.push(newWorkout);
   saveDB();
   showWorkout(newWorkout.id);
@@ -2147,6 +2150,7 @@ function renderWorkout(){
   renderCircuitTimerLaunch(w);
   renderExerciseBucket('warmupExercises', w.warmup, 'warmup');
   renderExerciseBucket('mainExercises', w.main, 'main');
+  renderCircuitPanel(w);
   renderSectionHeaders(w);
   initWheels();
   wireUpExerciseDrag();
@@ -2158,7 +2162,8 @@ function renderSectionHeaders(w){
     const el = document.getElementById(key+'Label');
     const col = collapsedSections.has(key);
     el.classList.toggle('is-collapsed', col);
-    el.innerHTML = `<span class="chev">▼</span><span>${label}</span><span class="sec-count">(${arr.length})</span>`;
+    const n = (key==='main' && isCircuitWorkout(w)) ? arr.length + getCircuit(w).exercises.length : arr.length;
+    el.innerHTML = `<span class="chev">▼</span><span>${label}</span><span class="sec-count">(${n})</span>`;
     document.getElementById(key+'Section').style.display = col ? 'none' : '';
   });
 }
@@ -2169,7 +2174,7 @@ function toggleSection(key){
 
 function renderCircuitTimerLaunch(w){
   const wrap = document.getElementById('circuitTimerLaunch');
-  if(!w.types.includes('Cardio 4x4')){
+  if(true){ // the timer now lives in the Workout section of Cardio 4x4 workouts (renderCircuitPanel)
     wrap.classList.add('hidden');
     wrap.innerHTML = '';
     return;
@@ -2184,6 +2189,63 @@ function renderCircuitTimerLaunch(w){
       </span>
     </button>
   `;
+}
+
+/* ---------------- Circuit (Cardio 4x4 workouts) ----------------
+   A Cardio 4x4 workout's Workout section holds its circuit: rounds, work and rest, and the exercises in order,
+   saved on the workout as w.circuit = {rounds, workSeconds, restSeconds, exercises:[exerciseId]}. It is created
+   on the first change, so opening a workout never writes anything. Start runs the circuit timer with it. */
+const CIRCUIT_DEFAULT = { rounds:4, workSeconds:240, restSeconds:180 };
+function isCircuitWorkout(w){ return !!w && (w.types||[]).includes('Cardio 4x4'); }
+function getCircuit(w){ return w.circuit || { ...CIRCUIT_DEFAULT, exercises:[] }; }
+function ensureCircuit(w){ if(!w.circuit) w.circuit = { ...CIRCUIT_DEFAULT, exercises:[] }; return w.circuit; }
+function renderCircuitPanel(w){
+  const panel = document.getElementById('circuitPanel'), addBtn = document.getElementById('mainAddBtn');
+  if(!isCircuitWorkout(w)){ panel.classList.add('hidden'); panel.innerHTML=''; addBtn.classList.remove('hidden'); return; }
+  addBtn.classList.add('hidden'); panel.classList.remove('hidden');
+  if(w.main.length===0) document.getElementById('mainExercises').innerHTML = '';
+  const c = getCircuit(w), n = c.exercises.length;
+  const rows = n===0 ? `<div style="color:var(--muted); font-size:13.5px; padding:4px 2px 8px;">No exercises added yet.</div>` :
+    c.exercises.map((exId,i)=>{ const def = getExerciseDef(exId); const name = def ? def.name : 'Unknown exercise';
+      return `<div class="ct-picked-row"><div class="pos">${i+1}</div><div class="icon">${getExerciseIcon(name)}</div><div class="name">${escapeHtml(name)}</div>`+
+        (i>0 ? `<div class="remove" onclick="circuitMove(${i},-1)" aria-label="Move up">▲</div>` : '')+
+        `<div class="remove" onclick="circuitRemove(${i})">remove</div></div>`; }).join('');
+  let summary = '';
+  if(n){ const sched = buildSchedule({rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exerciseCount:n});
+    summary = `Total session: <strong>${Math.round(sched.totalSeconds/60)} min</strong>. Each round, ${ctFmtMinSec(c.workSeconds/n)} per exercise before rest.`; }
+  const stepper = (label,key,val,delta)=> `<div class="ct-config-row"><label>${label}</label><div class="ct-stepper"><button onclick="circuitAdjust('${key}',${-delta})">−</button><span class="ct-val">${val}</span><button onclick="circuitAdjust('${key}',${delta})">+</button></div></div>`;
+  panel.innerHTML = `
+    <div class="ct-section">
+      ${stepper('Rounds','rounds',c.rounds,1)}
+      ${stepper('Work (min:sec)','workSeconds',ctFmtMinSec(c.workSeconds),30)}
+      ${stepper('Rest (min:sec)','restSeconds',ctFmtMinSec(c.restSeconds),30)}
+    </div>
+    <div class="ct-section">
+      <h3>Circuit exercises</h3>
+      ${rows}
+      <button class="add-exercise-btn" onclick="circuitOpenPicker()">+ Add exercise to circuit</button>
+      <div class="ct-summary">${summary}</div>
+    </div>
+    <button class="circuit-timer-btn" onclick="circuitStart()" ${n?'':'disabled style="opacity:.5"'}>
+      <span class="icon">⏱️</span>
+      <span class="text"><div class="title">${n ? `Start circuit · ${c.rounds} rounds` : 'Add an exercise to start'}</div><div class="sub">Guided rounds with countdown tones</div></span>
+    </button>
+    <button class="ct-test-sound" onclick="ctPlayTestTone()">🔊 Test sound</button>`;
+}
+function circuitAdjust(key, delta){
+  const c = ensureCircuit(getWorkout());
+  if(key==='rounds') c.rounds = Math.max(1, Math.min(12, c.rounds + delta));
+  else if(key==='workSeconds') c.workSeconds = Math.max(30, Math.min(1800, c.workSeconds + delta));
+  else if(key==='restSeconds') c.restSeconds = Math.max(0, Math.min(1800, c.restSeconds + delta));
+  saveDB(); renderWorkout();
+}
+function circuitRemove(i){ const c = ensureCircuit(getWorkout()); c.exercises.splice(i,1); saveDB(); renderWorkout(); }
+function circuitMove(i, d){ const c = ensureCircuit(getWorkout()); const j=i+d; if(j<0||j>=c.exercises.length) return; [c.exercises[i],c.exercises[j]]=[c.exercises[j],c.exercises[i]]; saveDB(); renderWorkout(); }
+function circuitOpenPicker(){ window.ctPickerTarget = 'workout'; ctOpenExercisePicker(); }
+function circuitStart(){
+  const c = getCircuit(getWorkout()); if(!c.exercises.length) return;
+  Object.assign(ctConfig, { rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exercises:[...c.exercises] });
+  openCircuitTimer(); ctStartSession();
 }
 
 /* ---------------- Exercise drag-to-reorder ---------------- */
@@ -3285,6 +3347,12 @@ function ctRenderPickerList(query){
 }
 
 function ctAddExercise(exId){
+  if(window.ctPickerTarget==='workout'){
+    window.ctPickerTarget = null;
+    ensureCircuit(getWorkout()).exercises.push(exId); saveDB(); renderWorkout();
+    document.querySelector('.sheet-overlay')?.remove();
+    return;
+  }
   ctConfig.exercises.push(exId);
   ctRenderPicked();
   document.querySelector('.sheet-overlay')?.remove();
