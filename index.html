@@ -1001,6 +1001,13 @@ function exerciseMatchesTerms(name, terms){
   const nameWords = searchWords(name), tagWords = getExerciseTags(name).flatMap(searchWords);
   return terms.every(t=> wordsStartWith(nameWords, t) || wordsStartWith(tagWords, t));
 }
+// In the add-exercise sheet, a search can reach across warm-up/main only by exercise name; matches that rely
+// on a tag must also belong to the section being added to.
+function nameMatchesTerms(name, terms){ const w = searchWords(name); return terms.every(t=> wordsStartWith(w, t)); }
+function pickerSearchMatch(name, terms, warmupBucket){
+  if(!exerciseMatchesTerms(name, terms)) return false;
+  return nameMatchesTerms(name, terms) || showsInPickerList(name, warmupBucket);
+}
 function matchingTags(name, terms){ return getExerciseTags(name).filter(tag=> terms.some(t=> wordsStartWith(searchWords(tag), t))); }
 // Suggestion chips. Browse (empty search): the section's most common tags. Typing: whole words from exercise
 // names and tags that start with the word being typed, each with how many exercises it would find.
@@ -1019,7 +1026,8 @@ function typingChips(q){
     searchWords(e.name).forEach(w=>{ if(w.length>=3 && w.startsWith(last) && !SEARCH_CHIP_SKIP.has(w)) cands.add(w); });
     getExerciseTags(e.name).forEach(t=>{ if(!SEARCH_CHIP_SKIP.has(t) && wordsStartWith(searchWords(t), last)) cands.add(t); });
   });
-  return [...cands].map(c=>[c, db.exercises.filter(e=> exerciseMatchesTerms(e.name, before.concat(searchWords(c)))).length])
+  const warmupBucket = window.currentPickerBucket==='warmup';
+  return [...cands].map(c=>[c, db.exercises.filter(e=> pickerSearchMatch(e.name, before.concat(searchWords(c)), warmupBucket)).length])
     .filter(([c,n])=> n>0 && c!==last)
     // drop near-duplicates: a longer chip that finds the same exercises as a shorter one it starts with
     .filter(([c,n],i,all)=> !all.some(([d,m])=> d!==c && m===n && c.startsWith(d)))
@@ -2980,7 +2988,7 @@ function renderPickerList(query){
     matches = db.exercises
       .map(e=>{
         const name = e.name.toLowerCase();
-        if(!exerciseMatchesTerms(e.name, terms)) return null;
+        if(!pickerSearchMatch(e.name, terms, warmupBucket)) return null;
         let score = 3;
         if(name === q) score = 0;
         else if(name.startsWith(q)) score = 1;
