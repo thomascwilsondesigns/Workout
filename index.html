@@ -192,6 +192,10 @@
     border-radius:var(--radius); opacity:0.95; transform:scale(1.02);
   }
   .drag-source-hidden{ visibility:hidden; }
+  /* Long-press starts a drag on collapsed cards; stop iOS selecting text or showing the copy callout instead. */
+  .exercise-head, .exercise-card.reorderable, html.dragging, html.dragging *{
+    -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+  }
   .drag-placeholder{
     border-radius:var(--radius); margin-bottom:10px; border:2px dashed var(--sage);
     background:rgba(90,107,82,0.08);
@@ -578,7 +582,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-09 · keyboard fix 3</div>
+  <div class="build-label">Build 2026-11-09 · drag fix</div>
 </div>
 
 <!-- STATS -->
@@ -2286,6 +2290,7 @@ function wireUpExerciseDrag(){
     const fromBucket = cardEl.dataset.bucket;
     const isCollapsed = collapsedExercises.has(instId);
     if(!isCollapsed) return; // only draggable while collapsed, per spec
+    cardEl.classList.add('reorderable');
 
     let pressTimer = null;
     let longPressFired = false;
@@ -2330,6 +2335,8 @@ function wireUpExerciseDrag(){
 }
 
 function beginDrag(cardEl, instId, fromBucket, startClientY){
+  window.getSelection?.()?.removeAllRanges(); // drop any text selection the long-press started
+  document.documentElement.classList.add('dragging');
   const rect = cardEl.getBoundingClientRect();
   const ghost = cardEl.cloneNode(true);
   ghost.classList.add('drag-ghost');
@@ -2424,6 +2431,7 @@ function endDrag(){
   ghostEl.remove();
   placeholderEl.remove();
   sourceEl.classList.remove('drag-source-hidden');
+  document.documentElement.classList.remove('dragging');
   dragState = null;
   renderWorkout();
 }
