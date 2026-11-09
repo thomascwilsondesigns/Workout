@@ -937,7 +937,7 @@ const EXERCISE_TAGS = {
   "happy baby": ["hips", "lower back", "adductors", "stretch", "mobility"],
   "hip thrust": ["glutes", "hamstrings", "hip extension", "barbell", "bench"],
   "inchworm to lizard stretch": ["hips", "hamstrings", "thoracic", "warmup", "mobility"],
-  "kettlebell swing": ["glutes", "hamstrings", "posterior chain", "hinge"],
+  "kettlebell swing": ["glutes", "hamstrings", "posterior chain", "hinge", "circuit", "cardio", "conditioning"],
   "kickstand rdl": ["hamstrings", "glutes", "posterior chain", "hinge", "single leg", "dumbbell"],
   "lying strap hamstring stretch": ["hamstrings", "legs", "mobility", "warmup"],
   "overhead triceps extension": ["arms", "push", "cable"],
@@ -963,7 +963,7 @@ const EXERCISE_TAGS = {
   "standing chest press": ["pecs", "triceps", "shoulder", "push", "cable"],
   "standing hip internal rotation": ["glutes", "band", "mobility"],
   "standing leg curl": ["hamstrings", "legs", "cable"],
-  "step up": ["quads", "glutes", "legs", "single leg", "box"],
+  "step up": ["quads", "glutes", "legs", "single leg", "box", "circuit", "cardio", "conditioning"],
   "subscapularis release": ["shoulder", "rotator cuff", "lacrosse ball", "warmup"],
   "tall-kneeling hip hinge": ["glutes", "hamstrings", "hip extension", "band", "warmup"],
   "thoracic extension": ["upper back", "posture", "foam roller", "mobility"],
@@ -2241,7 +2241,7 @@ function circuitAdjust(key, delta){
 }
 function circuitRemove(i){ const c = ensureCircuit(getWorkout()); c.exercises.splice(i,1); saveDB(); renderWorkout(); }
 function circuitMove(i, d){ const c = ensureCircuit(getWorkout()); const j=i+d; if(j<0||j>=c.exercises.length) return; [c.exercises[i],c.exercises[j]]=[c.exercises[j],c.exercises[i]]; saveDB(); renderWorkout(); }
-function circuitOpenPicker(){ window.ctPickerTarget = 'workout'; ctOpenExercisePicker(); }
+function circuitOpenPicker(){ openPicker('circuit'); } // same add-exercise sheet as the other sections
 function circuitStart(){
   const c = getCircuit(getWorkout()); if(!c.exercises.length) return;
   Object.assign(ctConfig, { rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exercises:[...c.exercises] });
@@ -2948,7 +2948,7 @@ function openPicker(bucketKey){
   overlay.innerHTML = `
     <div class="picker-sheet">
       <div class="picker-sheet-header">
-        <h2>Add exercise</h2>
+        <h2>${bucketKey==='circuit' ? 'Add to circuit' : 'Add exercise'}</h2>
         <input type="text" class="picker-search" id="pickerSearch" placeholder="Search or scroll the list below..." autocomplete="off" style="margin-bottom:0;">
         <div class="search-chips hidden" id="pickerChips"></div>
       </div>
@@ -3196,6 +3196,7 @@ function createAndAddExercise(bucketKey){
   renderWorkout();
 }
 function addInstanceToWorkout(w, bucketKey, def){
+  if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // Cardio 4x4 circuit holds exercise ids only
   const last = findLastInstance(def.id, w.id);
   const secondaryType = last?.secondaryType || 'weight';
   const prevSets = blankSetsFrom(last); // same set count as last time, values blank; last numbers show beside the exercise
@@ -3347,12 +3348,6 @@ function ctRenderPickerList(query){
 }
 
 function ctAddExercise(exId){
-  if(window.ctPickerTarget==='workout'){
-    window.ctPickerTarget = null;
-    ensureCircuit(getWorkout()).exercises.push(exId); saveDB(); renderWorkout();
-    document.querySelector('.sheet-overlay')?.remove();
-    return;
-  }
   ctConfig.exercises.push(exId);
   ctRenderPicked();
   document.querySelector('.sheet-overlay')?.remove();
