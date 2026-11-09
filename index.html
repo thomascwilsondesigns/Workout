@@ -582,7 +582,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-09 · cards collapse on open</div>
+  <div class="build-label">Build 2026-11-09 · one card open</div>
 </div>
 
 <!-- STATS -->
@@ -2848,7 +2848,8 @@ function setDetailTab(instId, tab){
 }
 
 function toggleCollapse(instId){
-  if(collapsedExercises.has(instId)) collapsedExercises.delete(instId);
+  // One expanded card at a time: opening a card collapses the rest; tapping the open card collapses it.
+  if(collapsedExercises.has(instId)) collapseAllExcept(instId);
   else collapsedExercises.add(instId);
   renderWorkout();
 }
