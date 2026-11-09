@@ -582,7 +582,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-09 · new butterfly drawing</div>
+  <div class="build-label">Build 2026-11-09 · renamed workout types</div>
 </div>
 
 <!-- STATS -->
@@ -1301,6 +1301,28 @@ applyExerciseRenames(EXERCISE_CLEANUP_9, 'workoutLogCleanup_2026_11j', 'workoutL
 /* Tenth cleanup (Nov 2026): "Bench leg raise" becomes "Leg raise" (history kept). */
 applyExerciseRenames([["Bench leg raise","Leg raise"]], 'workoutLogCleanup_2026_11k', 'workoutLogDB_v1_backup_pre_cleanup_2026_11k');
 
+/* Workout type renames (Nov 2026): "Cardio Zone 2" -> "Cardio - Steady State", "Cardio 4x4" -> "Circuit".
+   Each workout stores its type names in w.types, so saved workouts are updated once, after a backup of
+   the raw data (no backup, no changes). */
+function renameWorkoutTypes(pairs, flag, backupKey){
+  let done = false;
+  try { done = localStorage.getItem(flag)==='1'; } catch(e){ return; }
+  if(done) return;
+  const map = new Map(pairs);
+  const hits = db.workouts.filter(w=> (w.types||[]).some(t=> map.has(t)));
+  if(hits.length){
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      if(raw && !localStorage.getItem(backupKey)) localStorage.setItem(backupKey, raw);
+    } catch(e){ return; } // no backup, no changes
+    hits.forEach(w=>{ w.types = [...new Set(w.types.map(t=> map.get(t) || t))]; });
+    saveDB();
+  }
+  try { localStorage.setItem(flag, '1'); } catch(e){}
+}
+renameWorkoutTypes([["Cardio Zone 2","Cardio - Steady State"],["Cardio 4x4","Circuit"]],
+  'workoutLogTypeRenames_2026_11', 'workoutLogDB_v1_backup_pre_type_renames_2026_11');
+
 const SEED_EXERCISES = [
   "Deadlift","Bench press","Floor press","Standing chest press",
   "Half-kneeling landmine press","Seated cable row","Back squat",
@@ -1350,7 +1372,7 @@ const ADDITIONAL_EXERCISES = [
   if(addedAny) saveDB();
 }
 
-const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio Zone 2","Cardio 4x4","Upper Body","Lower Body"];
+const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body"];
 let currentWorkoutId = null;
 let openExerciseDetail = {}; // exerciseInstanceId -> {open:bool, tab:'cues'|'links'|'notes'}
 let collapsedExercises = new Set(); // exerciseInstanceId -> collapsed (sets hidden, summary shown); every card starts collapsed when a workout opens
@@ -2215,7 +2237,7 @@ function toggleSection(key){
 
 function renderCircuitTimerLaunch(w){
   const wrap = document.getElementById('circuitTimerLaunch');
-  if(true){ // the timer now lives in the Workout section of Cardio 4x4 workouts (renderCircuitPanel)
+  if(true){ // the timer now lives in the Workout section of Circuit workouts (renderCircuitPanel)
     wrap.classList.add('hidden');
     wrap.innerHTML = '';
     return;
@@ -2232,12 +2254,12 @@ function renderCircuitTimerLaunch(w){
   `;
 }
 
-/* ---------------- Circuit (Cardio 4x4 workouts) ----------------
-   A Cardio 4x4 workout's Workout section holds its circuit: rounds, work and rest, and the exercises in order,
+/* ---------------- Circuit (Circuit workouts; formerly "Cardio 4x4") ----------------
+   A Circuit workout's Workout section holds its circuit: rounds, work and rest, and the exercises in order,
    saved on the workout as w.circuit = {rounds, workSeconds, restSeconds, exercises:[exerciseId]}. It is created
    on the first change, so opening a workout never writes anything. Start runs the circuit timer with it. */
 const CIRCUIT_DEFAULT = { rounds:4, workSeconds:240, restSeconds:180 };
-function isCircuitWorkout(w){ return !!w && (w.types||[]).includes('Cardio 4x4'); }
+function isCircuitWorkout(w){ return !!w && (w.types||[]).includes('Circuit'); }
 function getCircuit(w){ return w.circuit || { ...CIRCUIT_DEFAULT, exercises:[] }; }
 function ensureCircuit(w){ if(!w.circuit) w.circuit = { ...CIRCUIT_DEFAULT, exercises:[] }; return w.circuit; }
 function renderCircuitPanel(w){
@@ -3243,7 +3265,7 @@ function createAndAddExercise(bucketKey){
   renderWorkout();
 }
 function addInstanceToWorkout(w, bucketKey, def){
-  if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // Cardio 4x4 circuit holds exercise ids only
+  if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // a Circuit workout's circuit holds exercise ids only
   const last = findLastInstance(def.id, w.id);
   const secondaryType = last?.secondaryType || 'weight';
   const prevSets = blankSetsFrom(last); // same set count as last time, values blank; last numbers show beside the exercise
