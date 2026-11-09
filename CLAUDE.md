@@ -18,7 +18,7 @@ Single-file vanilla JS/HTML app (`index.html`, ~3,500 lines). Hosted on GitHub P
 ## Look
 - Theme: Midnight (dark, lime accent, coral PRs, yellow warm-up) is on via `class="theme-midnight"` on `<html>`. Its rules are all prefixed `.theme-midnight` at the end of the stylesheet. Removing the class falls back to Sage & Ember (sage/amber), whose rules are kept unprefixed.
 - Exercise drawings are two-tone: elements of the person have `class="fig"` (lime in Midnight), equipment, walls and floor have `class="eq"` (grey). New drawings need these classes on every path/circle.
-- Exercise cards: drawing tile 47px (4px padding, 13px radius), head padding 16px, 12px between cards, names 15.5px.
+- Exercise cards: drawing tile 47px (4px padding, 13px radius), head padding 16px, 12px between cards, names 15.5px. Add-exercise search list: bare drawings 34px, rows 13px vertical padding.
 - Home-screen icon: `apple-touch-icon.png` (180x180, a dumbbell with one lime plate each side on the Midnight background) and `favicon-32.png` sit next to `index.html`. iOS caches the icon when a bookmark is added, so re-add the bookmark to see a new icon.
 
 ## Behavior that must be preserved
