@@ -93,6 +93,12 @@
     flex:1; overflow-y:auto; padding:0 18px 18px; -webkit-overflow-scrolling:touch;
   }
   .picker-sheet-footer{padding:10px 18px 22px; flex-shrink:0;}
+  /* iOS keyboard open: the keyboard covers the page without resizing it, so fit sheets to the visible area
+     above it (syncVisualViewport). The picker keeps a steady height so results sit right under the search box. */
+  html.kb-open .sheet-overlay{top:var(--vv-top,0px); bottom:auto; height:var(--vv-h,100%);}
+  html.kb-open .sheet{max-height:calc(var(--vv-h,100vh) - 24px);}
+  html.kb-open .picker-sheet{height:calc(var(--vv-h,100vh) - 24px); max-height:none;}
+  html.kb-open .picker-sheet-footer{padding-bottom:10px;}
   .type-grid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
   .type-chip{
     padding:9px 14px; border-radius:20px; border:1.5px solid var(--line); background:#fff;
@@ -1048,6 +1054,19 @@ function applySearchChip(chip){
   input.value = (v.trim()==='' ? '' : m[1]) + chip + ' ';
   renderPickerList(input.value); renderSearchChips(input.value);
   input.focus();
+}
+/* ---------------- Keyboard-aware sheets (iOS) ---------------- */
+function syncVisualViewport(vv){
+  const root = document.documentElement;
+  const kb = window.innerHeight - vv.height > 120; // keyboard (not just the toolbar) is up
+  root.classList.toggle('kb-open', kb);
+  root.style.setProperty('--vv-h', vv.height + 'px');
+  root.style.setProperty('--vv-top', vv.offsetTop + 'px');
+}
+if(window.visualViewport){
+  const vvSync = ()=> syncVisualViewport(window.visualViewport);
+  window.visualViewport.addEventListener('resize', vvSync);
+  window.visualViewport.addEventListener('scroll', vvSync);
 }
 /* ---------------- Storage ---------------- */
 const DB_KEY = 'workoutLogDB_v1';
