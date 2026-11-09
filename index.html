@@ -582,7 +582,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-09 · bigger drawings</div>
+  <div class="build-label">Build 2026-11-09 · cards stay collapsed</div>
 </div>
 
 <!-- STATS -->
@@ -1353,7 +1353,21 @@ const ADDITIONAL_EXERCISES = [
 const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio Zone 2","Cardio 4x4","Upper Body","Lower Body"];
 let currentWorkoutId = null;
 let openExerciseDetail = {}; // exerciseInstanceId -> {open:bool, tab:'cues'|'links'|'notes'}
-let collapsedExercises = new Set(); // exerciseInstanceId -> collapsed (sets hidden, summary shown)
+// exerciseInstanceId -> collapsed (sets hidden, summary shown). View state only: kept in its own localStorage
+// key (never in workoutLogDB_v1) so cards stay collapsed when iOS reloads the app.
+const COLLAPSED_KEY = 'workoutLogUI_collapsed_v1';
+let collapsedExercises = (()=>{
+  try { const ids = JSON.parse(localStorage.getItem(COLLAPSED_KEY) || '[]'); return new Set(Array.isArray(ids) ? ids : []); }
+  catch(e){ return new Set(); }
+})();
+function saveCollapsed(){
+  try {
+    // keep only ids of exercise instances that still exist
+    const live = new Set(db.workouts.flatMap(w=> [...(w.warmup||[]), ...(w.main||[])].map(i=> i.id)));
+    [...collapsedExercises].forEach(id=>{ if(!live.has(id)) collapsedExercises.delete(id); });
+    localStorage.setItem(COLLAPSED_KEY, JSON.stringify([...collapsedExercises]));
+  } catch(e){}
+}
 
 function uid(){ return Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
 
@@ -2842,6 +2856,7 @@ function setDetailTab(instId, tab){
 function toggleCollapse(instId){
   if(collapsedExercises.has(instId)) collapsedExercises.delete(instId);
   else collapsedExercises.add(instId);
+  saveCollapsed();
   renderWorkout();
 }
 function collapseAllExcept(instId){
@@ -2851,6 +2866,7 @@ function collapseAllExcept(instId){
     if(inst.id !== instId) collapsedExercises.add(inst.id);
   });
   collapsedExercises.delete(instId);
+  saveCollapsed();
 }
 function changeSecondaryType(instId, newType){
   const {inst} = findInstAndBucket(instId);
