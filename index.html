@@ -208,6 +208,7 @@
   .exercise-head-left{display:flex; align-items:center; min-width:0; flex:1; cursor:pointer;}
   .exercise-head-text{display:flex; flex-direction:column; min-width:0;}
   .exercise-head .name{font-weight:600; font-size:15.5px;}
+  .band-dot{display:inline-block; width:9px; height:9px; border-radius:50%; margin:0 3px 0 2px; vertical-align:0; box-shadow:0 0 0 1px rgba(255,255,255,.35);}
   .set-summary{font-size:12.5px; color:var(--muted); margin-top:2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
   .delta-up{color:#4a7c3f; font-weight:600;}
   .delta-down{color:var(--muted);}
@@ -586,7 +587,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · started exercises move up</div>
+  <div class="build-label">Build 2026-11-10 · band colours</div>
 </div>
 
 <!-- STATS -->
@@ -1803,8 +1804,8 @@ function renderHistoryPane(inst, def, state){
   const rows = shown.map(ses=>{
     const prs = computePRsForInstance(ses.inst, ses.workout, sessions);
     const t = ses.inst.secondaryType || 'weight';
-    const sets = ses.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSet(x,t)).join(' · ');
-    return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${Object.keys(prs).length?`<span class="pr-badge">${TROPHY_SVG} PR</span>`:''}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${escapeHtml(sets)}</div></div>`;
+    const sets = ses.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSetHtml(x,t)).join(' · ');
+    return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${Object.keys(prs).length?`<span class="pr-badge">${TROPHY_SVG} PR</span>`:''}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${sets}</div></div>`;
   }).join('');
   const more = desc.length>8 ? `<button class="btn-text" onclick="toggleHistAll('${inst.id}')">${state.showAll?'Show fewer':'Show all '+desc.length+' sessions'}</button>` : '';
   return `${chartHtml}${recHtml}<div class="hist-h">All sessions</div>${rows}${more}`;
@@ -2133,6 +2134,14 @@ function fmtSet(s, type){
   else if(type==='time') sec = formatTimeValue(s.time);
   else sec = (s.weight ?? '–') + (s.weight!=null ? 'lb' : '');
   return (s.warm?'W ':'') + reps + '×' + sec;
+}
+
+// Same as fmtSet but as HTML, with a coloured dot before a band's name so band sets read at a glance.
+const BAND_SWATCH = { red:'#e5484d', yellow:'#f5d90a', black:'#16191d', green:'#30a46c', orange:'#f76b15', purple:'#8e4ec6', blue:'#0090ff' };
+function fmtSetHtml(s, type){
+  if(type!=='band' || !s.band) return escapeHtml(fmtSet(s, type));
+  return escapeHtml((s.warm?'W ':'') + (s.reps ?? '–') + '×') +
+    `<span class="band-dot" style="background:${BAND_SWATCH[s.band] || '#888'}"></span>` + escapeHtml(s.band);
 }
 
 function sessionsBefore(a, b){ // is workout a before workout b
@@ -2537,8 +2546,8 @@ function renderExerciseCard(inst, bucketKey){
   let prevHtml = '';
   if(lastSes){
     const lt = lastSes.inst.secondaryType || 'weight';
-    const txt = lastSes.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSet(x, lt)).join(' · ');
-    prevHtml = `<div class="prev-line"><b>Last · ${fmtDateY(lastSes.workout.date)}</b><br>${escapeHtml(txt)}</div>`;
+    const txt = lastSes.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSetHtml(x, lt)).join(' · ');
+    prevHtml = `<div class="prev-line"><b>Last · ${fmtDateY(lastSes.workout.date)}</b><br>${txt}</div>`;
   }
   const prHtml = prKeys.length ? `<div class="pr-list">${prKeys.map(i=>{
     const n = inst.sets.slice(0,Number(i)).filter(x=>!x.warm).length+1;
@@ -2655,7 +2664,7 @@ function setSummaryText(inst, secondaryType, bucketKey){
   if(!inst.sets || inst.sets.length===0) return 'No sets logged';
   const shown = inst.sets.filter(x=>x.done!==false);
   if(shown.length===0) return `Not started · ${inst.sets.length} set${inst.sets.length===1?'':'s'}`;
-  const parts = shown.map(x=>fmtSet(x, secondaryType));
+  const parts = shown.map(x=>fmtSetHtml(x, secondaryType));
   // Progress delta is only meaningful for main-lift progressive overload — warmups/PT
   // work isn't tracked for "improvement" the same way, so skip it there.
   if(bucketKey==='warmup') return parts.join(', ');
@@ -2993,6 +3002,9 @@ function toggleSetDone(instId, idx){
       if(!src && idx>0) src = inst.sets[idx-1];
       if(src){ x.reps = src.reps ?? null; x.weight = src.weight ?? null; x.band = src.band ?? null; x.time = src.time ?? null; }
     }
+    // A band set whose wheel was never moved has no band saved, though the wheel shows the first colour;
+    // checking it records what was on screen.
+    if((inst.secondaryType||'weight')==='band' && !x.band) x.band = BAND_COLORS[0];
     if(!wasStarted) moveUpIfNewlyStarted(bucket, inst);
   }
   saveDB();
