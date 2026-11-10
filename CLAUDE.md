@@ -26,6 +26,7 @@ Single-file vanilla JS/HTML app (`index.html`, ~3,500 lines). Hosted on GitHub P
 ## Behavior that must be preserved
 - Dates use the local date (`localDateStr()`), never `toISOString()` (a UTC bug bit once).
 - Opening a workout (from the list, a copy, or after the app restarts) shows every exercise card collapsed (`showWorkout`, `shownWorkoutId`); re-showing the same workout keeps its cards as they are. Only one card is expanded at a time: opening a card (or starting to log on one, or adding one) collapses the rest; tapping the open card collapses it. Collapsed state is in memory only.
+- When an exercise gets its first checked set (`toggleSetDone`), it moves up within its section to just above the first not-started exercise (`moveUpIfNewlyStarted`); it never moves down, and unchecking leaves it in place. This changes the saved order, same as drag-to-reorder.
 - Long-press drag-to-reorder of collapsed exercise cards: those cards (`.reorderable`), every `.exercise-head` and the whole page during a drag (`html.dragging`) have text selection and the iOS callout turned off, so a long-press drags instead of selecting text.
 - Wheel pickers only save on real touch input. This fixes an iOS bug where backgrounding the app zeroed values. Do not remove that guard. While a finger is on a wheel (`touching`) nothing is saved or snapped, so long drags with pauses keep scrolling; the value settles after touchend and momentum.
 - Copying a workout or adding an exercise gives blank, unchecked sets, with last session's numbers shown beside the exercise. Intentional.

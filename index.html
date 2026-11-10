@@ -586,7 +586,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · reps to 30</div>
+  <div class="build-label">Build 2026-11-10 · started exercises move up</div>
 </div>
 
 <!-- STATS -->
@@ -2966,11 +2966,22 @@ function addSet(instId){
   saveDB();
   renderWorkout();
 }
+const isStarted = inst => (inst.sets||[]).some(s=> s.done!==false);
+// When an exercise gets its first checked set, move it up within its section to just above the first exercise
+// that hasn't been started, so started exercises sit together at the top. Never moves an exercise down.
+function moveUpIfNewlyStarted(bucket, inst){
+  const from = bucket.indexOf(inst);
+  const to = bucket.findIndex((o, i)=> i < from && !isStarted(o));
+  if(from < 0 || to < 0) return;
+  bucket.splice(from, 1);
+  bucket.splice(to, 0, inst);
+}
 function toggleSetDone(instId, idx){
-  const {inst} = findInstAndBucket(instId);
+  const {inst, bucket} = findInstAndBucket(instId);
   const x = inst && inst.sets[idx];
   if(!x) return;
   const turningOn = (x.done===false);
+  const wasStarted = isStarted(inst);
   x.done = turningOn;
   if(turningOn){
     // Checking an untouched set fills it from last session's matching set (or the set above).
@@ -2982,6 +2993,7 @@ function toggleSetDone(instId, idx){
       if(!src && idx>0) src = inst.sets[idx-1];
       if(src){ x.reps = src.reps ?? null; x.weight = src.weight ?? null; x.band = src.band ?? null; x.time = src.time ?? null; }
     }
+    if(!wasStarted) moveUpIfNewlyStarted(bucket, inst);
   }
   saveDB();
   if(turningOn){
