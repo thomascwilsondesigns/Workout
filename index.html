@@ -562,6 +562,10 @@ svg .eq{color:var(--muted)}
 .search-chip{flex:none;font-size:13.5px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:var(--card);color:var(--ink);white-space:nowrap;cursor:pointer;font-family:inherit}
 .search-chip .n{color:var(--muted);margin-left:6px;font-size:12px;font-variant-numeric:tabular-nums}
 .search-chip:active{background:var(--sage-tint)}
+/* Exercise cards with no checked sets get a grey accent bar and no fill; it turns warm-up yellow / workout lime once a set is checked. */
+#mainSection .exercise-card.not-started,#warmupSection .exercise-card.not-started,
+.theme-midnight #mainSection .exercise-card.not-started,.theme-midnight #warmupSection .exercise-card.not-started{border-left-color:var(--line)}
+.exercise-card.not-started{background:transparent}
 </style>
 </head>
 <body>
@@ -582,7 +586,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · foam rolling</div>
+  <div class="build-label">Build 2026-11-10 · started accent bar</div>
 </div>
 
 <!-- STATS -->
