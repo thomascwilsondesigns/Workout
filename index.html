@@ -582,7 +582,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-09 · renamed workout types</div>
+  <div class="build-label">Build 2026-11-10 · lower body types</div>
 </div>
 
 <!-- STATS -->
@@ -1323,6 +1323,33 @@ function renameWorkoutTypes(pairs, flag, backupKey){
 renameWorkoutTypes([["Cardio Zone 2","Cardio - Steady State"],["Cardio 4x4","Circuit"]],
   'workoutLogTypeRenames_2026_11', 'workoutLogDB_v1_backup_pre_type_renames_2026_11');
 
+/* "Lower Body" split into three types (Nov 2026). Saved "Lower Body" workouts are sorted once by their main
+   lift: a workout whose Workout section has exactly one of Split squat / Back squat / Deadlift gets that type;
+   with none, or more than one, it stays "Lower Body". Backup of the raw data first (no backup, no changes). */
+function splitLowerBodyType(flag, backupKey){
+  let done = false;
+  try { done = localStorage.getItem(flag)==='1'; } catch(e){ return; }
+  if(done) return;
+  const LIFTS = { 'split squat':'Lower Body - Split Squat', 'back squat':'Lower Body - Back Squat', 'deadlift':'Lower Body - Deadlift' };
+  const nameOf = id => ((db.exercises.find(e=> e.id===id)||{}).name||'').trim().toLowerCase();
+  const changes = [];
+  db.workouts.forEach(w=>{
+    if(!(w.types||[]).includes('Lower Body')) return;
+    const found = [...new Set((w.main||[]).map(i=> LIFTS[nameOf(i.exerciseId)]).filter(Boolean))];
+    if(found.length===1) changes.push([w, found[0]]);
+  });
+  if(changes.length){
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      if(raw && !localStorage.getItem(backupKey)) localStorage.setItem(backupKey, raw);
+    } catch(e){ return; } // no backup, no changes
+    changes.forEach(([w, t])=>{ w.types = [...new Set(w.types.map(x=> x==='Lower Body' ? t : x))]; });
+    saveDB();
+  }
+  try { localStorage.setItem(flag, '1'); } catch(e){}
+}
+splitLowerBodyType('workoutLogLowerBodySplit_2026_11', 'workoutLogDB_v1_backup_pre_lower_body_split_2026_11');
+
 const SEED_EXERCISES = [
   "Deadlift","Bench press","Floor press","Standing chest press",
   "Half-kneeling landmine press","Seated cable row","Back squat",
@@ -1372,7 +1399,7 @@ const ADDITIONAL_EXERCISES = [
   if(addedAny) saveDB();
 }
 
-const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body"];
+const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body - Split Squat","Lower Body - Back Squat","Lower Body - Deadlift"];
 let currentWorkoutId = null;
 let openExerciseDetail = {}; // exerciseInstanceId -> {open:bool, tab:'cues'|'links'|'notes'}
 let collapsedExercises = new Set(); // exerciseInstanceId -> collapsed (sets hidden, summary shown); every card starts collapsed when a workout opens
