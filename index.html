@@ -586,7 +586,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · started accent bar</div>
+  <div class="build-label">Build 2026-11-10 · wrist rotations</div>
 </div>
 
 <!-- STATS -->
@@ -806,6 +806,12 @@ const EXERCISE_ICONS = {
 "reverse wrist curl": `
 <svg viewBox="2 4 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path class="eq" d="M32.6 24.1L33.9 37.5" stroke-width="1"/><path class="fig" d="M5 17L29 17" stroke-width="6"/><path class="fig" d="M29 17Q32.6 19.0 34.9 22.4" stroke-width="5.6"/><path class="fig" d="M34.9 22.4Q36.3 24.5 33.2 26.6" stroke-width="3.4"/><circle class="eq" cx="33.9" cy="38.6" r="1.2" stroke-width="1.4"/><circle class="eq" cx="32.6" cy="24.1" r="1.60" fill="currentColor" stroke="none"/></svg>`,
 
+"wrist pronation": `
+<svg viewBox="2 4 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path class="eq" d="M15.14 33.70L14.30 32.57L13.59 31.06L13.05 29.25L12.72 27.21L12.60 25.07L12.70 22.92L13.03 20.88L13.55 19.05L14.25 17.51L15.08 16.36L16.02 15.64L17.00 15.40L17.98 15.64L18.92 16.36L19.75 17.51L20.45 19.05L20.97 20.88L21.30 22.92L21.40 25.07L21.28 27.21L20.95 29.25L20.41 31.06L19.70 32.57L18.86 33.70" stroke-width="1.8"/><path class="eq" d="M18.81 31.10L18.86 33.70L21.15 32.48" stroke-width="1.8"/><path class="eq" d="M31 17.6L41.5 17.6" stroke-width="1"/><circle class="eq" cx="42.4" cy="17.6" r="1.2" stroke-width="1.4"/><path class="eq" d="M31 17.8L31 32.2" stroke-width="1.8"/><path class="fig" d="M5 25L27 25" stroke-width="6"/><path class="fig" d="M27.5 25L32.5 25" stroke-width="7.4"/><path class="fig" d="M32.6 22.3L35 21.6" stroke-width="2.6"/></svg>`,
+
+"wrist supination": `
+<svg viewBox="2 4 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path class="eq" d="M18.86 33.70L19.70 32.57L20.41 31.06L20.95 29.25L21.28 27.21L21.40 25.07L21.30 22.92L20.97 20.88L20.45 19.05L19.75 17.51L18.92 16.36L17.98 15.64L17.00 15.40L16.02 15.64L15.08 16.36L14.25 17.51L13.55 19.05L13.03 20.88L12.70 22.92L12.60 25.07L12.72 27.21L13.05 29.25L13.59 31.06L14.30 32.57L15.14 33.70" stroke-width="1.8"/><path class="eq" d="M12.85 32.48L15.14 33.70L15.19 31.10" stroke-width="1.8"/><path class="eq" d="M31 17.6L41.5 17.6" stroke-width="1"/><circle class="eq" cx="42.4" cy="17.6" r="1.2" stroke-width="1.4"/><path class="eq" d="M31 17.8L31 32.2" stroke-width="1.8"/><path class="fig" d="M5 25L27 25" stroke-width="6"/><path class="fig" d="M27.5 25L32.5 25" stroke-width="7.4"/><path class="fig" d="M32.6 27.7L35 28.4" stroke-width="2.6"/></svg>`,
+
 "wrist curl": `
 <svg viewBox="2 4 42 42" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path class="eq" d="M37.5 20.1L42.2 37.5" stroke-width="1"/><path class="fig" d="M5 17L29 17" stroke-width="6"/><path class="fig" d="M29 17Q32.9 19.8 35.9 21.0" stroke-width="5.6"/><path class="fig" d="M35.9 21.0Q38.4 21.7 39.9 18.7" stroke-width="3.4"/><circle class="eq" cx="42.2" cy="38.6" r="1.2" stroke-width="1.4"/><circle class="eq" cx="37.5" cy="20.1" r="1.60" fill="currentColor" stroke="none"/></svg>`,
 
@@ -997,6 +1003,8 @@ const EXERCISE_TAGS = {
   "wall sit with ball squeeze": ["quads", "adductors", "legs", "warmup"],
   "wall slides": ["shoulder", "scapula", "serratus", "posture", "foam roller", "warmup"],
   "wrist curl": ["forearms", "cable"],
+  "wrist pronation": ["forearms", "cable", "rotation", "palm down"],
+  "wrist supination": ["forearms", "cable", "rotation", "palm up"],
   "foot release": ["lacrosse ball", "lacrosse", "warmup"],
   "kettlebell windmill": ["shoulder", "obliques", "core", "hips", "hamstrings", "thoracic", "mobility", "warmup", "main"],
   "crossbody deadlift": ["hamstrings", "glutes", "posterior chain", "hinge", "single arm", "dumbbell"],
@@ -1381,7 +1389,7 @@ const ADDITIONAL_EXERCISES = [
   "Wall drive march","Scapular CARs","Wall slides",
   "Tibialis raise","Standing calf raise","Biceps curl",
   "Reverse curl","Triceps pushdown","Overhead triceps extension",
-  "Reverse wrist curl","Wrist curl","Ski pull","Step up",
+  "Reverse wrist curl","Wrist curl","Wrist pronation","Wrist supination","Ski pull","Step up",
   "Kettlebell swing","Single leg hip thrust","Hip thrust",
   "Standing leg curl","Pull-through",
   "45° back extension",
