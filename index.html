@@ -2621,7 +2621,7 @@ function renderExerciseCard(inst, bucketKey){
   ` : '';
 
   return `
-    <div class="exercise-card" data-inst-id="${inst.id}" data-bucket="${bucketKey}">
+    <div class="exercise-card ${(inst.sets||[]).some(x=> x.done!==false) ? 'started' : 'not-started'}" data-inst-id="${inst.id}" data-bucket="${bucketKey}">
       <div class="exercise-head">
         <div class="exercise-head-left" onclick="toggleCollapse('${inst.id}')">
           <span class="exercise-icon">${getExerciseIcon(def.name)}</span>
