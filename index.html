@@ -586,7 +586,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · wrist rotations</div>
+  <div class="build-label">Build 2026-11-10 · wheel drag fix</div>
 </div>
 
 <!-- STATS -->
@@ -2803,14 +2803,23 @@ function initWheels(){
     // the system causes (iOS resetting offsets after backgrounding, relayout) is
     // treated as a display glitch and snapped back to the saved value instead.
     let userActive = false;
-    const markUser = ()=>{ userActive = true; };
-    el.addEventListener('touchstart', markUser, {passive:true});
+    // While a finger is on the wheel nothing is saved or snapped, however long the drag or however
+    // often it pauses; the value is settled once the finger lifts and any momentum stops.
+    let touching = false;
+    let userOffTimer = null;
+    const markUser = ()=>{ userActive = true; clearTimeout(userOffTimer); };
+    const userOffIn = ms=>{ clearTimeout(userOffTimer); userOffTimer = setTimeout(()=>{ userActive = false; }, ms); };
+    el.addEventListener('touchstart', ()=>{ touching = true; markUser(); }, {passive:true});
     el.addEventListener('pointerdown', markUser, {passive:true});
     el.addEventListener('mousedown', markUser, {passive:true});
     el.addEventListener('wheel', markUser, {passive:true});
-    const endUser = ()=>{ setTimeout(()=>{ userActive = false; }, 2500); };
-    el.addEventListener('touchend', endUser, {passive:true});
-    el.addEventListener('touchcancel', endUser, {passive:true});
+    const endTouch = ()=>{
+      touching = false;
+      userOffIn(2500);
+      clearTimeout(scrollTimeout); scrollTimeout = setTimeout(settle, 120); // settle even if the finger lifted without momentum
+    };
+    el.addEventListener('touchend', endTouch, {passive:true});
+    el.addEventListener('touchcancel', endTouch, {passive:true});
     el.scrollTop = selIdx * WHEEL_OPTION_HEIGHT;
     updateWheelCenterStyle(el);
     // The scrollTop assignment fires 'scroll' asynchronously on some browsers; clear
@@ -2819,11 +2828,9 @@ function initWheels(){
 
     let scrollTimeout = null;
     let lastSnappedIdx = selIdx;
-    el.addEventListener('scroll', ()=>{
-      updateWheelCenterStyle(el);
-      clearTimeout(scrollTimeout);
-      scrollTimeout = setTimeout(()=>{
+    const settle = ()=>{
         if(suppressNextCommit) return; // programmatic initial-position scroll, not a user edit
+        if(touching) return; // finger still down (a pause mid-drag): wait for touchend
         if(!userActive){
           // System-driven scroll: restore the wheel to what is actually saved.
           const cur = findInstAndBucket(instId);
@@ -2845,8 +2852,12 @@ function initWheels(){
         }
         commitWheelValue(instId, idx, field, options[clamped]);
         // Gesture finished (momentum settled); require a fresh touch for the next change.
-        setTimeout(()=>{ userActive = false; }, 400);
-      }, 90);
+        userOffIn(400);
+    };
+    el.addEventListener('scroll', ()=>{
+      updateWheelCenterStyle(el);
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(settle, 90);
     }, {passive:true});
 
     // Tap any visible option to jump straight to it, instead of needing a precise
@@ -2855,7 +2866,7 @@ function initWheels(){
     el.querySelectorAll('.wheel-option').forEach((optEl, optIdx)=>{
       optEl.addEventListener('click', ()=>{
         if(el.classList.contains('wheel-disabled')) return;
-        userActive = true;
+        markUser();
         el.scrollTo({top: optIdx*WHEEL_OPTION_HEIGHT, behavior:'smooth'});
       });
     });
