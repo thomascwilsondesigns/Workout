@@ -37,6 +37,7 @@ Syntax-check the script block with node, then test in Playwright with a mobile v
 
 ## Backlog ideas
 Auto rest timer, templates, plate calculator, supersets, RPE, export/backup button, kg/lb toggle.
+- Voice commands (on hold, Nov 2026): the goal is one quick gesture that opens the mic, e.g. "add bench press", "reps 8", "weight 135". Blocked because Safari's speech recognition (`webkitSpeechRecognition`) isn't available in iOS home-screen web apps (WebKit bug 225298). Keyboard dictation into a command box works but adds a step; in-page offline models are too heavy. Revisit if WebKit enables it for home-screen apps. Spoken confirmations via `speechSynthesis` would work today.
 
 ## Working style
 Commit in small steps with clear messages and say what changed. Ask before anything that could alter saved data.
