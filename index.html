@@ -586,7 +586,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · wrist arrows</div>
+  <div class="build-label">Build 2026-11-10 · reps to 30</div>
 </div>
 
 <!-- STATS -->
@@ -2566,7 +2566,7 @@ function renderExerciseCard(inst, bucketKey){
         ${inst.sets.map((s,i)=>`
           <div class="set-row">
             <div class="set-num tappable ${s.warm?'is-warm':''} ${prs[i]?'has-pr':''}" onclick="toggleWarmSet('${inst.id}',${i})">${s.warm ? 'W' : (inst.sets.slice(0,i).filter(x=>!x.warm).length+1)}</div>
-            ${renderWheel(inst.id, i, 'reps', s.reps, false, 0, 20, 1, 'Reps', i===0)}
+            ${renderWheel(inst.id, i, 'reps', s.reps, false, 0, 30, 1, 'Reps', i===0)}
             ${secondaryType==='band'
               ? renderBandWheel(inst.id, i, s.band, false, i===0)
               : secondaryType==='time'
