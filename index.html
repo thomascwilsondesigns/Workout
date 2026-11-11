@@ -571,6 +571,9 @@ svg .eq{color:var(--muted)}
 #mainSection .exercise-card.not-started,#warmupSection .exercise-card.not-started,
 .theme-midnight #mainSection .exercise-card.not-started,.theme-midnight #warmupSection .exercise-card.not-started{border-left-color:var(--line)}
 .exercise-card.not-started{background:transparent}
+/* Today's workout on the landing list: lime outline and a filled "Today" pill above the date. */
+.day-card.today .today-tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;background:var(--sage);color:var(--on-accent,#0b0e12);padding:2px 7px;border-radius:999px}
+.day-card.today,.theme-midnight .day-card.today{border:1.5px solid var(--sage);border-left-width:4px}
 </style>
 </head>
 <body>
@@ -591,7 +594,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · move after leaving exercise</div>
+  <div class="build-label">Build 2026-11-11 · today highlight</div>
 </div>
 
 <!-- STATS -->
