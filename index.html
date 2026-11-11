@@ -590,7 +590,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · wheel width</div>
+  <div class="build-label">Build 2026-11-11 · move after leaving exercise</div>
 </div>
 
 <!-- STATS -->
@@ -1430,6 +1430,7 @@ function uid(){ return Date.now().toString(36) + Math.random().toString(36).slic
 /* ---------------- Navigation ---------------- */
 let shownWorkoutId = null; // the workout whose cards' open/collapsed state is current; cleared when it's closed
 function showLanding(){
+  applyPendingMoves(null);
   currentWorkoutId = null;
   shownWorkoutId = null;
   document.getElementById('statsScreen').classList.add('hidden');
@@ -1447,6 +1448,7 @@ function showLanding(){
 function showWorkout(workoutId){
   openSwipeCard = null; // stale reference once we leave the landing screen
   lastEditedInstId = null; // fresh collapse-on-edit tracking for this workout view
+  if(currentWorkoutId && currentWorkoutId!==workoutId) applyPendingMoves(null); // finish moves in the workout being left
   currentWorkoutId = workoutId;
   document.getElementById('statsScreen').classList.add('hidden');
   document.getElementById('landingActions').classList.add('hidden');
@@ -2944,7 +2946,7 @@ function setDetailTab(instId, tab){
 function toggleCollapse(instId){
   // One expanded card at a time: opening a card collapses the rest; tapping the open card collapses it.
   if(collapsedExercises.has(instId)) collapseAllExcept(instId);
-  else collapsedExercises.add(instId);
+  else { collapsedExercises.add(instId); applyPendingMoves(null); }
   renderWorkout();
 }
 function collapseAllExcept(instId){
@@ -2954,6 +2956,7 @@ function collapseAllExcept(instId){
     if(inst.id !== instId) collapsedExercises.add(inst.id);
   });
   collapsedExercises.delete(instId);
+  applyPendingMoves(instId);
 }
 function changeSecondaryType(instId, newType){
   const {inst} = findInstAndBucket(instId);
@@ -2987,6 +2990,23 @@ function addSet(instId){
 const isStarted = inst => (inst.sets||[]).some(s=> s.done!==false);
 // When an exercise gets its first checked set, move it up within its section to just above the first exercise
 // that hasn't been started, so started exercises sit together at the top. Never moves an exercise down.
+// The move waits until you're done with the exercise: it happens when that card is collapsed, another exercise
+// is opened or edited, an exercise is added, or the workout is closed (applyPendingMoves). In memory only.
+let pendingMoveUp = new Set();
+function applyPendingMoves(keepId){
+  const w = getWorkout();
+  if(!w){ pendingMoveUp.clear(); return; }
+  let moved = false;
+  [...pendingMoveUp].forEach(id=>{
+    if(id===keepId) return; // still being worked on
+    pendingMoveUp.delete(id);
+    for(const key of ['warmup','main']){
+      const inst = w[key].find(i=> i.id===id);
+      if(inst && isStarted(inst)){ const before = w[key].indexOf(inst); moveUpIfNewlyStarted(w[key], inst); moved = moved || w[key].indexOf(inst)!==before; }
+    }
+  });
+  if(moved) saveDB();
+}
 function moveUpIfNewlyStarted(bucket, inst){
   const from = bucket.indexOf(inst);
   const to = bucket.findIndex((o, i)=> i < from && !isStarted(o));
@@ -3014,7 +3034,7 @@ function toggleSetDone(instId, idx){
     // A band set whose wheel was never moved has no band saved, though the wheel shows the first colour;
     // checking it records what was on screen.
     if((inst.secondaryType||'weight')==='band' && !x.band) x.band = BAND_COLORS[0];
-    if(!wasStarted) moveUpIfNewlyStarted(bucket, inst);
+    if(!wasStarted) pendingMoveUp.add(inst.id); // moved up later, once you leave this exercise
   }
   saveDB();
   if(turningOn){
