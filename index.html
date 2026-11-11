@@ -244,8 +244,11 @@
     font-size:14px; color:var(--muted); user-select:none; cursor:pointer;
   }
   .wheel-option.wheel-center{font-size:17px; font-weight:700; color:var(--sage-dark);}
+  /* The brackets and edge fade sit in .wheel-frame, outside the scrolling viewport, so they stay centred
+     instead of scrolling with the numbers. */
+  .wheel-frame{position:relative;}
   .wheel-viewport-mask{
-    position:absolute; left:0; right:0; top:0; height:100%; pointer-events:none;
+    position:absolute; left:1px; right:1px; top:1px; bottom:1px; border-radius:8px; pointer-events:none;
     background:linear-gradient(to bottom, #faf9f5 0%, transparent 30%, transparent 70%, #faf9f5 100%);
   }
   .wheel-center-line{
@@ -587,7 +590,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-10 · band colours</div>
+  <div class="build-label">Build 2026-11-11 · wheel brackets</div>
 </div>
 
 <!-- STATS -->
@@ -2726,14 +2729,16 @@ function renderWheel(instId, setIdx, field, value, disabled, min, max, step, lab
   return `
     <div class="wheel-field">
       <div class="wheel-label ${showLabel?'':'wheel-label-hidden'}">${label}</div>
+      <div class="wheel-frame">
       <div class="wheel-viewport ${disabled?'wheel-disabled':''}" id="${wheelId}"
            data-inst="${instId}" data-idx="${setIdx}" data-field="${field}"
            data-options='${JSON.stringify(options)}'>
         <div class="wheel-track">
           ${options.map(v=>`<div class="wheel-option" data-value="${v}">${v}</div>`).join('')}
         </div>
-        <div class="wheel-viewport-mask"></div>
-        <div class="wheel-center-line"></div>
+      </div>
+      <div class="wheel-viewport-mask"></div>
+      <div class="wheel-center-line"></div>
       </div>
     </div>
   `;
@@ -2745,14 +2750,16 @@ function renderBandWheel(instId, setIdx, value, disabled, showLabel){
   return `
     <div class="wheel-field">
       <div class="wheel-label ${showLabel?'':'wheel-label-hidden'}">Band</div>
+      <div class="wheel-frame">
       <div class="wheel-viewport ${disabled?'wheel-disabled':''}" id="${wheelId}"
            data-inst="${instId}" data-idx="${setIdx}" data-field="band"
            data-options='${JSON.stringify(BAND_COLORS)}'>
         <div class="wheel-track">
           ${BAND_COLORS.map(c=>`<div class="wheel-option" data-value="${c}">${c}</div>`).join('')}
         </div>
-        <div class="wheel-viewport-mask"></div>
-        <div class="wheel-center-line"></div>
+      </div>
+      <div class="wheel-viewport-mask"></div>
+      <div class="wheel-center-line"></div>
       </div>
     </div>
   `;
@@ -2776,14 +2783,16 @@ function renderTimeWheel(instId, setIdx, value, disabled, showLabel){
   return `
     <div class="wheel-field">
       <div class="wheel-label ${showLabel?'':'wheel-label-hidden'}">Time</div>
+      <div class="wheel-frame">
       <div class="wheel-viewport ${disabled?'wheel-disabled':''}" id="${wheelId}"
            data-inst="${instId}" data-idx="${setIdx}" data-field="time"
            data-options='${JSON.stringify(TIME_OPTIONS_SECONDS)}'>
         <div class="wheel-track">
           ${TIME_OPTIONS_SECONDS.map(v=>`<div class="wheel-option" data-value="${v}">${formatTimeValue(v)}</div>`).join('')}
         </div>
-        <div class="wheel-viewport-mask"></div>
-        <div class="wheel-center-line"></div>
+      </div>
+      <div class="wheel-viewport-mask"></div>
+      <div class="wheel-center-line"></div>
       </div>
     </div>
   `;
