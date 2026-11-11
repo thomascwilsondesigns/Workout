@@ -60,6 +60,13 @@
   }
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
+  .update-bar{position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top) + 10px); z-index:60;
+    display:flex; align-items:center; gap:10px; padding:10px 10px 10px 16px; border-radius:14px;
+    background:var(--card); border:1.5px solid var(--sage); color:var(--ink); font-size:14.5px; font-weight:600;
+    box-shadow:0 8px 24px rgba(0,0,0,.45);}
+  .update-bar span{flex:1;}
+  .update-reload{background:var(--sage); color:var(--on-accent,#0b0e12); border:none; border-radius:10px; padding:8px 14px; font-size:14.5px; font-weight:700; font-family:inherit; cursor:pointer;}
+  .update-close{background:none; border:none; color:var(--muted); font-size:16px; padding:6px 8px; cursor:pointer;}
   .cat-dot{display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0;}
   .type-item .cat-dot{margin-right:5px; vertical-align:1px;}
   /* Landing calendar dock: fixed to the bottom; the workout list scrolls above it (body padding below). */
@@ -616,7 +623,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-11 · calendar dock</div>
+  <div class="build-label">Build 2026-11-11 · update check</div>
 </div>
 
 <!-- STATS -->
@@ -3914,6 +3921,37 @@ function ctShowCompletion(){
 
 /* ---------------- Init ---------------- */
 showLanding();
+
+/* ---------------- Update check ----------------
+   GitHub Pages lets the phone keep an old copy of this page for ~10 minutes, and a home-screen bookmark has no
+   reload button. On launch and whenever the app comes back to the front (at most once a minute), fetch the live
+   page bypassing every cache and compare its build label with the one running. If it differs, offer a one-tap
+   reload. Offline or any error: do nothing. Saved data is untouched (it lives in localStorage, not the page). */
+let lastUpdateCheck = 0;
+function runningBuild(){ const el = document.querySelector('.build-label'); return el ? el.textContent.trim() : ''; }
+async function checkForUpdate(force){
+  if(!force && Date.now() - lastUpdateCheck < 60000) return;
+  lastUpdateCheck = Date.now();
+  if(!/^https?:/.test(location.protocol)) return;
+  try {
+    const res = await fetch(location.pathname + '?check=' + Date.now(), {cache:'no-store'});
+    if(!res.ok) return;
+    const m = (await res.text()).match(/<div class="build-label">([^<]*)<\/div>/);
+    if(m && m[1].trim() && m[1].trim() !== runningBuild()) showUpdateBar();
+  } catch(e){}
+}
+function showUpdateBar(){
+  if(document.getElementById('updateBar')) return;
+  const bar = document.createElement('div');
+  bar.id = 'updateBar';
+  bar.className = 'update-bar';
+  bar.innerHTML = `<span>New version available</span>
+    <button class="update-reload" onclick="location.replace(location.pathname + '?v=' + Date.now())">Reload</button>
+    <button class="update-close" aria-label="Dismiss" onclick="this.parentElement.remove()">✕</button>`;
+  document.body.appendChild(bar);
+}
+setTimeout(()=> checkForUpdate(true), 1500);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkForUpdate(false); });
 </script>
 </body>
 </html>
