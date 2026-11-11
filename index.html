@@ -606,7 +606,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · scroll expanded card</div>
+  <div class="build-label">Build 2026-11-11 · scroll added exercise</div>
 </div>
 
 <!-- STATS -->
@@ -2322,7 +2322,9 @@ function formatLoadDelta(pct){
   return ` <span class="${cls}">· ${arrow} ${sign}${pct}%</span>`;
 }
 
+let scrollToAfterRender = null; // exercise instance to bring into view after the next render (newly added)
 function renderWorkout(){
+  if(scrollToAfterRender){ const id = scrollToAfterRender; scrollToAfterRender = null; setTimeout(()=> scrollCardIntoView(id), 0); }
   const w = getWorkout();
   document.getElementById('headerTitle').textContent = formatDateShort(w.date);
   renderCircuitTimerLaunch(w);
@@ -3387,7 +3389,7 @@ function wireUpPickerItemGestures(){
       }
     }, {passive:true});
 
-    itemEl.addEventListener('touchend', ()=>{
+    itemEl.addEventListener('touchend', (e)=>{
       clearTimer();
       if(longPressFired) return; // long-press already handled the tap
       if(movedPastThreshold) return; // this was a scroll, not a tap — don't toggle/select
@@ -3395,6 +3397,9 @@ function wireUpPickerItemGestures(){
         window.pickerSuppressNextToggle = false;
         return; // this is the tail-end of the gesture that just triggered enterMultiSelect via re-render
       }
+      // Stop the browser's follow-up click: once the sheet closes it would land on whatever card is now under
+      // the finger (often the exercise just added) and collapse it.
+      if(e.cancelable) e.preventDefault();
       if(window.pickerMultiSelect) toggleItemSelection(exId);
       else selectExerciseFromDropdown(exId);
     });
@@ -3459,6 +3464,7 @@ function addInstanceToWorkout(w, bucketKey, def){
   w[bucketKey].push(inst);
   // Newly added exercise opens expanded; collapse every other exercise in this workout.
   collapseAllExcept(inst.id);
+  scrollToAfterRender = inst.id; // once drawn, bring it into view like any expanded card
   saveDB();
 }
 function deleteExerciseDef(exId, evt){
