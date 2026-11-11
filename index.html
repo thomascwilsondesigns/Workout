@@ -62,16 +62,25 @@
   .today-tag{display:none;}
   .cat-dot{display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0;}
   .type-item .cat-dot{margin-right:5px; vertical-align:1px;}
-  .home-cal{margin-top:18px;}
-  .hc-month{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px 10px 8px; margin-bottom:12px;}
-  .hc-month h4{margin:0 4px 8px; font-size:14px; color:var(--ink);}
-  .hc-grid{display:grid; grid-template-columns:repeat(7,1fr); row-gap:2px; text-align:center;}
-  .hc-dow{font-size:10.5px; color:var(--muted); font-weight:700; padding-bottom:4px;}
-  .hc-day{height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13.5px; color:#5d6876; background:none; border:none; padding:0; border-radius:9px; font-family:inherit;}
+  /* Landing calendar dock: fixed to the bottom; the workout list scrolls above it (body padding below). */
+  .home-cal-dock{position:fixed; left:0; right:0; bottom:0; z-index:25; background:var(--bg); border-top:1px solid var(--line);
+    padding:8px 0 calc(6px + env(safe-area-inset-bottom)); box-shadow:0 -8px 20px rgba(0,0,0,.35);}
+  #landingScreen{padding-bottom:calc(var(--home-cal-h, 300px) + 12px);}
+  body:has(#landingScreen:not(.hidden)) .fab{bottom:calc(var(--home-cal-h, 300px) + 14px);}
+  .hc-track{display:flex; overflow-x:auto; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:none;}
+  .hc-track::-webkit-scrollbar{display:none;}
+  .hc-month{flex:0 0 100%; scroll-snap-align:start; box-sizing:border-box; padding:0 14px;}
+  .hc-head{display:flex; align-items:center; justify-content:space-between; margin:0 0 4px;}
+  .hc-head h4{margin:0; font-size:14.5px; color:var(--ink);}
+  .hc-nav{background:none; border:none; color:var(--sage); font-size:24px; line-height:1; padding:2px 12px; cursor:pointer; font-family:inherit;}
+  .hc-nav.off{visibility:hidden;}
+  .hc-grid{display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:auto repeat(6, 34px); text-align:center;}
+  .hc-dow{font-size:10.5px; color:var(--muted); font-weight:700; padding-bottom:3px;}
+  .hc-day{height:34px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13.5px; color:#5d6876; background:none; border:none; padding:0; border-radius:9px; font-family:inherit;}
   .hc-day.has{color:var(--ink); font-weight:700; cursor:pointer;}
   .hc-day.today span:first-child{outline:1.5px solid var(--sage); border-radius:6px; padding:0 4px;}
   .hc-day.future{opacity:.35;}
-  .hc-dots{display:flex; gap:3px; height:9px; align-items:center; margin-top:2px;}
+  .hc-dots{display:flex; gap:3px; height:8px; align-items:center; margin-top:1px;}
   .day-card .date-line{font-weight:600; font-size:15.5px; color:var(--ink);}
   .day-card .type-line{font-size:13px; color:var(--muted); margin-top:3px;}
   .empty-state{text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.6;}
@@ -606,7 +615,8 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · scroll added exercise</div>
+  <div id="homeCalDock" class="home-cal-dock"></div>
+  <div class="build-label">Build 2026-11-11 · calendar dock</div>
 </div>
 
 <!-- STATS -->
@@ -1595,10 +1605,11 @@ function renderLanding(){
   const sorted = [...db.workouts].sort((a,b)=> b.date.localeCompare(a.date) || b.createdAt - a.createdAt);
   if(sorted.length===0){
     list.innerHTML = `<div class="empty-state">No workouts logged yet.<br>Tap + to add your first one.</div>`;
+    renderHomeCalendar(sorted, localDateStr());
     return;
   }
   const today = localDateStr();
-  list.innerHTML = sorted.slice(0, RECENT_CARDS).map(w=>`
+  list.innerHTML = sorted.map(w=>`
     <div class="day-card-wrap">
       <div class="day-card-actions">
         <button class="day-card-action-btn copy-btn" onclick="copyWorkout('${w.id}', event)">
@@ -1616,13 +1627,14 @@ function renderLanding(){
         </div>
       </div>
     </div>
-  `).join('') + renderHomeCalendar(sorted, today);
+  `).join('');
+  renderHomeCalendar(sorted, today);
   initSwipeCards();
 }
 
-/* Home calendar: below the recent cards, every month from the current one back to the first workout.
-   Days with a workout are bold with a dot per workout category; tap a day to open it. */
-const RECENT_CARDS = 6;
+/* Home calendar: a panel fixed to the bottom of the landing screen showing one month at a time; swipe left/right
+   (or use the arrows) to move between months, from the first workout's month to the current one. Workout days are
+   bold with a dot per workout category; tap a day to open it. The workout list scrolls above it. */
 const CATEGORY_COLORS = { upper:'#5ab8ff', lower:'#ff7a5c', core:'#f5c84b', cardio:'#3fd6b0', circuit:'#b48cff', other:'#8b96a3' };
 const CATEGORY_ORDER = ['upper','lower','core','cardio','circuit','other'];
 function workoutCategory(type){
@@ -1633,16 +1645,18 @@ function workoutCategory(type){
   if(/^Cardio/.test(type)) return 'cardio';
   return 'other';
 }
+let homeCalFromEnd = 0; // how many months back from the newest the calendar was showing (kept across re-renders)
 function renderHomeCalendar(sorted, today){
-  if(!sorted.length) return '';
+  const dock = document.getElementById('homeCalDock');
   const byDay = {};
   sorted.forEach(w=> (w.types||[]).forEach(t=> (byDay[w.date] = byDay[w.date] || new Set()).add(workoutCategory(t))));
   sorted.forEach(w=>{ if(!byDay[w.date]) byDay[w.date] = new Set(['other']); }); // a workout with no type still shows
   const ym = ds=> ({y:+ds.slice(0,4), m:+ds.slice(5,7)-1});
-  const newest = sorted[0].date > today ? ym(sorted[0].date) : ym(today);
-  const oldest = ym(sorted[sorted.length-1].date);
-  let html = '<div class="home-cal">';
-  for(let y=newest.y, m=newest.m; y>oldest.y || (y===oldest.y && m>=oldest.m); m--, (m<0 && (m=11, y--))){
+  const newest = sorted.length && sorted[0].date > today ? ym(sorted[0].date) : ym(today);
+  const oldest = sorted.length && sorted[sorted.length-1].date < today ? ym(sorted[sorted.length-1].date) : ym(today);
+  const months = [];
+  for(let y=oldest.y, m=oldest.m; y<newest.y || (y===newest.y && m<=newest.m); m++, (m>11 && (m=0, y++))) months.push({y, m});
+  const monthsHtml = months.map(({y, m})=>{
     const first = new Date(y, m, 1), offset = (first.getDay()+6)%7, dim = new Date(y, m+1, 0).getDate();
     let cells = ['M','T','W','T','F','S','S'].map(d=>`<div class="hc-dow">${d}</div>`).join('');
     for(let i=0;i<offset;i++) cells += '<div></div>';
@@ -1654,9 +1668,25 @@ function renderHomeCalendar(sorted, today){
         ? `<button class="hc-day has ${ds===today?'today':''}" onclick="homeCalTap('${ds}')"><span>${d}</span><span class="hc-dots">${dots}</span></button>`
         : `<div class="hc-day ${ds===today?'today':''} ${ds>today?'future':''}"><span>${d}</span><span class="hc-dots"></span></div>`;
     }
-    html += `<div class="hc-month"><h4>${first.toLocaleDateString('en-US',{month:'long', year:'numeric'})}</h4><div class="hc-grid">${cells}</div></div>`;
-  }
-  return html + '</div>';
+    return `<div class="hc-month"><div class="hc-head"><button class="hc-nav" onclick="homeCalStep(-1)" aria-label="Previous month">‹</button><h4>${first.toLocaleDateString('en-US',{month:'long', year:'numeric'})}</h4><button class="hc-nav" onclick="homeCalStep(1)" aria-label="Next month">›</button></div><div class="hc-grid">${cells}</div></div>`;
+  }).join('');
+  dock.innerHTML = `<div class="hc-track" id="homeCalTrack">${monthsHtml}</div>`;
+  const track = document.getElementById('homeCalTrack');
+  const n = months.length;
+  track.querySelectorAll('.hc-month').forEach((el, i)=>{
+    if(i===0) el.querySelector('.hc-nav').classList.add('off');
+    if(i===n-1) el.querySelectorAll('.hc-nav')[1].classList.add('off');
+  });
+  requestAnimationFrame(()=>{
+    track.scrollLeft = Math.max(0, n-1-Math.min(homeCalFromEnd, n-1)) * track.clientWidth;
+    document.documentElement.style.setProperty('--home-cal-h', dock.offsetHeight + 'px');
+  });
+  let t = null;
+  track.addEventListener('scroll', ()=>{ clearTimeout(t); t = setTimeout(()=>{ homeCalFromEnd = n-1-Math.round(track.scrollLeft / track.clientWidth); }, 120); }, {passive:true});
+}
+function homeCalStep(dir){
+  const track = document.getElementById('homeCalTrack');
+  if(track) track.scrollBy({left: dir*track.clientWidth, behavior:'smooth'});
 }
 
 /* ---------------- Swipe-to-reveal (copy/delete) ---------------- */
