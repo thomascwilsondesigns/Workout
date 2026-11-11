@@ -60,6 +60,18 @@
   }
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
+  .cat-dot{display:inline-block; width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .type-item .cat-dot{margin-right:5px; vertical-align:1px;}
+  .home-cal{margin-top:18px;}
+  .hc-month{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:12px 10px 8px; margin-bottom:12px;}
+  .hc-month h4{margin:0 4px 8px; font-size:14px; color:var(--ink);}
+  .hc-grid{display:grid; grid-template-columns:repeat(7,1fr); row-gap:2px; text-align:center;}
+  .hc-dow{font-size:10.5px; color:var(--muted); font-weight:700; padding-bottom:4px;}
+  .hc-day{height:40px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:13.5px; color:#5d6876; background:none; border:none; padding:0; border-radius:9px; font-family:inherit;}
+  .hc-day.has{color:var(--ink); font-weight:700; cursor:pointer;}
+  .hc-day.today span:first-child{outline:1.5px solid var(--sage); border-radius:6px; padding:0 4px;}
+  .hc-day.future{opacity:.35;}
+  .hc-dots{display:flex; gap:3px; height:9px; align-items:center; margin-top:2px;}
   .day-card .date-line{font-weight:600; font-size:15.5px; color:var(--ink);}
   .day-card .type-line{font-size:13px; color:var(--muted); margin-top:3px;}
   .empty-state{text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.6;}
@@ -594,7 +606,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · today highlight</div>
+  <div class="build-label">Build 2026-11-11 · home calendar</div>
 </div>
 
 <!-- STATS -->
@@ -1586,7 +1598,7 @@ function renderLanding(){
     return;
   }
   const today = localDateStr();
-  list.innerHTML = sorted.map(w=>`
+  list.innerHTML = sorted.slice(0, RECENT_CARDS).map(w=>`
     <div class="day-card-wrap">
       <div class="day-card-actions">
         <button class="day-card-action-btn copy-btn" onclick="copyWorkout('${w.id}', event)">
@@ -1600,12 +1612,51 @@ function renderLanding(){
         <div class="day-card-main" onclick="handleDayCardTap('${w.id}', event)">
           <div class="today-tag">Today</div>
           <div class="date-line">${formatDateLong(w.date)}</div>
-          <div class="type-line">${w.types.join(', ')}</div>
+          <div class="type-line">${w.types.map(t=>`<span class="type-item"><i class="cat-dot" style="background:${CATEGORY_COLORS[workoutCategory(t)]}"></i>${escapeHtml(t)}</span>`).join(', ')}</div>
         </div>
       </div>
     </div>
-  `).join('');
+  `).join('') + renderHomeCalendar(sorted, today);
   initSwipeCards();
+}
+
+/* Home calendar: below the recent cards, every month from the current one back to the first workout.
+   Days with a workout are bold with a dot per workout category; tap a day to open it. */
+const RECENT_CARDS = 6;
+const CATEGORY_COLORS = { upper:'#5ab8ff', lower:'#ff7a5c', core:'#f5c84b', cardio:'#3fd6b0', circuit:'#b48cff', other:'#8b96a3' };
+const CATEGORY_ORDER = ['upper','lower','core','cardio','circuit','other'];
+function workoutCategory(type){
+  if(/^Lower Body/.test(type)) return 'lower';
+  if(/^(Upper Body|Shoulders|Arms)$/.test(type)) return 'upper';
+  if(type==='Core') return 'core';
+  if(type==='Circuit' || type==='Cardio 4x4') return 'circuit';
+  if(/^Cardio/.test(type)) return 'cardio';
+  return 'other';
+}
+function renderHomeCalendar(sorted, today){
+  if(!sorted.length) return '';
+  const byDay = {};
+  sorted.forEach(w=> (w.types||[]).forEach(t=> (byDay[w.date] = byDay[w.date] || new Set()).add(workoutCategory(t))));
+  sorted.forEach(w=>{ if(!byDay[w.date]) byDay[w.date] = new Set(['other']); }); // a workout with no type still shows
+  const ym = ds=> ({y:+ds.slice(0,4), m:+ds.slice(5,7)-1});
+  const newest = sorted[0].date > today ? ym(sorted[0].date) : ym(today);
+  const oldest = ym(sorted[sorted.length-1].date);
+  let html = '<div class="home-cal">';
+  for(let y=newest.y, m=newest.m; y>oldest.y || (y===oldest.y && m>=oldest.m); m--, (m<0 && (m=11, y--))){
+    const first = new Date(y, m, 1), offset = (first.getDay()+6)%7, dim = new Date(y, m+1, 0).getDate();
+    let cells = ['M','T','W','T','F','S','S'].map(d=>`<div class="hc-dow">${d}</div>`).join('');
+    for(let i=0;i<offset;i++) cells += '<div></div>';
+    for(let d=1; d<=dim; d++){
+      const ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+      const cats = byDay[ds] ? CATEGORY_ORDER.filter(c=> byDay[ds].has(c)) : [];
+      const dots = cats.map(c=>`<i class="cat-dot" style="background:${CATEGORY_COLORS[c]}"></i>`).join('');
+      cells += cats.length
+        ? `<button class="hc-day has ${ds===today?'today':''}" onclick="homeCalTap('${ds}')"><span>${d}</span><span class="hc-dots">${dots}</span></button>`
+        : `<div class="hc-day ${ds===today?'today':''} ${ds>today?'future':''}"><span>${d}</span><span class="hc-dots"></span></div>`;
+    }
+    html += `<div class="hc-month"><h4>${first.toLocaleDateString('en-US',{month:'long', year:'numeric'})}</h4><div class="hc-grid">${cells}</div></div>`;
+  }
+  return html + '</div>';
 }
 
 /* ---------------- Swipe-to-reveal (copy/delete) ---------------- */
@@ -1868,8 +1919,9 @@ function shiftStatsMonth(delta){
   if(m<0){ m=11; y--; } if(m>11){ m=0; y++; }
   statsMonth = {y,m}; renderStats();
 }
-function calTap(dateStr){
-  const list = db.workouts.filter(w=>w.date===dateStr && workoutCounts(w));
+function calTap(dateStr){ openDayWorkouts(dateStr, db.workouts.filter(w=>w.date===dateStr && workoutCounts(w))); }
+function homeCalTap(dateStr){ openDayWorkouts(dateStr, db.workouts.filter(w=>w.date===dateStr)); }
+function openDayWorkouts(dateStr, list){
   if(list.length===1){ showWorkout(list[0].id); return; }
   if(list.length===0) return;
   const overlay = document.createElement('div');
