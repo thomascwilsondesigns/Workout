@@ -606,7 +606,7 @@ svg .eq{color:var(--muted)}
 <!-- LANDING -->
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
-  <div class="build-label">Build 2026-11-11 · home calendar</div>
+  <div class="build-label">Build 2026-11-11 · scroll expanded card</div>
 </div>
 
 <!-- STATS -->
@@ -3001,11 +3001,32 @@ function setDetailTab(instId, tab){
   renderWorkout();
 }
 
+// After a card expands, scroll just enough that its bottom isn't cut off by the bottom of the screen.
+// If the card is taller than the space below the sticky header, line its top up under the header instead.
+function scrollCardIntoView(instId){
+  requestAnimationFrame(()=>{
+    const card = document.querySelector(`.exercise-card[data-inst-id="${instId}"]`);
+    if(!card) return;
+    let sc = card.parentElement;
+    while(sc && sc!==document.body && !(sc.scrollHeight > sc.clientHeight && /auto|scroll/.test(getComputedStyle(sc).overflowY))) sc = sc.parentElement;
+    if(!sc || (sc===document.body && document.body.scrollHeight <= document.body.clientHeight)) sc = document.scrollingElement;
+    const header = document.querySelector('header');
+    const topLimit = (header ? header.getBoundingClientRect().bottom : 0) + 8;
+    const bottomLimit = (window.visualViewport ? window.visualViewport.height : window.innerHeight) - 12;
+    const r = card.getBoundingClientRect();
+    let delta = 0;
+    if(r.bottom > bottomLimit) delta = r.bottom - bottomLimit;          // reveal the bottom
+    if(r.top - delta < topLimit) delta = r.top - topLimit;              // but never push the top under the header
+    if(Math.abs(delta) > 1) sc.scrollBy({top: delta, behavior:'smooth'});
+  });
+}
 function toggleCollapse(instId){
   // One expanded card at a time: opening a card collapses the rest; tapping the open card collapses it.
-  if(collapsedExercises.has(instId)) collapseAllExcept(instId);
+  const opening = collapsedExercises.has(instId);
+  if(opening) collapseAllExcept(instId);
   else { collapsedExercises.add(instId); applyPendingMoves(null); }
   renderWorkout();
+  if(opening) scrollCardIntoView(instId);
 }
 function collapseAllExcept(instId){
   const w = getWorkout();
