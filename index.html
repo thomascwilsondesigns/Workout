@@ -59,6 +59,7 @@
     touch-action:pan-y; transition:transform .2s ease; will-change:transform;
   }
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
+  .today-tag{display:none;}
   .day-card .date-line{font-weight:600; font-size:15.5px; color:var(--ink);}
   .day-card .type-line{font-size:13px; color:var(--muted); margin-top:3px;}
   .empty-state{text-align:center; color:var(--muted); padding:60px 20px; font-size:14px; line-height:1.6;}
@@ -1581,6 +1582,7 @@ function renderLanding(){
     list.innerHTML = `<div class="empty-state">No workouts logged yet.<br>Tap + to add your first one.</div>`;
     return;
   }
+  const today = localDateStr();
   list.innerHTML = sorted.map(w=>`
     <div class="day-card-wrap">
       <div class="day-card-actions">
@@ -1591,8 +1593,9 @@ function renderLanding(){
           <span class="icon">✕</span><span>Delete</span>
         </button>
       </div>
-      <div class="day-card" data-workout-id="${w.id}">
+      <div class="day-card ${w.date===today ? 'today' : ''}" data-workout-id="${w.id}">
         <div class="day-card-main" onclick="handleDayCardTap('${w.id}', event)">
+          <div class="today-tag">Today</div>
           <div class="date-line">${formatDateLong(w.date)}</div>
           <div class="type-line">${w.types.join(', ')}</div>
         </div>
