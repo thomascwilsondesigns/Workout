@@ -623,7 +623,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-12 · no band dot on cards</div>
+  <div class="build-label">Build 2026-11-12 · remember collapsed sections</div>
 </div>
 
 <!-- STATS -->
@@ -2384,11 +2384,15 @@ function renderWorkout(){
   wireUpExerciseDrag();
 }
 
-const collapsedSections = new Set();
+// Collapsed Warmup/Workout sections are remembered per workout, across closing the workout and the app. View
+// state only: kept under its own localStorage key ({workoutId: ['warmup', ...]}), never in workoutLogDB_v1.
+const SECTIONS_KEY = 'workoutLogUI_sections_v1';
+function loadSectionState(){ try { const o = JSON.parse(localStorage.getItem(SECTIONS_KEY) || '{}'); return (o && typeof o==='object') ? o : {}; } catch(e){ return {}; } }
+function isSectionCollapsed(workoutId, key){ return (loadSectionState()[workoutId] || []).includes(key); }
 function renderSectionHeaders(w){
   [['warmup','Warmup',w.warmup],['main','Workout',w.main]].forEach(([key,label,arr])=>{
     const el = document.getElementById(key+'Label');
-    const col = collapsedSections.has(key);
+    const col = isSectionCollapsed(w.id, key);
     el.classList.toggle('is-collapsed', col);
     const n = (key==='main' && isCircuitWorkout(w)) ? arr.length + getCircuit(w).exercises.length : arr.length;
     el.innerHTML = `<span class="chev">▼</span><span>${label}</span><span class="sec-count">(${n})</span>`;
@@ -2396,7 +2400,14 @@ function renderSectionHeaders(w){
   });
 }
 function toggleSection(key){
-  if(collapsedSections.has(key)) collapsedSections.delete(key); else collapsedSections.add(key);
+  const w = getWorkout(); if(!w) return;
+  const state = loadSectionState();
+  const cur = new Set(state[w.id] || []);
+  if(cur.has(key)) cur.delete(key); else cur.add(key);
+  if(cur.size) state[w.id] = [...cur]; else delete state[w.id];
+  const live = new Set(db.workouts.map(x=> x.id));
+  Object.keys(state).forEach(id=>{ if(!live.has(id)) delete state[id]; }); // forget deleted workouts
+  try { localStorage.setItem(SECTIONS_KEY, JSON.stringify(state)); } catch(e){}
   renderWorkout();
 }
 
