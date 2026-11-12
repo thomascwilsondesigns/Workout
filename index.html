@@ -623,7 +623,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-12 · compact cards</div>
+  <div class="build-label">Build 2026-11-12 · no band dot on cards</div>
 </div>
 
 <!-- STATS -->
@@ -2777,7 +2777,7 @@ function setSummaryText(inst, secondaryType, bucketKey){
   if(!inst.sets || inst.sets.length===0) return 'No sets logged';
   const shown = inst.sets.filter(x=>x.done!==false);
   if(shown.length===0) return `Not started · ${inst.sets.length} set${inst.sets.length===1?'':'s'}`;
-  const parts = shown.map(x=>fmtSetHtml(x, secondaryType));
+  const parts = shown.map(x=>escapeHtml(fmtSet(x, secondaryType))); // plain text: no band dot on the collapsed card
   // Progress delta is only meaningful for main-lift progressive overload — warmups/PT
   // work isn't tracked for "improvement" the same way, so skip it there.
   if(bucketKey==='warmup') return parts.join(', ');
