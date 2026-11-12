@@ -623,7 +623,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-11 · update check</div>
+  <div class="build-label">Build 2026-11-12 · prefilled sets</div>
 </div>
 
 <!-- STATS -->
@@ -2220,6 +2220,13 @@ function isCounted(s){ return !s.warm && s.done!==false; }
 function e1rmOf(w, r){ if(!(w>0) || !(r>0) || r>15) return 0; return r===1 ? w : w*(1+r/30); } // Epley
 function hasLoggedSets(inst){ return (inst.sets||[]).some(s=> s.done!==false && ((s.reps>0) || (s.time>0))); }
 function blankSet(warm){ const o={reps:null,weight:null,band:null,time:null,done:false}; if(warm) o.warm=true; return o; }
+// Sets for a newly added exercise: a copy of the checked sets from the last time it was logged (reps, weight,
+// band, time, W flag), all unchecked, so unchanged numbers just need ticking. Nothing logged before: one blank set.
+function prefilledSetsFrom(inst){
+  const src = inst && Array.isArray(inst.sets) ? inst.sets.filter(x=>x.done!==false) : [];
+  if(!src.length) return [blankSet()];
+  return src.map(x=>{ const o = blankSet(x.warm); o.reps = x.reps ?? null; o.weight = x.weight ?? null; o.band = x.band ?? null; o.time = x.time ?? null; return o; });
+}
 function blankSetsFrom(inst){
   const src = inst && Array.isArray(inst.sets) ? inst.sets.filter(x=>x.done!==false) : [];
   return src.length ? src.map(x=>blankSet(x.warm)) : [blankSet()];
@@ -3496,7 +3503,7 @@ function addInstanceToWorkout(w, bucketKey, def){
   if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // a Circuit workout's circuit holds exercise ids only
   const last = findLastInstance(def.id, w.id);
   const secondaryType = last?.secondaryType || 'weight';
-  const prevSets = blankSetsFrom(last); // same set count as last time, values blank; last numbers show beside the exercise
+  const prevSets = prefilledSetsFrom(last); // last time's sets and numbers, unchecked
   const inst = { id: uid(), exerciseId: def.id, secondaryType, sets: prevSets };
   w[bucketKey].push(inst);
   // Newly added exercise opens expanded; collapse every other exercise in this workout.
