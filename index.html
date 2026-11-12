@@ -623,7 +623,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-12 · prefilled sets</div>
+  <div class="build-label">Build 2026-11-12 · snow angels</div>
 </div>
 
 <!-- STATS -->
@@ -911,6 +911,9 @@ const EXERCISE_ICONS = {
 "thoracic extension": `
 <svg viewBox="1 4.9 38 38" fill="none" stroke="currentColor" stroke-width="1.42" stroke-linecap="round" stroke-linejoin="round"><circle class="eq" cx="17.79" cy="28.62" r="2.76" stroke-width="1.64"/><path class="fig" d="M27.69 29.54L12.55 24.03" stroke-width="4.50"/><path class="fig" d="M12.55 24.03L8.18 16.46L13.5 22.81" stroke-width="3.07"/><path class="fig" d="M27.69 29.54L35.08 20.73L39.02 31.54L42.7 31.54" stroke-width="3.07"/><circle class="fig" cx="9.21" cy="20.7" r="3.91" fill="currentColor" stroke="none"/><path class="eq" d="M3 31.38L45 31.38" stroke-width="1.23" opacity="0.55"/></svg>`,
 
+"snow angels": `
+<svg viewBox="0 -1 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path class="eq" d="M24 4.2L24 31" stroke-width="9.5" opacity="0.6"/><path class="eq" d="M39.88 22.63L40.55 21.77L41.15 20.86L41.67 19.90L42.13 18.91L42.51 17.89L42.80 16.84L43.02 15.77L43.15 14.69L43.20 13.60L43.17 12.51L43.05 11.43L42.85 10.35L42.56 9.30L42.20 8.27L41.76 7.28L41.25 6.31L40.66 5.40L40.00 4.53L39.28 3.71L38.50 2.95" stroke-width="1.4"/><path class="eq" d="M40.65 3.41L38.50 2.95L38.85 5.12" stroke-width="1.4"/><path class="eq" d="M39.92 20.43L39.88 22.63L41.94 21.87" stroke-width="1.4"/><path class="eq" d="M8.12 22.63L7.45 21.77L6.85 20.86L6.33 19.90L5.87 18.91L5.49 17.89L5.20 16.84L4.98 15.77L4.85 14.69L4.80 13.60L4.83 12.51L4.95 11.43L5.15 10.35L5.44 9.30L5.80 8.27L6.24 7.28L6.75 6.31L7.34 5.40L8.00 4.53L8.72 3.71L9.50 2.95" stroke-width="1.4"/><path class="eq" d="M9.15 5.12L9.50 2.95L7.35 3.41" stroke-width="1.4"/><path class="eq" d="M6.06 21.87L8.12 22.63L8.08 20.43" stroke-width="1.4"/><path class="fig" d="M29.00 13.50L35.20 19.20L39.00 25.20" stroke-width="3.4" opacity="0.42"/><path class="fig" d="M26.60 27.00L29.20 36.00L29.60 44.00" stroke-width="3.6"/><path class="fig" d="M19.00 13.50L12.80 19.20L9.00 25.20" stroke-width="3.4" opacity="0.42"/><path class="fig" d="M21.40 27.00L18.80 36.00L18.40 44.00" stroke-width="3.6"/><path class="fig" d="M24.00 27.00L24.00 13.50" stroke-width="5.25"/><path class="fig" d="M29.00 13.50L19.00 13.50" stroke-width="4.25"/><path class="fig" d="M29.00 13.50L35.00 8.20L38.60 2.90" stroke-width="3.4"/><path class="fig" d="M19.00 13.50L13.00 8.20L9.40 2.90" stroke-width="3.4"/><circle class="fig" cx="24" cy="8" r="3.5" fill="currentColor" stroke="none"/></svg>`,
+
 "foam rolling": `
 <svg viewBox="2.5 5.5 45 45" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle class="eq" cx="33" cy="36.6" r="3.4" stroke-width="1.6"/><circle class="eq" cx="33" cy="36.6" r="0.9" fill="currentColor" stroke="none"/><path class="fig" d="M5.5 39L8 31.5L11 24.5" stroke-width="3.75" opacity="0.42"/><path class="fig" d="M21 31L11 24.5" stroke-width="5.5"/><path class="fig" d="M21 31L43.5 33.6L44.4 30.4" stroke-width="3.75"/><path class="fig" d="M11 24.5L6.5 31.5L5 39" stroke-width="3.75"/><circle class="fig" cx="8.4" cy="19.6" r="4.2" fill="currentColor" stroke="none"/><path class="eq" d="M3 40.3L45 40.3" stroke-width="1.5" opacity="0.55"/></svg>`,
 
@@ -995,6 +998,7 @@ const EXERCISE_TAGS = {
   "floor press": ["chest", "pecs", "triceps", "push", "dumbbell"],
   "front raise": ["shoulder", "dumbbell", "serratus", "scapula", "warmup", "main"],
   "foam rolling": ["roller", "self massage", "release", "recovery", "warmup"],
+  "snow angels": ["foam roller", "shoulder", "chest", "pecs", "thoracic", "mobility", "warmup"],
   "glute release": ["glutes", "hips", "lacrosse ball", "lacrosse", "warmup"],
   "half-kneeling landmine press": ["shoulder", "chest", "triceps", "core", "push"],
   "happy baby": ["hips", "lower back", "adductors", "stretch", "mobility"],
@@ -1432,7 +1436,7 @@ const ADDITIONAL_EXERCISES = [
   "45° back extension",
   "Wall calf stretch","Reclined butterfly stretch","Lying strap hamstring stretch",
   "Couch stretch","Doorway pec stretch","Thread the needle","Thoracic extension",
-  "Glute release","Foam rolling","Subscapularis release","Cupping","Happy baby",
+  "Glute release","Foam rolling","Snow angels","Subscapularis release","Cupping","Happy baby",
   "Shoulder internal rotation","Shoulder external rotation",
   "Front raise","Kickstand RDL","Pec release","Prone Y raise","Reverse fly",
   "Scapular plank","Treadmill run",
