@@ -630,7 +630,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-14 · tap to check for updates</div>
+  <div class="build-label">Build 2026-11-14 · timer beeps duck video</div>
 </div>
 
 <!-- STATS -->
@@ -2195,6 +2195,9 @@ class TimerAudio {
 
   ensureContext(){
     if(!this.ctx){
+      // Mark our sounds as short alerts (Safari Audio Session API, iOS 16.4+) so a beep ducks other audio,
+      // e.g. a YouTube Picture-in-Picture video, instead of interrupting it. Ignored where unsupported.
+      try { if(navigator.audioSession) navigator.audioSession.type = 'transient'; } catch(e){}
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
     }
     if(this.ctx.state === 'suspended') this.ctx.resume();
