@@ -133,7 +133,7 @@
   html.kb-open .sheet-overlay{top:var(--vv-top,0px); bottom:auto; height:var(--vv-h,100%); align-items:flex-start; padding-top:24px; box-sizing:border-box;}
   html.kb-open .sheet{max-height:calc(var(--vv-h,100vh) - 24px);}
   html.kb-open .picker-sheet{height:calc(var(--vv-h,100vh) - 24px); max-height:none;}
-  .build-label{text-align:center; font-size:11px; color:var(--muted); opacity:.6; padding:24px 0 32px;}
+  .build-label{text-align:center; font-size:11px; color:var(--muted); opacity:.6; padding:24px 0 32px; cursor:pointer;}
   html.kb-open .picker-sheet-footer{padding-bottom:10px;}
   .type-grid{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
   .type-chip{
@@ -630,7 +630,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-14 · sync</div>
+  <div class="build-label">Build 2026-11-14 · tap to check for updates</div>
 </div>
 
 <!-- STATS -->
@@ -4138,16 +4138,17 @@ function openSyncSettings(){
    reload. Offline or any error: do nothing. Saved data is untouched (it lives in localStorage, not the page). */
 let lastUpdateCheck = 0;
 function runningBuild(){ const el = document.querySelector('.build-label'); return el ? el.textContent.trim() : ''; }
-async function checkForUpdate(force){
+async function checkForUpdate(force, manual){
   if(!force && Date.now() - lastUpdateCheck < 60000) return;
   lastUpdateCheck = Date.now();
-  if(!/^https?:/.test(location.protocol)) return;
+  if(!/^https?:/.test(location.protocol)){ if(manual) showToast('Can\'t check for updates here'); return; }
   try {
     const res = await fetch(location.pathname + '?check=' + Date.now(), {cache:'no-store'});
-    if(!res.ok) return;
-    const m = (await res.text()).match(/<div class="build-label">([^<]*)<\/div>/);
+    if(!res.ok){ if(manual) showToast('Couldn\'t check for updates'); return; }
+    const m = (await res.text()).match(/<div class="build-label"[^>]*>([^<]*)<\/div>/);
     if(m && m[1].trim() && m[1].trim() !== runningBuild()) showUpdateBar();
-  } catch(e){}
+    else if(manual) showToast('You\'re on the latest version');
+  } catch(e){ if(manual) showToast('Couldn\'t check for updates (offline?)'); }
 }
 function showUpdateBar(){
   if(document.getElementById('updateBar')) return;
@@ -4160,6 +4161,9 @@ function showUpdateBar(){
   document.body.appendChild(bar);
 }
 setTimeout(()=> checkForUpdate(true), 1500);
+// Tap the build label to check now. (The label's markup must stay exactly <div class="build-label">…</div>:
+// older builds look for it in that form to detect updates.)
+document.querySelectorAll('.build-label').forEach(el=> el.addEventListener('click', ()=> checkForUpdate(true, true)));
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') checkForUpdate(false); });
 </script>
 </body>
