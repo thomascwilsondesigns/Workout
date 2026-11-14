@@ -60,6 +60,12 @@
   }
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
+  #syncBtn.spinning svg{animation:syncspin .9s linear infinite;}
+  @keyframes syncspin{to{transform:rotate(360deg);}}
+  .sync-sheet label{display:block; font-size:12.5px; color:var(--muted); font-weight:600; margin:10px 0 0;}
+  .sync-sheet label input{display:block; width:100%; box-sizing:border-box; margin-top:5px; font-size:16px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink);}
+  .sync-help{font-size:13px; color:var(--muted); line-height:1.45; margin:0 0 6px;}
+  .sync-sheet .btn-primary{margin-top:16px;}
   .update-bar{position:fixed; left:12px; right:12px; top:calc(env(safe-area-inset-top) + 10px); z-index:60;
     display:flex; align-items:center; gap:10px; padding:10px 10px 10px 16px; border-radius:14px;
     background:var(--card); border:1.5px solid var(--sage); color:var(--ink); font-size:14.5px; font-weight:600;
@@ -610,6 +616,7 @@ svg .eq{color:var(--muted)}
   <span class="back hidden" id="backBtn">←</span>
   <h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1>
   <div class="header-actions" id="landingActions">
+    <span class="header-action-icon" id="syncBtn" title="Sync" onclick="syncNow()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg></span>
     <span class="header-action-icon" title="Stats" onclick="showStats()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>
   </div>
   <div class="header-actions hidden" id="headerActions">
@@ -623,7 +630,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-12 · remember collapsed sections</div>
+  <div class="build-label">Build 2026-11-14 · sync</div>
 </div>
 
 <!-- STATS -->
@@ -1146,7 +1153,32 @@ function loadDB(){
   if(raw) return JSON.parse(raw);
   return { workouts: [], exercises: [] };
 }
-function saveDB(){ localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function saveDB(){ stampEdits(); localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+/* Sync bookkeeping: each workout and exercise carries updatedAt (ms) and db.deleted remembers deletions
+   ({workouts:{id:ms}, exercises:{id:ms}}), so a sync can keep the most recent edit of each workout and carry
+   deletions to other devices. stampEdits compares every item with how it looked at the last save; anything that
+   changed gets a new updatedAt, anything that vanished gets a deletion record. Inactive until addSyncFields has
+   run (syncSnapshot stays null), so the startup migrations above it don't stamp anything. */
+let syncSnapshot = null;
+function syncKeyOf(o){ const { updatedAt, ...rest } = o; return JSON.stringify(rest); }
+function takeSyncSnapshot(){
+  syncSnapshot = new Map();
+  (db.workouts||[]).forEach(w=> syncSnapshot.set('w:'+w.id, syncKeyOf(w)));
+  (db.exercises||[]).forEach(e=> syncSnapshot.set('e:'+e.id, syncKeyOf(e)));
+}
+function stampEdits(){
+  if(!syncSnapshot || !db.deleted) return;
+  const now = Date.now(), seen = new Set();
+  [['w', db.workouts, 'workouts'], ['e', db.exercises, 'exercises']].forEach(([k, list, dk])=>{
+    (list||[]).forEach(o=>{
+      const key = k+':'+o.id, j = syncKeyOf(o); seen.add(key);
+      if(syncSnapshot.get(key) !== j){ o.updatedAt = now; syncSnapshot.set(key, syncKeyOf(o)); }
+    });
+    [...syncSnapshot.keys()].forEach(key=>{
+      if(key.startsWith(k+':') && !seen.has(key)){ db.deleted[dk][key.slice(2)] = now; syncSnapshot.delete(key); }
+    });
+  });
+}
 let db = loadDB();
 
 /* ---------------- One-time exercise renames (Nov 2026) ----------------
@@ -1455,6 +1487,28 @@ const ADDITIONAL_EXERCISES = [
   });
   if(addedAny) saveDB();
 }
+
+/* Sync fields (Nov 2026): give every workout and exercise an updatedAt and add db.deleted. One-time, with a
+   backup of the raw data first (no backup, no changes). Then start tracking edits for sync. */
+(function addSyncFields(){
+  const flag = 'workoutLogSyncFields_2026_11', backupKey = 'workoutLogDB_v1_backup_pre_sync_fields_2026_11';
+  let done = false;
+  try { done = localStorage.getItem(flag)==='1'; } catch(e){ return; }
+  if(!done){
+    try {
+      const raw = localStorage.getItem(DB_KEY);
+      if(raw && !localStorage.getItem(backupKey)) localStorage.setItem(backupKey, raw);
+    } catch(e){ return; } // no backup, no changes (and no sync tracking this session)
+    db.workouts.forEach(w=>{ if(w.updatedAt==null) w.updatedAt = w.createdAt || 0; });
+    db.exercises.forEach(e=>{ if(e.updatedAt==null) e.updatedAt = 0; });
+    if(!db.deleted) db.deleted = { workouts:{}, exercises:{} };
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    try { localStorage.setItem(flag, '1'); } catch(e){}
+  }
+  if(!db.deleted) db.deleted = { workouts:{}, exercises:{} };
+  db.deleted.workouts = db.deleted.workouts || {}; db.deleted.exercises = db.deleted.exercises || {};
+  takeSyncSnapshot();
+})();
 
 const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body - Split Squat","Lower Body - Back Squat","Lower Body - Deadlift"];
 let currentWorkoutId = null;
@@ -3943,6 +3997,139 @@ function ctShowCompletion(){
 
 /* ---------------- Init ---------------- */
 showLanding();
+
+/* ---------------- Sync (private GitHub repo) ----------------
+   Settings (this device only): localStorage 'workoutLogSync_v1' = {repo:'owner/name', token, path, lastSync}.
+   Sync = download the data file, merge it with this device, save locally, upload the result (retrying if another
+   device uploaded in between). Merge: per workout/exercise the newest updatedAt wins; deletions win over older
+   edits; exercises with the same name but different ids (each device created its own built-ins) are joined under
+   the smaller id and workouts repointed. A backup of this device's data is kept before each sync. */
+const SYNC_KEY = 'workoutLogSync_v1';
+function syncSettings(){ try { return JSON.parse(localStorage.getItem(SYNC_KEY) || 'null'); } catch(e){ return null; } }
+function saveSyncSettings(o){ try { localStorage.setItem(SYNC_KEY, JSON.stringify(o)); } catch(e){} }
+function b64encodeUtf8(str){ const bytes = new TextEncoder().encode(str); let bin = ''; for(let i=0;i<bytes.length;i+=0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i+0x8000)); return btoa(bin); }
+function b64decodeUtf8(b64){ const bin = atob(b64.replace(/\s/g,'')); const bytes = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) bytes[i] = bin.charCodeAt(i); return new TextDecoder().decode(bytes); }
+function ghUrl(st){ return `https://api.github.com/repos/${st.repo}/contents/${encodeURIComponent(st.path||'workout-data.json')}`; }
+function ghHeaders(st, accept){ return { 'Authorization':'Bearer '+st.token, 'Accept': accept || 'application/vnd.github+json', 'X-GitHub-Api-Version':'2022-11-28' }; }
+async function ghGet(st){
+  const res = await fetch(ghUrl(st) + '?t=' + Date.now(), { headers: ghHeaders(st), cache:'no-store' });
+  if(res.status===404) return { data:null, sha:null };
+  if(!res.ok) throw new Error(res.status===401 ? 'GitHub rejected the token (401).' : res.status===403 ? 'The token can\'t read that repo (403).' : 'GitHub error '+res.status+' reading the data file.');
+  const j = await res.json();
+  let text = j.content ? b64decodeUtf8(j.content) : '';
+  if(!text && j.download_url!==undefined){ // files over 1 MB come without inline content
+    const raw = await fetch(ghUrl(st) + '?t=' + Date.now(), { headers: ghHeaders(st, 'application/vnd.github.raw'), cache:'no-store' });
+    if(!raw.ok) throw new Error('GitHub error '+raw.status+' reading the data file.');
+    text = await raw.text();
+  }
+  return { data: text ? JSON.parse(text) : null, sha: j.sha };
+}
+async function ghPut(st, data, sha){
+  const body = { message: 'Sync from ' + (navigator.platform || 'device') + ' ' + new Date().toISOString().slice(0,16), content: b64encodeUtf8(JSON.stringify(data)) };
+  if(sha) body.sha = sha;
+  const res = await fetch(ghUrl(st), { method:'PUT', headers: { ...ghHeaders(st), 'Content-Type':'application/json' }, body: JSON.stringify(body) });
+  if(res.status===409 || res.status===422) return false; // someone else uploaded first
+  if(!res.ok) throw new Error(res.status===403 || res.status===404 ? 'The token can\'t write to that repo ('+res.status+').' : 'GitHub error '+res.status+' saving the data file.');
+  return true;
+}
+function mergeDBs(local, remote){
+  if(!remote) return JSON.parse(JSON.stringify(local));
+  const L = JSON.parse(JSON.stringify(local)), R = JSON.parse(JSON.stringify(remote));
+  const deleted = { workouts:{}, exercises:{} };
+  [L.deleted, R.deleted].forEach(d=> d && ['workouts','exercises'].forEach(k=> Object.entries(d[k]||{}).forEach(([id,t])=>{ deleted[k][id] = Math.max(deleted[k][id]||0, t); })));
+  const pick = (a, b)=> !a ? b : !b ? a : ((b.updatedAt||0) > (a.updatedAt||0) ? b : a); // tie keeps this device's
+  // exercises: newest per id, then join same-name duplicates under the smaller id
+  const exById = new Map();
+  [...(L.exercises||[]), ...(R.exercises||[])].forEach(e=> exById.set(e.id, pick(exById.get(e.id), e)));
+  const byName = new Map(), remap = {};
+  [...exById.values()].sort((a,b)=> a.id < b.id ? -1 : a.id > b.id ? 1 : 0).forEach(e=>{
+    const n = (e.name||'').trim().toLowerCase(), keep = byName.get(n);
+    if(!keep){ byName.set(n, e); return; }
+    remap[e.id] = keep.id;
+    if((e.updatedAt||0) > (keep.updatedAt||0)) byName.set(n, { ...e, id: keep.id });
+  });
+  let exercises = [...byName.values()].filter(e=> !(deleted.exercises[e.id] >= (e.updatedAt||0)));
+  // workouts: newest per id; a deletion newer than the last edit removes it
+  const wById = new Map();
+  [...(L.workouts||[]), ...(R.workouts||[])].forEach(w=> wById.set(w.id, pick(wById.get(w.id), w)));
+  const fix = id=> remap[id] || id;
+  const workouts = [...wById.values()].filter(w=> !(deleted.workouts[w.id] >= (w.updatedAt||0))).map(w=>{
+    ['warmup','main'].forEach(k=> (w[k]||[]).forEach(i=>{ i.exerciseId = fix(i.exerciseId); }));
+    if(w.circuit && Array.isArray(w.circuit.exercises)) w.circuit.exercises = w.circuit.exercises.map(fix);
+    return w;
+  });
+  // never drop an exercise a workout still uses
+  const used = new Set(); workouts.forEach(w=>{ ['warmup','main'].forEach(k=> (w[k]||[]).forEach(i=> used.add(i.exerciseId))); ((w.circuit||{}).exercises||[]).forEach(id=> used.add(id)); });
+  const have = new Set(exercises.map(e=> e.id));
+  [...byName.values()].forEach(e=>{ if(used.has(e.id) && !have.has(e.id)) exercises.push(e); });
+  return { ...L, workouts, exercises, deleted };
+}
+let syncing = false;
+async function syncNow(){
+  const st = syncSettings();
+  if(!st || !st.repo || !st.token){ openSyncSettings(); return; }
+  if(syncing) return; syncing = true;
+  const btn = document.getElementById('syncBtn'); if(btn) btn.classList.add('spinning');
+  try {
+    if(!navigator.onLine) throw new Error('You\'re offline.');
+    try { localStorage.setItem('workoutLogDB_v1_backup_pre_sync', localStorage.getItem(DB_KEY) || ''); } catch(e){ throw new Error('Couldn\'t back up this device\'s data first, so nothing was synced.'); }
+    let ok = false, merged = null, before = db.workouts.length;
+    for(let attempt=0; attempt<3 && !ok; attempt++){
+      stampEdits();
+      const { data, sha } = await ghGet(st);
+      merged = mergeDBs(db, data);
+      ok = await ghPut(st, merged, sha);
+    }
+    if(!ok) throw new Error('Another device kept syncing at the same moment. Try again.');
+    db = merged;
+    localStorage.setItem(DB_KEY, JSON.stringify(db));
+    takeSyncSnapshot();
+    st.lastSync = Date.now(); saveSyncSettings(st);
+    const diff = db.workouts.length - before;
+    showToast('Synced' + (diff>0 ? ` · ${diff} workout${diff===1?'':'s'} added` : diff<0 ? ` · ${-diff} removed` : ''));
+    if(currentWorkoutId && !getWorkout()) showLanding();
+    else if(currentWorkoutId) renderWorkout(); else showLanding();
+  } catch(e){
+    showToast('Sync failed: ' + (e && e.message ? e.message : 'network error'));
+  } finally {
+    syncing = false; if(btn) btn.classList.remove('spinning');
+  }
+}
+function openSyncSettings(){
+  const st = syncSettings() || { repo:'', token:'', path:'workout-data.json' };
+  const overlay = document.createElement('div');
+  overlay.className = 'sheet-overlay';
+  overlay.innerHTML = `<div class="sheet sync-sheet"><h2>Sync</h2>
+    <p class="sync-help">Keeps your workouts in one file in a <b>private</b> GitHub repo, so every browser or device you set up here can sync. Settings are saved on this device only.</p>
+    <label>Repository<input type="text" id="syncRepo" placeholder="owner/repo" autocomplete="off" autocapitalize="off" spellcheck="false" value="${escapeHtml(st.repo||'')}"></label>
+    <label>Access token<input type="password" id="syncToken" placeholder="github_pat_…" autocomplete="off" value="${escapeHtml(st.token||'')}"></label>
+    <label>File<input type="text" id="syncPath" autocomplete="off" autocapitalize="off" spellcheck="false" value="${escapeHtml(st.path||'workout-data.json')}"></label>
+    ${st.lastSync ? `<p class="sync-help">Last synced ${new Date(st.lastSync).toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'})}</p>` : ''}
+    <button class="btn-primary" id="syncSaveBtn">Save and sync</button>
+    ${st.token ? '<button class="btn-secondary" id="syncForgetBtn">Turn off sync on this device</button>' : ''}
+    <button class="btn-secondary" onclick="this.closest('.sheet-overlay').remove()">Cancel</button></div>`;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  overlay.querySelector('#syncSaveBtn').onclick = ()=>{
+    const repo = overlay.querySelector('#syncRepo').value.trim().replace(/^https?:\/\/github\.com\//,'').replace(/\.git$/,'').replace(/\/$/,'');
+    const token = overlay.querySelector('#syncToken').value.trim();
+    const path = overlay.querySelector('#syncPath').value.trim() || 'workout-data.json';
+    if(!/^[\w.-]+\/[\w.-]+$/.test(repo)){ showToast('Repository should look like owner/repo'); return; }
+    if(!token){ showToast('Paste your access token'); return; }
+    saveSyncSettings({ ...st, repo, token, path });
+    overlay.remove(); syncNow();
+  };
+  const forget = overlay.querySelector('#syncForgetBtn');
+  if(forget) forget.onclick = ()=>{ try { localStorage.removeItem(SYNC_KEY); } catch(e){} overlay.remove(); showToast('Sync turned off on this device'); };
+}
+// Long-press the sync button to change settings.
+(function(){
+  const btn = document.getElementById('syncBtn'); if(!btn) return;
+  let t = null, held = false;
+  btn.addEventListener('touchstart', ()=>{ held = false; t = setTimeout(()=>{ held = true; openSyncSettings(); }, 550); }, {passive:true});
+  btn.addEventListener('touchend', e=>{ clearTimeout(t); if(held && e.cancelable) e.preventDefault(); });
+  btn.addEventListener('touchmove', ()=> clearTimeout(t), {passive:true});
+})();
 
 /* ---------------- Update check ----------------
    GitHub Pages lets the phone keep an old copy of this page for ~10 minutes, and a home-screen bookmark has no
