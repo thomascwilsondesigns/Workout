@@ -608,6 +608,9 @@ svg .eq{color:var(--muted)}
 /* Today's workout on the landing list: lime outline and a filled "Today" pill above the date. */
 .day-card.today .today-tag{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px;background:var(--sage);color:var(--on-accent,#0b0e12);padding:2px 7px;border-radius:999px}
 .day-card.today,.theme-midnight .day-card.today{border:1.5px solid var(--sage);border-left-width:4px}
+/* Expanded exercise with saved videos, notes or cues: a small lime dot on its ⋯ button (not on collapsed cards). */
+.exercise-card.expanded .exercise-head .chev.has-info{position:relative}
+.exercise-card.expanded .exercise-head .chev.has-info::after{content:'';position:absolute;top:1px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--sage)}
 </style>
 </head>
 <body>
@@ -630,7 +633,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-16 · rear delt raise image</div>
+  <div class="build-label">Build 2026-11-16 · notes dot</div>
 </div>
 
 <!-- STATS -->
@@ -2843,7 +2846,7 @@ function renderExerciseCard(inst, bucketKey){
   ` : '';
 
   return `
-    <div class="exercise-card ${(inst.sets||[]).some(x=> x.done!==false) ? 'started' : 'not-started'}" data-inst-id="${inst.id}" data-bucket="${bucketKey}">
+    <div class="exercise-card ${(inst.sets||[]).some(x=> x.done!==false) ? 'started' : 'not-started'} ${collapsed ? 'collapsed' : 'expanded'}" data-inst-id="${inst.id}" data-bucket="${bucketKey}">
       <div class="exercise-head">
         <div class="exercise-head-left" onclick="toggleCollapse('${inst.id}')">
           <span class="exercise-icon">${getExerciseIcon(def.name)}</span>
