@@ -2853,7 +2853,7 @@ function renderExerciseCard(inst, bucketKey){
           </div>
         </div>
         <span class="collapse-chev ${collapsed?'':'open'}" onclick="toggleCollapse('${inst.id}')">▾</span>
-        <span class="chev ${state.open?'open':''}" onclick="toggleExerciseDetail('${inst.id}')" title="Cues, video, notes">⋯</span>
+        <span class="chev ${state.open?'open':''} ${infoBadge(def)?'has-info':''}" data-info="${infoBadge(def)}" onclick="toggleExerciseDetail('${inst.id}')" title="Cues, video, notes">⋯</span>
       </div>
       ${bodyHtml}
       ${detailHtml}
@@ -2873,6 +2873,13 @@ function setSummaryText(inst, secondaryType, bucketKey){
   return parts.join(', ') + formatLoadDelta(delta);
 }
 
+// What an exercise has saved, for the hint on its ⋯ button: '▶' videos, '✎' notes or cues ('' if nothing).
+function infoBadge(def){
+  if(!def) return '';
+  const vid = (def.links||[]).length > 0;
+  const note = !!(def.notes||'').trim() || (def.cues||[]).length > 0;
+  return [vid?'▶':'', note?'✎':''].filter(Boolean).join(' ');
+}
 function videoEmbedHtml(url){
   const ytId = extractYouTubeId(url);
   if(ytId){
