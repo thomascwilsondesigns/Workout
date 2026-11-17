@@ -633,7 +633,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-16 · notes dot</div>
+  <div class="build-label">Build 2026-11-17 · no duplicate exercises</div>
 </div>
 
 <!-- STATS -->
@@ -3603,6 +3603,8 @@ function createAndAddExercise(bucketKey){
 }
 function addInstanceToWorkout(w, bucketKey, def){
   if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // a Circuit workout's circuit holds exercise ids only
+  // An exercise appears at most once per workout (warm-up and Workout sections together): a second add is ignored.
+  if([...(w.warmup||[]), ...(w.main||[])].some(i=> i.exerciseId===def.id)){ showToast(def.name + ' is already in this workout'); return; }
   const last = findLastInstance(def.id, w.id);
   const secondaryType = last?.secondaryType || 'weight';
   const prevSets = prefilledSetsFrom(last); // last time's sets and numbers, unchecked
