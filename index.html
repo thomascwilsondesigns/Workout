@@ -635,7 +635,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-18 · auto sync</div>
+  <div class="build-label">Build 2026-11-18 · accessory type</div>
 </div>
 
 <!-- STATS -->
@@ -1030,7 +1030,7 @@ const EXERCISE_TAGS = {
   "reclined butterfly stretch": ["adductors", "hips", "mobility"],
   "reverse curl": ["forearms", "biceps", "brachialis", "arms"],
   "reverse fly": ["shoulder", "rear delts", "upper back", "posture", "pull", "dumbbell", "bench", "warmup", "main"],
-  "side-lying rear delt raise": ["shoulder", "rear delts", "posterior shoulder", "upper back", "posture", "dumbbell"],
+  "side-lying rear delt raise": ["shoulder", "rear delts", "posterior shoulder", "upper back", "posture", "dumbbell", "warmup", "main"],
   "reverse wrist curl": ["forearms", "cable"],
   "scapular cars": ["shoulder", "scapula", "warmup", "mobility"],
   "scapular plank": ["shoulder", "scapula", "serratus", "core", "warmup"],
@@ -1541,7 +1541,7 @@ const ADDITIONAL_EXERCISES = [
   takeSyncSnapshot();
 })();
 
-const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body - Split Squat","Lower Body - Back Squat","Lower Body - Deadlift"];
+const WORKOUT_TYPES = ["Shoulders","Arms","Core","Cardio - Steady State","Circuit","Upper Body","Lower Body - Split Squat","Lower Body - Back Squat","Lower Body - Deadlift","Accessory"];
 let currentWorkoutId = null;
 let openExerciseDetail = {}; // exerciseInstanceId -> {open:bool, tab:'cues'|'links'|'notes'}
 let collapsedExercises = new Set(); // exerciseInstanceId -> collapsed (sets hidden, summary shown); every card starts collapsed when a workout opens
@@ -1731,12 +1731,13 @@ function renderLanding(){
 /* Home calendar: a panel fixed to the bottom of the landing screen showing one month at a time; swipe left/right
    (or use the arrows) to move between months, from the first workout's month to the current one. Workout days are
    bold with a dot per workout category; tap a day to open it. The workout list scrolls above it. */
-const CATEGORY_COLORS = { upper:'#5ab8ff', lower:'#ff7a5c', core:'#f5c84b', cardio:'#3fd6b0', circuit:'#b48cff', other:'#8b96a3' };
-const CATEGORY_ORDER = ['upper','lower','core','cardio','circuit','other'];
+const CATEGORY_COLORS = { upper:'#5ab8ff', lower:'#ff7a5c', core:'#f5c84b', cardio:'#3fd6b0', circuit:'#b48cff', accessory:'#ff8fcf', other:'#8b96a3' };
+const CATEGORY_ORDER = ['upper','lower','core','cardio','circuit','accessory','other'];
 function workoutCategory(type){
   if(/^Lower Body/.test(type)) return 'lower';
   if(/^(Upper Body|Shoulders|Arms)$/.test(type)) return 'upper';
   if(type==='Core') return 'core';
+  if(type==='Accessory') return 'accessory';
   if(type==='Circuit' || type==='Cardio 4x4') return 'circuit';
   if(/^Cardio/.test(type)) return 'cardio';
   return 'other';
