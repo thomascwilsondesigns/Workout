@@ -613,6 +613,8 @@ svg .eq{color:var(--muted)}
 /* Expanded exercise with saved videos, notes or cues: a small lime dot on its ⋯ button (not on collapsed cards). */
 .exercise-card.expanded .exercise-head .chev.has-info{position:relative}
 .exercise-card.expanded .exercise-head .chev.has-info::after{content:'';position:absolute;top:1px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--sage)}
+/* Stats calendar: workout days are filled with their category colours (inline); dark bold number on top. */
+.theme-midnight .cal-day.has{color:#0b0e12; font-weight:800; border-color:transparent}
 </style>
 </head>
 <body>
@@ -635,7 +637,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-18 · accessory type</div>
+  <div class="build-label">Build 2026-11-18 · stats calendar colours</div>
 </div>
 
 <!-- STATS -->
@@ -2091,7 +2093,20 @@ function renderStats(){
   // calendar
   const {y,m} = statsMonth;
   const first = new Date(y,m,1), offset = (first.getDay()+6)%7, dim = new Date(y,m+1,0).getDate();
-  const days = {}; counted.forEach(w=>{ days[w.date] = (days[w.date]||0)+1; });
+  const days = {}, dayCats = {};
+  counted.forEach(w=>{
+    days[w.date] = (days[w.date]||0)+1;
+    const set = dayCats[w.date] = dayCats[w.date] || new Set();
+    (w.types && w.types.length ? w.types : ['']).forEach(t=> set.add(workoutCategory(t)));
+  });
+  // Fill a workout day with its category colours: one colour fills the circle, two split it in half, three in thirds…
+  const dayFill = ds=>{
+    const cats = CATEGORY_ORDER.filter(c=> dayCats[ds] && dayCats[ds].has(c));
+    if(!cats.length) return '';
+    if(cats.length===1) return `background:${CATEGORY_COLORS[cats[0]]}`;
+    const step = 360/cats.length;
+    return `background:conic-gradient(${cats.map((c,i)=>`${CATEGORY_COLORS[c]} ${i*step}deg ${(i+1)*step}deg`).join(',')})`;
+  };
   const todayStr = localDateStr();
   let cells = ['Mo','Tu','We','Th','Fr','Sa','Su'].map(d=>`<div class="cal-dow">${d}</div>`).join('');
   for(let i=0;i<offset;i++) cells += '<div></div>';
@@ -2099,7 +2114,7 @@ function renderStats(){
   for(let d=1; d<=dim; d++){
     const ds = y+'-'+String(m+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
     const has = days[ds]; if(has) monthCount += has;
-    cells += `<button class="cal-day ${has?'has':''} ${ds===todayStr?'today':''}" ${has?`onclick="calTap('${ds}')"`:'disabled'}>${d}</button>`;
+    cells += `<button class="cal-day ${has?'has':''} ${ds===todayStr?'today':''}" ${has?`style="${dayFill(ds)}" onclick="calTap('${ds}')"`:'disabled'}>${d}</button>`;
   }
   const monthName = first.toLocaleDateString('en-US',{month:'long', year:'numeric'});
   const sorted = counted.map(w=>w.date).sort();
