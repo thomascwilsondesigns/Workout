@@ -61,6 +61,8 @@
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
   #syncBtn.spinning svg{animation:syncspin .9s linear infinite;}
+  #syncBtn{position:relative;}
+  #syncBtn.needs-sync::after{content:''; position:absolute; top:0; right:0; width:7px; height:7px; border-radius:50%; background:var(--coral, #ff7a5c);}
   @keyframes syncspin{to{transform:rotate(360deg);}}
   .sync-sheet label{display:block; font-size:12.5px; color:var(--muted); font-weight:600; margin:10px 0 0;}
   .sync-sheet label input{display:block; width:100%; box-sizing:border-box; margin-top:5px; font-size:16px; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--ink);}
@@ -633,7 +635,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-17 · no duplicate exercises</div>
+  <div class="build-label">Build 2026-11-18 · auto sync</div>
 </div>
 
 <!-- STATS -->
@@ -1160,7 +1162,11 @@ function loadDB(){
   if(raw) return JSON.parse(raw);
   return { workouts: [], exercises: [] };
 }
-function saveDB(){ stampEdits(); localStorage.setItem(DB_KEY, JSON.stringify(db)); }
+function saveDB(){
+  const changed = stampEdits();
+  localStorage.setItem(DB_KEY, JSON.stringify(db));
+  if(changed && typeof markSyncDirty==='function') markSyncDirty();
+}
 /* Sync bookkeeping: each workout and exercise carries updatedAt (ms) and db.deleted remembers deletions
    ({workouts:{id:ms}, exercises:{id:ms}}), so a sync can keep the most recent edit of each workout and carry
    deletions to other devices. stampEdits compares every item with how it looked at the last save; anything that
@@ -1174,17 +1180,19 @@ function takeSyncSnapshot(){
   (db.exercises||[]).forEach(e=> syncSnapshot.set('e:'+e.id, syncKeyOf(e)));
 }
 function stampEdits(){
-  if(!syncSnapshot || !db.deleted) return;
+  if(!syncSnapshot || !db.deleted) return false;
   const now = Date.now(), seen = new Set();
+  let changed = false;
   [['w', db.workouts, 'workouts'], ['e', db.exercises, 'exercises']].forEach(([k, list, dk])=>{
     (list||[]).forEach(o=>{
       const key = k+':'+o.id, j = syncKeyOf(o); seen.add(key);
-      if(syncSnapshot.get(key) !== j){ o.updatedAt = now; syncSnapshot.set(key, syncKeyOf(o)); }
+      if(syncSnapshot.get(key) !== j){ o.updatedAt = now; syncSnapshot.set(key, syncKeyOf(o)); changed = true; }
     });
     [...syncSnapshot.keys()].forEach(key=>{
-      if(key.startsWith(k+':') && !seen.has(key)){ db.deleted[dk][key.slice(2)] = now; syncSnapshot.delete(key); }
+      if(key.startsWith(k+':') && !seen.has(key)){ db.deleted[dk][key.slice(2)] = now; syncSnapshot.delete(key); changed = true; }
     });
   });
+  return changed;
 }
 let db = loadDB();
 
@@ -4100,32 +4108,76 @@ function mergeDBs(local, remote){
   return { ...L, workouts, exercises, deleted };
 }
 let syncing = false;
-async function syncNow(){
+/* Automatic sync (when sync is set up on this device): pull on launch and whenever the app comes back to the front,
+   push ~20 s after the last change, and try once more when the app goes to the background. Silent; a failure or
+   unsynced changes show a small dot on the ⟳ button. Unsynced state survives closing the app. */
+const SYNC_DIRTY_KEY = 'workoutLogSyncDirty_v1';
+let autoSyncTimer = null, lastAutoSync = 0, lastSyncFailed = false;
+function syncConfigured(){ const st = syncSettings(); return !!(st && st.repo && st.token); }
+function syncDirty(){ try { return localStorage.getItem(SYNC_DIRTY_KEY)==='1'; } catch(e){ return false; } }
+function setSyncDirty(v){ try { v ? localStorage.setItem(SYNC_DIRTY_KEY,'1') : localStorage.removeItem(SYNC_DIRTY_KEY); } catch(e){} updateSyncBadge(); }
+function updateSyncBadge(){ const b = document.getElementById('syncBtn'); if(b) b.classList.toggle('needs-sync', syncConfigured() && (lastSyncFailed || syncDirty())); }
+function markSyncDirty(){
+  if(!syncConfigured()) return;
+  setSyncDirty(true);
+  clearTimeout(autoSyncTimer);
+  autoSyncTimer = setTimeout(()=> autoSync('idle'), 20000);
+}
+function autoSync(reason){
+  if(!syncConfigured() || syncing || !navigator.onLine) return;
+  if(reason==='front' && Date.now() - lastAutoSync < 30000) return;
+  // don't pull new data under the user's finger: wait while a sheet is open or a card is being dragged
+  if(document.querySelector('.sheet-overlay') || document.documentElement.classList.contains('dragging')){
+    clearTimeout(autoSyncTimer); autoSyncTimer = setTimeout(()=> autoSync(reason), 15000); return;
+  }
+  lastAutoSync = Date.now();
+  syncNow({ silent:true });
+}
+document.addEventListener('visibilitychange', ()=>{
+  if(document.visibilityState==='visible') autoSync('front');
+  else if(syncDirty()){ clearTimeout(autoSyncTimer); autoSync('leaving'); }
+});
+setTimeout(()=> autoSync('launch'), 2500);
+setTimeout(updateSyncBadge, 0);
+
+async function syncNow(opts){
+  const silent = !!(opts && opts.silent);
   const st = syncSettings();
-  if(!st || !st.repo || !st.token){ openSyncSettings(); return; }
+  if(!st || !st.repo || !st.token){ if(!silent) openSyncSettings(); return; }
   if(syncing) return; syncing = true;
-  const btn = document.getElementById('syncBtn'); if(btn) btn.classList.add('spinning');
+  const btn = document.getElementById('syncBtn'); if(btn && !silent) btn.classList.add('spinning');
   try {
     if(!navigator.onLine) throw new Error('You\'re offline.');
     try { localStorage.setItem('workoutLogDB_v1_backup_pre_sync', localStorage.getItem(DB_KEY) || ''); } catch(e){ throw new Error('Couldn\'t back up this device\'s data first, so nothing was synced.'); }
-    let ok = false, merged = null, before = db.workouts.length;
+    let ok = false, merged = null, localAtMerge = null;
+    const before = JSON.stringify(db), beforeCount = db.workouts.length;
     for(let attempt=0; attempt<3 && !ok; attempt++){
       stampEdits();
       const { data, sha } = await ghGet(st);
+      localAtMerge = JSON.stringify(db);
       merged = mergeDBs(db, data);
       ok = await ghPut(st, merged, sha);
     }
     if(!ok) throw new Error('Another device kept syncing at the same moment. Try again.');
-    db = merged;
+    // anything edited on this device while the network calls were running is merged back in, not lost
+    const editedMeanwhile = stampEdits() || JSON.stringify(db) !== localAtMerge;
+    db = editedMeanwhile ? mergeDBs(merged, db) : merged;
     localStorage.setItem(DB_KEY, JSON.stringify(db));
     takeSyncSnapshot();
     st.lastSync = Date.now(); saveSyncSettings(st);
-    const diff = db.workouts.length - before;
-    showToast('Synced' + (diff>0 ? ` · ${diff} workout${diff===1?'':'s'} added` : diff<0 ? ` · ${-diff} removed` : ''));
-    if(currentWorkoutId && !getWorkout()) showLanding();
-    else if(currentWorkoutId) renderWorkout(); else showLanding();
+    lastSyncFailed = false;
+    setSyncDirty(editedMeanwhile);
+    if(editedMeanwhile){ clearTimeout(autoSyncTimer); autoSyncTimer = setTimeout(()=> autoSync('idle'), 5000); }
+    const diff = db.workouts.length - beforeCount;
+    if(!silent) showToast('Synced' + (diff>0 ? ` · ${diff} workout${diff===1?'':'s'} added` : diff<0 ? ` · ${-diff} removed` : ''));
+    if(JSON.stringify(db) !== before){ // only redraw if something actually came in
+      if(currentWorkoutId && !getWorkout()) showLanding();
+      else if(currentWorkoutId){ if(!silent || !document.querySelector('.wheel-viewport:active')) renderWorkout(); }
+      else showLanding();
+    }
   } catch(e){
-    showToast('Sync failed: ' + (e && e.message ? e.message : 'network error'));
+    lastSyncFailed = true; updateSyncBadge();
+    if(!silent) showToast('Sync failed: ' + (e && e.message ? e.message : 'network error'));
   } finally {
     syncing = false; if(btn) btn.classList.remove('spinning');
   }
@@ -4155,7 +4207,7 @@ function openSyncSettings(){
     overlay.remove(); syncNow();
   };
   const forget = overlay.querySelector('#syncForgetBtn');
-  if(forget) forget.onclick = ()=>{ try { localStorage.removeItem(SYNC_KEY); } catch(e){} overlay.remove(); showToast('Sync turned off on this device'); };
+  if(forget) forget.onclick = ()=>{ try { localStorage.removeItem(SYNC_KEY); } catch(e){} setSyncDirty(false); overlay.remove(); showToast('Sync turned off on this device'); };
 }
 // Long-press the sync button to change settings.
 (function(){
