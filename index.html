@@ -621,6 +621,8 @@ svg .eq{color:var(--muted)}
 .ct-speed-row select.ct-speed{width:auto; min-width:76px; padding:6px 10px; font-size:16px;}
 .ct-speed-row .ct-dist{color:var(--ink);}
 .ct-speed-row .ct-dist b{color:var(--sage);}
+.ct-last-line{margin:-4px 0 6px 34px; font-size:12.5px; color:var(--muted);}
+.ct-speed-row .ct-hist-link{color:var(--sage); font-weight:600; cursor:pointer; margin-left:auto;}
 </style>
 </head>
 <body>
@@ -641,7 +643,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-19 · treadmill speed in circuits</div>
+  <div class="build-label">Build 2026-11-19 · treadmill speed history</div>
 </div>
 
 <!-- STATS -->
@@ -1942,9 +1944,61 @@ function toggleHistAll(instId){
   openExerciseDetail[instId] = { ...cur, showAll: !cur.showAll };
   renderWorkout();
 }
+/* Speed log for speed exercises (Treadmill run): one entry per workout from either checked Time sets with a speed
+   or a Circuit workout's entry with a speed. Oldest first. */
+function speedSessions(exId, excludeWorkoutId){
+  const out = [];
+  db.workouts.forEach(w=>{
+    if(w.id===excludeWorkoutId) return;
+    let secs = 0, miles = 0, desc = [];
+    [...(w.warmup||[]), ...(w.main||[])].forEach(i=>{
+      if(i.exerciseId!==exId || (i.secondaryType||'weight')!=='time') return;
+      i.sets.filter(x=> isCounted(x) && x.speed>0 && x.time>0).forEach(x=>{
+        const t = x.time*Math.max(1, x.reps||1); secs += t; miles += setMiles(x);
+        desc.push(`${Math.max(1,x.reps||1)}×${formatTimeValue(x.time)}`);
+      });
+    });
+    const c = w.circuit;
+    if(c && Array.isArray(c.speeds)) c.exercises.forEach((id,k)=>{
+      if(id!==exId || !(c.speeds[k]>0)) return;
+      const per = c.workSeconds/c.exercises.length; secs += per*c.rounds; miles += circuitMiles(c, k);
+      desc.push(`${c.rounds}×${formatTimeValue(Math.round(per))} circuit`);
+    });
+    if(secs>0) out.push({ workout:w, date:w.date, secs, miles, speed: miles/(secs/3600), desc: desc.join(' + ') });
+  });
+  return out.sort((a,b)=> a.date.localeCompare(b.date) || (a.workout.createdAt||0)-(b.workout.createdAt||0));
+}
+function fmtSpeed(v){ return (Math.round(v*10)/10).toFixed(1); }
+function speedLastLine(exId, excludeWorkoutId){
+  const all = speedSessions(exId, excludeWorkoutId), last = all[all.length-1];
+  return last ? `Last · ${fmtDateY(last.date)} · ${fmtSpeed(last.speed)} mph · ${fmtMiles(last.miles)} mi (${last.desc})` : '';
+}
+function speedHistoryHtml(exId, rid){
+  const all = speedSessions(exId);
+  if(!all.length) return '';
+  let best = 0;
+  const pts = all.map(x=>{ const pr = best>0 && x.speed>best; best = Math.max(best, x.speed);
+    return { value:x.speed, pr, axis:a=> fmtSpeed(a), label:new Date(x.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}),
+      txt: fmtDateY(x.date)+' · '+fmtSpeed(x.speed)+' mph · '+fmtMiles(x.miles)+' mi'+(pr?' · fastest':'') }; });
+  const rows = all.slice().reverse().map(x=>`<tr><td>${fmtDateY(x.date)}</td><td><b>${fmtSpeed(x.speed)} mph</b></td><td>${fmtMiles(x.miles)} mi</td><td style="color:var(--muted);text-align:right">${escapeHtml(x.desc)}</td></tr>`).join('');
+  return `<div class="hist-h">Speed</div>
+    ${pts.length>1 ? `<div class="chart-wrap">${lineChartSvg(pts, rid)}</div><div class="chart-readout" id="${rid}">${escapeHtml(pts[pts.length-1].txt)}</div>` : ''}
+    <div class="hist-h">Speed &amp; distance log</div><table class="raw-table">${rows}</table>`;
+}
+function openSpeedHistory(exId){
+  const def = getExerciseDef(exId); if(!def) return;
+  const overlay = document.createElement('div');
+  overlay.className = 'sheet-overlay';
+  overlay.innerHTML = `<div class="sheet"><h2>${escapeHtml(def.name)}</h2>${speedHistoryHtml(exId, 'speedSheetReadout') || '<p style="color:var(--muted)">No speeds logged yet.</p>'}
+    <button class="btn-secondary" style="margin-top:14px" onclick="this.closest('.sheet-overlay').remove()">Close</button></div>`;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+}
+
 function renderHistoryPane(inst, def, state){
   const sessions = getExerciseSessions(def.id);
-  if(sessions.length===0) return `<div style="color:var(--muted);">No history yet. Check off some sets and they will show up here.</div>`;
+  const speedHtml = hasSpeed(def) ? speedHistoryHtml(def.id, 'speedReadout-'+inst.id) : '';
+  if(sessions.length===0) return speedHtml || `<div style="color:var(--muted);">No history yet. Check off some sets and they will show up here.</div>`;
   const mets = sessions.map(sessionMetrics);
   const avail = HIST_METRICS.filter(m=> mets.some(x=>x[m.k]!=null));
   let metric = avail.find(m=>m.k===state.metric) || avail[0];
@@ -2003,7 +2057,7 @@ function renderHistoryPane(inst, def, state){
     return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${Object.keys(prs).length?`<span class="pr-badge">${TROPHY_SVG} PR</span>`:''}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${sets}</div></div>`;
   }).join('');
   const more = desc.length>8 ? `<button class="btn-text" onclick="toggleHistAll('${inst.id}')">${state.showAll?'Show fewer':'Show all '+desc.length+' sessions'}</button>` : '';
-  return `${chartHtml}${recHtml}<div class="hist-h">All sessions</div>${rows}${more}`;
+  return `${speedHtml}${chartHtml}${recHtml}<div class="hist-h">All sessions</div>${rows}${more}`;
 }
 
 /* ---------------- Stats screen ---------------- */
@@ -2563,7 +2617,8 @@ function renderCircuitPanel(w){
       if(hasSpeed(def)){
         const sp = (c.speeds||[])[i], mi = circuitMiles(c, i);
         const opts = ['<option value="">—</option>'].concat(Array.from({length:151},(_,k)=>{ const v=(k/10).toFixed(1); return `<option value="${v}" ${sp!=null && Math.abs(sp-k/10)<0.001?'selected':''}>${v}</option>`; })).join('');
-        speedRow = `<div class="ct-speed-row"><label>Speed</label><select class="type-select ct-speed" onchange="circuitSetSpeed(${i}, this.value)">${opts}</select><span class="unit">mph</span>${mi>0 ? `<span class="ct-dist">≈ <b>${fmtMiles(mi)} mi</b> over ${c.rounds} round${c.rounds===1?'':'s'}</span>` : ''}</div>`;
+        const lastLine = speedLastLine(exId, w.id);
+        speedRow = `${lastLine ? `<div class="ct-last-line">${escapeHtml(lastLine)}</div>` : ''}<div class="ct-speed-row"><label>Speed</label><select class="type-select ct-speed" onchange="circuitSetSpeed(${i}, this.value)">${opts}</select><span class="unit">mph</span>${mi>0 ? `<span class="ct-dist">≈ <b>${fmtMiles(mi)} mi</b> over ${c.rounds} round${c.rounds===1?'':'s'}</span>` : ''}<span class="ct-hist-link" onclick="openSpeedHistory('${exId}')">History</span></div>`;
       }
       return `<div class="ct-picked-row"><div class="pos">${i+1}</div><div class="icon">${getExerciseIcon(name)}</div><div class="name">${escapeHtml(name)}</div>`+
         (i>0 ? `<div class="remove" onclick="circuitMove(${i},-1)" aria-label="Move up">▲</div>` : '')+
