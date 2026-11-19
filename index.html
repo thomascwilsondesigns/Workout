@@ -616,6 +616,11 @@ svg .eq{color:var(--muted)}
 .exercise-card.expanded .exercise-head .chev.has-info::after{content:'';position:absolute;top:1px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--sage)}
 /* Stats calendar: workout days are filled with their category colours (inline); dark bold number on top. */
 .theme-midnight .cal-day.has{color:#0b0e12; font-weight:800; border-color:transparent}
+.ct-speed-row{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:-2px 0 10px 34px; font-size:13.5px; color:var(--muted);}
+.ct-speed-row label{font-weight:600;}
+.ct-speed-row select.ct-speed{width:auto; min-width:76px; padding:6px 10px; font-size:16px;}
+.ct-speed-row .ct-dist{color:var(--ink);}
+.ct-speed-row .ct-dist b{color:var(--sage);}
 </style>
 </head>
 <body>
@@ -636,7 +641,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-19 · timer beeps on time, treadmill speed</div>
+  <div class="build-label">Build 2026-11-19 · treadmill speed in circuits</div>
 </div>
 
 <!-- STATS -->
@@ -2554,9 +2559,15 @@ function renderCircuitPanel(w){
   const c = getCircuit(w), n = c.exercises.length;
   const rows = n===0 ? `<div style="color:var(--muted); font-size:13.5px; padding:4px 2px 8px;">No exercises added yet.</div>` :
     c.exercises.map((exId,i)=>{ const def = getExerciseDef(exId); const name = def ? def.name : 'Unknown exercise';
+      let speedRow = '';
+      if(hasSpeed(def)){
+        const sp = (c.speeds||[])[i], mi = circuitMiles(c, i);
+        const opts = ['<option value="">—</option>'].concat(Array.from({length:151},(_,k)=>{ const v=(k/10).toFixed(1); return `<option value="${v}" ${sp!=null && Math.abs(sp-k/10)<0.001?'selected':''}>${v}</option>`; })).join('');
+        speedRow = `<div class="ct-speed-row"><label>Speed</label><select class="type-select ct-speed" onchange="circuitSetSpeed(${i}, this.value)">${opts}</select><span class="unit">mph</span>${mi>0 ? `<span class="ct-dist">≈ <b>${fmtMiles(mi)} mi</b> over ${c.rounds} round${c.rounds===1?'':'s'}</span>` : ''}</div>`;
+      }
       return `<div class="ct-picked-row"><div class="pos">${i+1}</div><div class="icon">${getExerciseIcon(name)}</div><div class="name">${escapeHtml(name)}</div>`+
         (i>0 ? `<div class="remove" onclick="circuitMove(${i},-1)" aria-label="Move up">▲</div>` : '')+
-        `<div class="remove" onclick="circuitRemove(${i})">remove</div></div>`; }).join('');
+        `<div class="remove" onclick="circuitRemove(${i})">remove</div></div>` + speedRow; }).join('');
   let summary = '';
   if(n){ const sched = buildSchedule({rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exerciseCount:n});
     summary = `Total session: <strong>${Math.round(sched.totalSeconds/60)} min</strong>. Each round, ${ctFmtMinSec(c.workSeconds/n)} per exercise before rest.`; }
@@ -2586,12 +2597,27 @@ function circuitAdjust(key, delta){
   else if(key==='restSeconds') c.restSeconds = Math.max(0, Math.min(1800, c.restSeconds + delta));
   saveDB(); renderWorkout();
 }
-function circuitRemove(i){ const c = ensureCircuit(getWorkout()); c.exercises.splice(i,1); saveDB(); renderWorkout(); }
-function circuitMove(i, d){ const c = ensureCircuit(getWorkout()); const j=i+d; if(j<0||j>=c.exercises.length) return; [c.exercises[i],c.exercises[j]]=[c.exercises[j],c.exercises[i]]; saveDB(); renderWorkout(); }
+function circuitRemove(i){ const c = ensureCircuit(getWorkout()); c.exercises.splice(i,1); if(c.speeds) c.speeds.splice(i,1); saveDB(); renderWorkout(); }
+function circuitMove(i, d){ const c = ensureCircuit(getWorkout()); const j=i+d; if(j<0||j>=c.exercises.length) return; [c.exercises[i],c.exercises[j]]=[c.exercises[j],c.exercises[i]];
+  if(c.speeds){ const sp = circuitSpeeds(c); [sp[i],sp[j]]=[sp[j],sp[i]]; } saveDB(); renderWorkout(); }
+// Optional speed (mph) per circuit entry for speed exercises (Treadmill run): circuit.speeds, same order as circuit.exercises.
+function circuitSpeeds(c){ if(!Array.isArray(c.speeds)) c.speeds = []; while(c.speeds.length < c.exercises.length) c.speeds.push(null); c.speeds.length = c.exercises.length; return c.speeds; }
+function circuitSetSpeed(i, v){ const c = ensureCircuit(getWorkout()); circuitSpeeds(c)[i] = v==='' ? null : Math.round(parseFloat(v)*10)/10; saveDB(); renderWorkout(); }
+// Distance one circuit entry covers: speed × its share of each work period × rounds.
+function circuitMiles(c, i){ const sp = (c.speeds||[])[i]; const n = c.exercises.length; return (sp>0 && n) ? sp * (c.workSeconds/n)/3600 * c.rounds : 0; }
+// The most recent speed used for an exercise, from logged sets or an earlier circuit (null if never).
+function lastSpeedFor(exId, excludeWorkoutId){
+  const sorted = [...db.workouts].filter(w=> w.id!==excludeWorkoutId).sort((a,b)=> b.date.localeCompare(a.date) || (b.createdAt||0)-(a.createdAt||0));
+  for(const w of sorted){
+    for(const i of [...(w.warmup||[]), ...(w.main||[])]) if(i.exerciseId===exId){ const s = (i.sets||[]).filter(x=> x.done!==false && x.speed>0).pop(); if(s) return s.speed; }
+    const c = w.circuit; if(c && Array.isArray(c.speeds)){ const k = c.exercises.findIndex((id,j)=> id===exId && c.speeds[j]>0); if(k>=0) return c.speeds[k]; }
+  }
+  return null;
+}
 function circuitOpenPicker(){ openPicker('circuit'); } // same add-exercise sheet as the other sections
 function circuitStart(){
   const c = getCircuit(getWorkout()); if(!c.exercises.length) return;
-  Object.assign(ctConfig, { rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exercises:[...c.exercises] });
+  Object.assign(ctConfig, { rounds:c.rounds, workSeconds:c.workSeconds, restSeconds:c.restSeconds, exercises:[...c.exercises], speeds: c.exercises.map((_,k)=> (c.speeds||[])[k] || null) });
   openCircuitTimer(); ctStartSession();
 }
 
@@ -3644,7 +3670,12 @@ function createAndAddExercise(bucketKey){
   renderWorkout();
 }
 function addInstanceToWorkout(w, bucketKey, def){
-  if(bucketKey==='circuit'){ ensureCircuit(w).exercises.push(def.id); saveDB(); return; } // a Circuit workout's circuit holds exercise ids only
+  if(bucketKey==='circuit'){ // a Circuit workout's circuit holds exercise ids (plus an optional speed per entry)
+    const c = ensureCircuit(w); c.exercises.push(def.id);
+    if(hasSpeed(def)){ circuitSpeeds(c)[c.exercises.length-1] = lastSpeedFor(def.id, w.id); }
+    else if(c.speeds) c.speeds[c.exercises.length-1] = null;
+    saveDB(); return;
+  }
   // An exercise appears at most once per workout (warm-up and Workout sections together): a second add is ignored.
   if([...(w.warmup||[]), ...(w.main||[])].some(i=> i.exerciseId===def.id)){ showToast(def.name + ' is already in this workout'); return; }
   const last = findLastInstance(def.id, w.id);
@@ -4018,7 +4049,8 @@ function ctRenderRunningState(state, elapsed){
     const def = exId ? getExerciseDef(exId) : null;
     const name = def ? def.name : '—';
     document.getElementById('ctExerciseDisplayIcon').innerHTML = getExerciseIcon(name);
-    document.getElementById('ctExerciseDisplayName').textContent = name;
+    const sp = (ctConfig.speeds||[])[state.exerciseIndex];
+    document.getElementById('ctExerciseDisplayName').textContent = sp>0 ? `${name} · ${sp} mph` : name;
     document.getElementById('ctExerciseDisplayPosition').textContent =
       ctConfig.exercises.length>1 ? `Exercise ${state.exerciseIndex+1} of ${ctConfig.exercises.length}` : '';
   } else {
