@@ -167,6 +167,7 @@
   .set-num.is-warm{color:var(--sage-dark); font-weight:800;}
   /* check-off, previous, PR */
   .set-row{grid-template-columns:24px 1fr 1fr 36px !important;}
+  .set-row.has-speed{grid-template-columns:24px 1fr 1fr 1fr 36px !important; gap:7px;}
   .set-check{
     width:34px; height:34px; border-radius:50%; border:1.8px solid var(--line); background:#faf9f5; color:#c9c5b8;
     font-size:17px; font-weight:800; cursor:pointer; margin-bottom:21px; padding:0; line-height:1; align-self:end;
@@ -635,7 +636,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-18 · no delete icon in workout</div>
+  <div class="build-label">Build 2026-11-19 · timer beeps on time, treadmill speed</div>
 </div>
 
 <!-- STATS -->
@@ -2331,8 +2332,13 @@ function blankSet(warm){ const o={reps:null,weight:null,band:null,time:null,done
 function prefilledSetsFrom(inst){
   const src = inst && Array.isArray(inst.sets) ? inst.sets.filter(x=>x.done!==false) : [];
   if(!src.length) return [blankSet()];
-  return src.map(x=>{ const o = blankSet(x.warm); o.reps = x.reps ?? null; o.weight = x.weight ?? null; o.band = x.band ?? null; o.time = x.time ?? null; return o; });
+  return src.map(x=>{ const o = blankSet(x.warm); o.reps = x.reps ?? null; o.weight = x.weight ?? null; o.band = x.band ?? null; o.time = x.time ?? null; if(x.speed!=null) o.speed = x.speed; return o; });
 }
+// Exercises whose sets also log a speed (mph wheel); with Time sets, distance = speed × time (× reps).
+const SPEED_EXERCISES = new Set(['treadmill run']);
+function hasSpeed(def){ return !!def && SPEED_EXERCISES.has((def.name||'').trim().toLowerCase()); }
+function setMiles(s){ return (s.speed>0 && s.time>0) ? s.speed * s.time/3600 * Math.max(1, s.reps||1) : 0; }
+function fmtMiles(mi){ return (mi>=10 ? mi.toFixed(1) : mi.toFixed(2)).replace(/\.?0+$/,'') || '0'; }
 function blankSetsFrom(inst){
   const src = inst && Array.isArray(inst.sets) ? inst.sets.filter(x=>x.done!==false) : [];
   return src.length ? src.map(x=>blankSet(x.warm)) : [blankSet()];
@@ -2344,7 +2350,7 @@ function fmtSet(s, type){
   const reps = s.reps ?? '–';
   let sec;
   if(type==='band') sec = s.band || '–';
-  else if(type==='time') sec = formatTimeValue(s.time);
+  else if(type==='time') sec = formatTimeValue(s.time) + (s.speed>0 ? ' @ ' + s.speed + ' mph' : '');
   else sec = (s.weight ?? '–') + (s.weight!=null ? 'lb' : '');
   return (s.warm?'W ':'') + reps + '×' + sec;
 }
@@ -2786,6 +2792,15 @@ function renderExerciseCard(inst, bucketKey){
     if(best>0) e1Html = `<div class="e1rm-line">Est. 1RM <b>${Math.round(best)} lb</b> · from ${bestSet.reps}×${bestSet.weight}</div>`;
   }
 
+  // Treadmill-style exercises: total distance from speed × time × reps over the working (non-W) sets;
+  // the checked ones once any are checked, otherwise what's planned.
+  let distHtml = '';
+  if(hasSpeed(def) && secondaryType==='time'){
+    const work = inst.sets.filter(x=> !x.warm), done = work.filter(isCounted);
+    const use = done.length ? done : work, mi = use.reduce((t,x)=> t + setMiles(x), 0);
+    if(mi>0) distHtml = `<div class="e1rm-line">Distance <b>${fmtMiles(mi)} mi</b>${done.length ? '' : ' · planned'}</div>`;
+  }
+
   let bodyHtml = '';
   if(!collapsed){
     bodyHtml = `
@@ -2799,7 +2814,7 @@ function renderExerciseCard(inst, bucketKey){
       ${prevHtml}
       <div class="sets-list">
         ${inst.sets.map((s,i)=>`
-          <div class="set-row">
+          <div class="set-row ${hasSpeed(def)?'has-speed':''}">
             <div class="set-num tappable ${s.warm?'is-warm':''} ${prs[i]?'has-pr':''}" onclick="toggleWarmSet('${inst.id}',${i})">${s.warm ? 'W' : (inst.sets.slice(0,i).filter(x=>!x.warm).length+1)}</div>
             ${renderWheel(inst.id, i, 'reps', s.reps, false, 0, 30, 1, 'Reps', i===0)}
             ${secondaryType==='band'
@@ -2807,6 +2822,7 @@ function renderExerciseCard(inst, bucketKey){
               : secondaryType==='time'
                 ? renderTimeWheel(inst.id, i, s.time, false, i===0)
                 : renderWheel(inst.id, i, 'weight', s.weight, false, 0, 260, 2.5, 'Lbs', i===0)}
+            ${hasSpeed(def) ? renderWheel(inst.id, i, 'speed', s.speed, false, 0, 15, 0.1, 'Mph', i===0) : ''}
             <button class="set-check ${s.done!==false?'on':''}" onclick="toggleSetDone('${inst.id}',${i})" aria-label="Mark set done">✓</button>
           </div>
         `).join('')}
@@ -2816,7 +2832,7 @@ function renderExerciseCard(inst, bucketKey){
         </div>
       </div>
       ${prHtml}
-      ${e1Html}`;
+      ${e1Html}${distHtml}`;
   }
 
   const tabs = ['cues','links','notes','history'];
@@ -2891,6 +2907,10 @@ function setSummaryText(inst, secondaryType, bucketKey){
   const shown = inst.sets.filter(x=>x.done!==false);
   if(shown.length===0) return `Not started · ${inst.sets.length} set${inst.sets.length===1?'':'s'}`;
   const parts = shown.map(x=>escapeHtml(fmtSet(x, secondaryType))); // plain text: no band dot on the collapsed card
+  if(secondaryType==='time' && hasSpeed(getExerciseDef(inst.exerciseId))){
+    const mi = shown.filter(x=>!x.warm).reduce((t,x)=> t + setMiles(x), 0);
+    if(mi>0) parts.push(fmtMiles(mi) + ' mi');
+  }
   // Progress delta is only meaningful for main-lift progressive overload — warmups/PT
   // work isn't tracked for "improvement" the same way, so skip it there.
   if(bucketKey==='warmup') return parts.join(', ');
@@ -3278,7 +3298,7 @@ function toggleSetDone(instId, idx){
       let src = null;
       if(ls){ const arr = ls.inst.sets.filter(y=>y.done!==false); src = arr[idx] || arr[arr.length-1]; }
       if(!src && idx>0) src = inst.sets[idx-1];
-      if(src){ x.reps = src.reps ?? null; x.weight = src.weight ?? null; x.band = src.band ?? null; x.time = src.time ?? null; }
+      if(src){ x.reps = src.reps ?? null; x.weight = src.weight ?? null; x.band = src.band ?? null; x.time = src.time ?? null; if(src.speed!=null) x.speed = src.speed; }
     }
     // A band set whose wheel was never moved has no band saved, though the wheel shows the first colour;
     // checking it records what was on screen.
@@ -3859,14 +3879,7 @@ async function ctHandleReturnFromBackground(){
     const ctx = ctAudio.ensureContext();
     if(ctx.state === 'suspended') await ctx.resume();
     ctSession.startCtxTime = ctAudio.ctx.currentTime - elapsed;
-
-    ctAudio.cancelAllPending();
-    ctSession.schedule.events.forEach(ev=>{
-      if(ev.atSecond <= elapsed) return;
-      if(ev.type==='round') ctAudio.scheduleCountdown(ctSession.startCtxTime + ev.atSecond, 'round');
-      else if(ev.type==='switch') ctAudio.scheduleCountdown(ctSession.startCtxTime + ev.atSecond, 'switch');
-      else if(ev.type==='complete') ctAudio.scheduleCompletion(ctSession.startCtxTime + ev.atSecond);
-    });
+    // Beeps are played just in time by ctPlayDueBeeps on the wall clock; ones missed while away are skipped.
   } finally {
     ctRecoveryInProgress = false;
   }
@@ -3903,17 +3916,44 @@ function ctRunPreStartCountdown(){
   }, 1000);
 }
 
+/* Beeps are timed off the same wall clock as the on-screen countdown and handed to Web Audio only a moment before
+   each one plays (ctPlayDueBeeps, every frame). Booking a whole session up front on the audio clock drifted on
+   iOS, where that clock can stall (audio idle between beeps, another app taking the sound), so later beeps
+   landed after the change they were counting down to. */
+function ctBuildBeeps(schedule){
+  const beeps = [];
+  schedule.events.forEach(ev=>{
+    if(ev.type==='round' || ev.type==='switch'){
+      const base = ev.type==='round' ? 440 : 660;
+      for(let i=5; i>=1; i--){
+        const at = ev.atSecond - i;
+        if(at < 0) continue;
+        beeps.push({ at, freq: base + (5-i)*18, dur: 0.14, gain: i===1 ? 0.45 : 0.3, done:false });
+      }
+    } else if(ev.type==='complete'){
+      [523.25, 659.25, 783.99].forEach((freq, i)=> beeps.push({ at: ev.atSecond + i*0.18, freq, dur: 0.35, gain: 0.4, done:false }));
+    }
+  });
+  return beeps.sort((a,b)=> a.at - b.at);
+}
+function ctPlayDueBeeps(elapsed, lookahead){
+  if(!ctSession || ctSession.paused || !ctSession.beeps) return;
+  const ctx = ctAudio.ensureContext(); // also resumes a suspended context
+  const LOOKAHEAD = lookahead || 0.3;
+  for(const b of ctSession.beeps){
+    if(b.done) continue;
+    if(b.at > elapsed + LOOKAHEAD) break;
+    b.done = true;
+    if(b.at < elapsed - 0.25) continue; // missed (app was in the background): skip rather than play late
+    ctAudio._scheduleBeep(ctx.currentTime + Math.max(0, b.at - elapsed), b.freq, b.dur, b.gain);
+  }
+}
 function ctBeginSessionNow(startCtxTime){
   const schedule = buildSchedule({
     rounds: ctConfig.rounds, workSeconds: ctConfig.workSeconds,
     restSeconds: ctConfig.restSeconds, exerciseCount: ctConfig.exercises.length
   });
-  schedule.events.forEach(ev=>{
-    if(ev.type==='round') ctAudio.scheduleCountdown(startCtxTime + ev.atSecond, 'round');
-    else if(ev.type==='switch') ctAudio.scheduleCountdown(startCtxTime + ev.atSecond, 'switch');
-    else if(ev.type==='complete') ctAudio.scheduleCompletion(startCtxTime + ev.atSecond);
-  });
-  ctSession = { schedule, startCtxTime, startWallTime: Date.now(), paused:false, pausedAtElapsed:0 };
+  ctSession = { schedule, startCtxTime, startWallTime: Date.now(), paused:false, pausedAtElapsed:0, beeps: ctBuildBeeps(schedule) };
   document.getElementById('ctRunningScreen').classList.remove('hidden');
   ctBuildProgressDots(schedule);
   ctRequestWakeLock();
@@ -3935,8 +3975,9 @@ function ctCurrentElapsed(){
 function ctRunTick(){
   if(!ctSession) return;
   const elapsed = Math.max(0, ctCurrentElapsed());
+  ctPlayDueBeeps(elapsed);
   const state = getStateAtTime(ctSession.schedule, elapsed);
-  if(state.phase==='end'){ ctShowCompletion(); return; }
+  if(state.phase==='end'){ ctPlayDueBeeps(elapsed, 2); ctShowCompletion(); return; } // let the finish chime's later notes play
   ctRenderRunningState(state, elapsed);
   ctSession._raf = requestAnimationFrame(ctRunTick);
 }
@@ -4019,13 +4060,8 @@ async function ctResumeSession(){
   ctSession.startCtxTime = ctAudio.ctx.currentTime - elapsed;
   ctSession.paused = false;
   btn.textContent = 'Pause';
-
-  ctSession.schedule.events.forEach(ev=>{
-    if(ev.atSecond <= elapsed) return;
-    if(ev.type==='round') ctAudio.scheduleCountdown(ctSession.startCtxTime + ev.atSecond, 'round');
-    else if(ev.type==='switch') ctAudio.scheduleCountdown(ctSession.startCtxTime + ev.atSecond, 'switch');
-    else if(ev.type==='complete') ctAudio.scheduleCompletion(ctSession.startCtxTime + ev.atSecond);
-  });
+  // beeps cancelled by the pause play again when their time comes
+  (ctSession.beeps||[]).forEach(b=>{ if(b.at >= elapsed) b.done = false; });
 
   ctRequestWakeLock();
   ctRunTick();
