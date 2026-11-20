@@ -635,7 +635,7 @@ svg .eq{color:var(--muted)}
     <span class="header-action-icon" title="Stats" onclick="showStats()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>
   </div>
   <div class="header-actions hidden" id="headerActions">
-    <span class="header-action-icon" title="Edit date" onclick="openDateEditSheet()">✎</span>
+    <span class="header-action-icon" title="Edit workout type" onclick="openTypeEditSheet()">✎</span>
   </div>
 </header>
 
@@ -643,7 +643,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-20 · copy keeps set numbers</div>
+  <div class="build-label">Build 2026-11-20 · edit workout type</div>
 </div>
 
 <!-- STATS -->
@@ -1624,6 +1624,39 @@ function openDateEditSheet(){
     saveDB();
     overlay.remove();
     showWorkout(w.id); // refreshes header text; landing list re-sorts on next visit
+  };
+}
+
+// ✎ in the workout header: change the workout's type(s). Old type names no longer offered (e.g. plain
+// "Lower Body") still appear while selected, so they can be removed.
+function openTypeEditSheet(){
+  const w = getWorkout(); if(!w) return;
+  const selected = new Set(w.types || []);
+  const options = [...WORKOUT_TYPES, ...[...selected].filter(t=> !WORKOUT_TYPES.includes(t))];
+  const overlay = document.createElement('div');
+  overlay.className = 'sheet-overlay';
+  overlay.innerHTML = `
+    <div class="sheet">
+      <h2>Edit workout type</h2>
+      <div class="type-grid">${options.map(t=>`<div class="type-chip ${selected.has(t)?'selected':''}" data-type="${escapeHtml(t)}">${escapeHtml(t)}</div>`).join('')}</div>
+      <button class="btn-primary" id="saveTypesBtn">Save</button>
+      <button class="btn-secondary" onclick="this.closest('.sheet-overlay').remove()">Cancel</button>
+    </div>`;
+  document.getElementById('modalRoot').appendChild(overlay);
+  overlay.addEventListener('click', e=>{ if(e.target===overlay) overlay.remove(); });
+  const saveBtn = overlay.querySelector('#saveTypesBtn');
+  overlay.querySelectorAll('.type-chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      const t = chip.dataset.type;
+      if(selected.has(t)){ selected.delete(t); chip.classList.remove('selected'); } else { selected.add(t); chip.classList.add('selected'); }
+      saveBtn.disabled = selected.size===0;
+    };
+  });
+  saveBtn.onclick = ()=>{
+    if(!selected.size) return;
+    w.types = options.filter(t=> selected.has(t)); // keep the list order
+    saveDB(); overlay.remove(); renderWorkout();
+    showToast('Workout type: ' + w.types.join(', '));
   };
 }
 
