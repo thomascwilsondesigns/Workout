@@ -643,7 +643,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-19 · treadmill speed history</div>
+  <div class="build-label">Build 2026-11-20 · copy keeps set numbers</div>
 </div>
 
 <!-- STATS -->
@@ -1631,7 +1631,8 @@ function openDateEditSheet(){
 function cloneExerciseInstance(inst){
   const copy = { ...inst, id: uid() };
   if(Array.isArray(inst.sets)){
-    copy.sets = blankSetsFrom(inst); // copied workouts start with blank, unchecked sets
+    // copied workouts keep every set with its numbers (reps, weight, band, time, speed, W flag), all unchecked
+    copy.sets = inst.sets.length ? inst.sets.map(x=>{ const o = blankSet(x.warm); o.reps = x.reps ?? null; o.weight = x.weight ?? null; o.band = x.band ?? null; o.time = x.time ?? null; if(x.speed!=null) o.speed = x.speed; return o; }) : [blankSet()];
   }
   return copy;
 }
