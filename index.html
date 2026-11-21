@@ -176,7 +176,7 @@
   .set-num.has-pr{color:var(--rust); font-weight:800;}
   .prev-line{padding:0 15px 8px; font-size:12.5px; color:var(--muted); line-height:1.45;}
   .prev-line b{color:var(--sage-dark); font-weight:700;}
-  .pr-badge{display:inline-flex; align-items:center; gap:3px; background:#f6e7dd; color:var(--rust); font-size:11px; font-weight:800; padding:2px 7px; border-radius:20px; margin-left:6px; vertical-align:middle;}
+  .pr-badge{display:inline-flex; align-items:center; gap:3px; white-space:nowrap; background:#f6e7dd; color:var(--rust); font-size:11px; font-weight:800; padding:2px 7px; border-radius:20px; margin-left:6px; vertical-align:middle;}
   .pr-list{padding:0 15px 8px; display:flex; flex-wrap:wrap; gap:6px;}
   .pr-chip{display:inline-flex; align-items:center; gap:4px; background:#f6e7dd; color:var(--rust); font-size:12px; font-weight:700; padding:4px 9px; border-radius:20px;}
   .e1rm-line{padding:0 15px 10px; font-size:12.5px; color:var(--muted);}
@@ -643,7 +643,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-21 · reopen last workout</div>
+  <div class="build-label">Build 2026-11-21 · PR badge shows record type</div>
 </div>
 
 <!-- STATS -->
@@ -2101,7 +2101,7 @@ function renderHistoryPane(inst, def, state){
     const prs = computePRsForInstance(ses.inst, ses.workout, sessions);
     const t = ses.inst.secondaryType || 'weight';
     const sets = ses.inst.sets.filter(x=>x.done!==false && (x.reps>0 || x.time>0)).map(x=>fmtSetHtml(x,t)).join(' · ');
-    return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${Object.keys(prs).length?`<span class="pr-badge">${TROPHY_SVG} PR</span>`:''}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${sets}</div></div>`;
+    return `<div class="hist-row"><div class="hd"><span>${fmtDateY(ses.workout.date)}${prBadgeHtml(prs)}</span><span style="color:var(--muted);font-weight:500">${escapeHtml(ses.workout.types.join(', '))}</span></div><div class="sets">${sets}</div></div>`;
   }).join('');
   const more = desc.length>8 ? `<button class="btn-text" onclick="toggleHistAll('${inst.id}')">${state.showAll?'Show fewer':'Show all '+desc.length+' sessions'}</button>` : '';
   return `${speedHtml}${chartHtml}${recHtml}<div class="hist-h">All sessions</div>${rows}${more}`;
@@ -2521,6 +2521,18 @@ function prCheck(b, s, type){
   if(e1rmOf(w,s.reps)>bw.maxE) out.push('Est. 1RM');
   if(w in bw.repsAt && s.reps>bw.repsAt[w]) out.push(w>0 ? 'Reps at '+w+' lb' : 'Reps (bodyweight)');
   return out;
+}
+// Short record types for PR badges, so the badge says at a glance which record was beaten.
+const PR_SHORT_ORDER = ['Weight','1RM','Volume','Reps','Time'];
+function prShortTypes(prs){
+  const set = new Set();
+  Object.values(prs||{}).forEach(labels=> labels.forEach(l=> set.add(
+    l==='Est. 1RM' ? '1RM' : /^Reps/.test(l) ? 'Reps' : l)));
+  return PR_SHORT_ORDER.filter(t=> set.has(t));
+}
+function prBadgeHtml(prs){
+  const t = prShortTypes(prs);
+  return t.length ? `<span class="pr-badge">${TROPHY_SVG} ${t.join(' · ')}</span>` : '';
 }
 // Returns {setIndex: [labels]} for sets in this instance that beat everything logged before it.
 function computePRsForInstance(inst, workout, sessions){
@@ -3019,7 +3031,7 @@ function renderExerciseCard(inst, bucketKey){
         <div class="exercise-head-left" onclick="toggleCollapse('${inst.id}')">
           <span class="exercise-icon">${getExerciseIcon(def.name)}</span>
           <div class="exercise-head-text">
-            <span class="name">${escapeHtml(def.name)}${prKeys.length ? `<span class="pr-badge">${TROPHY_SVG} PR</span>` : ''}</span>
+            <span class="name">${escapeHtml(def.name)}${prBadgeHtml(prs)}</span>
             ${collapsed ? `<span class="set-summary">${setSummaryText(inst, secondaryType, bucketKey)}</span>` : ''}
           </div>
         </div>
