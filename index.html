@@ -60,6 +60,11 @@
   }
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
+  .title-wrap{display:flex; align-items:center; gap:9px; min-width:0;}
+  .header-figure{display:inline-flex; flex-shrink:0;}
+  .header-figure.hidden{display:none;}
+  .cal-foot{display:flex; align-items:flex-end; justify-content:space-between; margin-top:8px;}
+  .cal-figure{display:inline-flex; flex-shrink:0;}
   #syncBtn.spinning svg{animation:syncspin .9s linear infinite;}
   #syncBtn{position:relative;}
   #syncBtn.needs-sync::after{content:''; position:absolute; top:0; right:0; width:7px; height:7px; border-radius:50%; background:var(--coral, #ff7a5c);}
@@ -629,7 +634,7 @@ svg .eq{color:var(--muted)}
 
 <header>
   <span class="back hidden" id="backBtn">←</span>
-  <h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1>
+  <div class="title-wrap"><span id="headerFigure" class="header-figure"></span><h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1></div>
   <div class="header-actions" id="landingActions">
     <span class="header-action-icon" id="syncBtn" title="Sync" onclick="syncNow()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg></span>
     <span class="header-action-icon" title="Stats" onclick="showStats()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>
@@ -643,7 +648,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-21 · PR badge shows record type</div>
+  <div class="build-label">Build 2026-11-23 · new colours and body key</div>
 </div>
 
 <!-- STATS -->
@@ -1573,6 +1578,7 @@ function showLanding(){
   document.getElementById('headerActions').classList.add('hidden');
   const h1 = document.getElementById('headerTitle');
   h1.textContent = 'Workout Log';
+  const hf = document.getElementById('headerFigure'); if(!hf.innerHTML) hf.innerHTML = bodyKeySvg(28); hf.classList.remove('hidden');
   h1.classList.remove('editable');
   renderLanding();
 }
@@ -1607,6 +1613,7 @@ function showWorkout(workoutId){
     shownWorkoutId = currentWorkoutId;
   }
   const h1 = document.getElementById('headerTitle');
+  document.getElementById('headerFigure').classList.add('hidden');
   h1.textContent = formatDateShort(w.date);
   h1.classList.add('editable');
   renderWorkout();
@@ -1786,17 +1793,21 @@ function renderLanding(){
 /* Home calendar: a panel fixed to the bottom of the landing screen showing one month at a time; swipe left/right
    (or use the arrows) to move between months, from the first workout's month to the current one. Workout days are
    bold with a dot per workout category; tap a day to open it. The workout list scrolls above it. */
-const CATEGORY_COLORS = { upper:'#5ab8ff', lower:'#ff7a5c', core:'#f5c84b', cardio:'#3fd6b0', circuit:'#b48cff', accessory:'#ff8fcf', other:'#8b96a3' };
-const CATEGORY_ORDER = ['upper','lower','core','cardio','circuit','accessory','other'];
+const CATEGORY_COLORS = { upper:'#3d7be2', arms:'#7cd3ff', lower:'#2f7d45', core:'#f2b632', cardio:'#ff5252', other:'#8b96a3' };
+const CATEGORY_ORDER = ['upper','arms','lower','core','cardio','other'];
 function workoutCategory(type){
   if(/^Lower Body/.test(type)) return 'lower';
-  if(/^(Upper Body|Shoulders|Arms)$/.test(type)) return 'upper';
-  if(type==='Core') return 'core';
-  if(type==='Accessory') return 'accessory';
-  if(type==='Circuit' || type==='Cardio 4x4') return 'circuit';
-  if(/^Cardio/.test(type)) return 'cardio';
+  if(/^(Upper Body|Shoulders)$/.test(type)) return 'upper';
+  if(type==='Arms') return 'arms';
+  if(type==='Core' || type==='Accessory') return 'core';
+  if(type==='Circuit' || /^Cardio/.test(type)) return 'cardio';
   return 'other';
 }
+// Body key: a small shaded figure coloured by category (shoulders/chest upper, arms, abs core, legs lower,
+// heart cardio). Gradient ids are made unique per copy so several can be on screen at once.
+const BODY_KEY_SVG = '<svg viewBox="0 0 60 120" width="WW" height="HH" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="upUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5c9bff"/><stop offset="1" stop-color="#1f5bc4"/></linearGradient><linearGradient id="armUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3e6ff"/><stop offset="1" stop-color="#4fb6e6"/></linearGradient><linearGradient id="coreUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd060"/><stop offset="1" stop-color="#c98a14"/></linearGradient><linearGradient id="legUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#45a862"/><stop offset="1" stop-color="#1f5a31"/></linearGradient><radialGradient id="htUID" cx="0.38" cy="0.32" r="0.75"><stop offset="0" stop-color="#ff9a9a"/><stop offset="0.55" stop-color="#ff3b3b"/><stop offset="1" stop-color="#b3141b"/></radialGradient></defs> <circle cx="30" cy="8.5" r="6.5" fill="#4f5a68"/> <path d="M30 16 C22 16 16 18 13 22 C9 27 9 34 8.5 40 L6 54 L5 63 L9 64 L12 53 L16 36 L18 48 L19 60 L19 86 L20 113 L26 114 L28 86 L29.5 62 L30.5 62 L32 86 L34 114 L40 113 L41 86 L41 60 L42 48 L44 36 L48 53 L51 64 L55 63 L54 54 L51.5 40 C51 34 51 27 47 22 C44 18 38 16 30 16Z" fill="#2a323d"/> <circle cx="15.5" cy="25" r="5.2" fill="url(#upUID)"/> <circle cx="44.5" cy="25" r="5.2" fill="url(#upUID)"/> <path d="M30 21 C25 19.5 20 21 19 25.5 C18.5 31 22 34.5 27 34.5 C29 34.5 30 33 30 31 C30 33 31 34.5 33 34.5 C38 34.5 41.5 31 41 25.5 C40 21 35 19.5 30 21Z" fill="url(#upUID)"/> <ellipse cx="12.3" cy="36.5" rx="3.4" ry="7" transform="rotate(12 12.3 36.5)" fill="url(#armUID)"/> <ellipse cx="47.7" cy="36.5" rx="3.4" ry="7" transform="rotate(-12 47.7 36.5)" fill="url(#armUID)"/> <path d="M10.5 44 C12 48 11.5 54 9 62 L6 61.5 C7 54 7.5 48 8.5 44Z" fill="url(#armUID)"/> <path d="M49.5 44 C48 48 48.5 54 51 62 L54 61.5 C53 54 52.5 48 51.5 44Z" fill="url(#armUID)"/> <rect x="23" y="36.5" width="14" height="19" rx="4" fill="url(#coreUID)"/> <path d="M30 37.5 V54.5 M24 42.8 H36 M24 49 H36" stroke="#0b0e12" stroke-width="1.1" opacity="0.5"/> <path d="M21 61 C18.5 68 18.5 78 21 86 C23.5 88.5 27 87.5 28 84 C29.5 76 29.5 68 28.5 61.5 C26.5 59 23 59 21 61Z" fill="url(#legUID)"/> <path d="M39 61 C41.5 68 41.5 78 39 86 C36.5 88.5 33 87.5 32 84 C30.5 76 30.5 68 31.5 61.5 C33.5 59 37 59 39 61Z" fill="url(#legUID)"/> <path d="M20.5 92 C19 99 19.5 106 22 111 L26 111 C27 106 27.5 99 26.5 92 C24.5 90 22 90 20.5 92Z" fill="url(#legUID)"/> <path d="M39.5 92 C41 99 40.5 106 38 111 L34 111 C33 106 32.5 99 33.5 92 C35.5 90 38 90 39.5 92Z" fill="url(#legUID)"/> <g transform="translate(34 22) scale(1.75) translate(-4.3 -1)"><path d="M0 2 c0-2.2 3-3.3 4.3-1.1 c1.3-2.2 4.3-1.1 4.3 1.1 c0 2.8-4.3 5-4.3 6.1 c0-1.1-4.3-3.3-4.3-6.1z" fill="url(#htUID)" stroke="#0b0e12" stroke-width="0.40"/></g> </svg>';
+let bodyKeySeq = 0;
+function bodyKeySvg(h){ const u = 'bk' + (bodyKeySeq++); return BODY_KEY_SVG.replace(/UID/g, u).replace('WW', String(h/2)).replace('HH', String(h)); }
 let homeCalFromEnd = 0; // how many months back from the newest the calendar was showing (kept across re-renders)
 function renderHomeCalendar(sorted, today){
   const dock = document.getElementById('homeCalDock');
@@ -2145,6 +2156,7 @@ function showStats(){
   document.getElementById('landingActions').classList.add('hidden');
   const h1 = document.getElementById('headerTitle');
   h1.textContent = 'Stats'; h1.classList.remove('editable');
+  document.getElementById('headerFigure').classList.add('hidden');
   if(!statsMonth){ const n = new Date(); statsMonth = {y:n.getFullYear(), m:n.getMonth()}; }
   renderStats();
 }
@@ -2239,7 +2251,7 @@ function renderStats(){
     <div class="stat-panel">
       <div class="cal-head"><button class="cal-nav" onclick="shiftStatsMonth(-1)" aria-label="Previous month">‹</button><div class="t">${monthName}</div><button class="cal-nav" onclick="shiftStatsMonth(1)" aria-label="Next month">›</button></div>
       <div class="cal-grid">${cells}</div>
-      <div class="chart-readout" style="margin-top:8px">${monthCount} workout${monthCount===1?'':'s'} this month</div>
+      <div class="cal-foot"><div class="chart-readout">${monthCount} workout${monthCount===1?'':'s'} this month</div><span class="cal-figure">${bodyKeySvg(40)}</span></div>
     </div>
     <div class="stat-panel"><h3>All time</h3>
       <div style="font-size:14px">${counted.length} workouts${sorted.length?` since ${fmtDateY(sorted[0])}`:''}</div>
