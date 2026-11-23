@@ -61,7 +61,7 @@
   .day-card-main{flex:1; min-width:0; cursor:pointer;}
   .today-tag{display:none;}
   .title-wrap{display:flex; align-items:center; gap:9px; min-width:0;}
-  .header-figure{display:inline-flex; flex-shrink:0;}
+  .header-figure{display:inline-flex; align-items:center; flex-shrink:0; padding:0 5px;}
   .header-figure.hidden{display:none;}
   .cal-foot{display:flex; align-items:flex-end; justify-content:space-between; margin-top:8px;}
   .cal-figure{display:inline-flex; flex-shrink:0;}
@@ -634,8 +634,9 @@ svg .eq{color:var(--muted)}
 
 <header>
   <span class="back hidden" id="backBtn">←</span>
-  <div class="title-wrap"><span id="headerFigure" class="header-figure"></span><h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1></div>
+  <div class="title-wrap"><h1 id="headerTitle" onclick="handleHeaderTap()">Workout Log</h1></div>
   <div class="header-actions" id="landingActions">
+    <span id="headerFigure" class="header-figure" aria-hidden="true"></span>
     <span class="header-action-icon" id="syncBtn" title="Sync" onclick="syncNow()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M20 12a8 8 0 0 1-14.3 4.9M4 12a8 8 0 0 1 14.3-4.9"/><path d="M18.5 3v4.2h-4.2M5.5 21v-4.2h4.2"/></svg></span>
     <span class="header-action-icon" title="Stats" onclick="showStats()"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:block"><path d="M5 20V11M12 20V4M19 20v-6"/></svg></span>
   </div>
@@ -648,7 +649,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-23 · new colours and body key</div>
+  <div class="build-label">Build 2026-11-23 · bold body figure</div>
 </div>
 
 <!-- STATS -->
@@ -1578,7 +1579,7 @@ function showLanding(){
   document.getElementById('headerActions').classList.add('hidden');
   const h1 = document.getElementById('headerTitle');
   h1.textContent = 'Workout Log';
-  const hf = document.getElementById('headerFigure'); if(!hf.innerHTML) hf.innerHTML = bodyKeySvg(28); hf.classList.remove('hidden');
+  const hf = document.getElementById('headerFigure'); if(!hf.innerHTML) hf.innerHTML = bodyKeySvg(24); hf.classList.remove('hidden');
   h1.classList.remove('editable');
   renderLanding();
 }
@@ -1803,11 +1804,10 @@ function workoutCategory(type){
   if(type==='Circuit' || /^Cardio/.test(type)) return 'cardio';
   return 'other';
 }
-// Body key: a small shaded figure coloured by category (shoulders/chest upper, arms, abs core, legs lower,
-// heart cardio). Gradient ids are made unique per copy so several can be on screen at once.
-const BODY_KEY_SVG = '<svg viewBox="0 0 60 120" width="WW" height="HH" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="upUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5c9bff"/><stop offset="1" stop-color="#1f5bc4"/></linearGradient><linearGradient id="armUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#b3e6ff"/><stop offset="1" stop-color="#4fb6e6"/></linearGradient><linearGradient id="coreUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffd060"/><stop offset="1" stop-color="#c98a14"/></linearGradient><linearGradient id="legUID" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#45a862"/><stop offset="1" stop-color="#1f5a31"/></linearGradient><radialGradient id="htUID" cx="0.38" cy="0.32" r="0.75"><stop offset="0" stop-color="#ff9a9a"/><stop offset="0.55" stop-color="#ff3b3b"/><stop offset="1" stop-color="#b3141b"/></radialGradient></defs> <circle cx="30" cy="8.5" r="6.5" fill="#4f5a68"/> <path d="M30 16 C22 16 16 18 13 22 C9 27 9 34 8.5 40 L6 54 L5 63 L9 64 L12 53 L16 36 L18 48 L19 60 L19 86 L20 113 L26 114 L28 86 L29.5 62 L30.5 62 L32 86 L34 114 L40 113 L41 86 L41 60 L42 48 L44 36 L48 53 L51 64 L55 63 L54 54 L51.5 40 C51 34 51 27 47 22 C44 18 38 16 30 16Z" fill="#2a323d"/> <circle cx="15.5" cy="25" r="5.2" fill="url(#upUID)"/> <circle cx="44.5" cy="25" r="5.2" fill="url(#upUID)"/> <path d="M30 21 C25 19.5 20 21 19 25.5 C18.5 31 22 34.5 27 34.5 C29 34.5 30 33 30 31 C30 33 31 34.5 33 34.5 C38 34.5 41.5 31 41 25.5 C40 21 35 19.5 30 21Z" fill="url(#upUID)"/> <ellipse cx="12.3" cy="36.5" rx="3.4" ry="7" transform="rotate(12 12.3 36.5)" fill="url(#armUID)"/> <ellipse cx="47.7" cy="36.5" rx="3.4" ry="7" transform="rotate(-12 47.7 36.5)" fill="url(#armUID)"/> <path d="M10.5 44 C12 48 11.5 54 9 62 L6 61.5 C7 54 7.5 48 8.5 44Z" fill="url(#armUID)"/> <path d="M49.5 44 C48 48 48.5 54 51 62 L54 61.5 C53 54 52.5 48 51.5 44Z" fill="url(#armUID)"/> <rect x="23" y="36.5" width="14" height="19" rx="4" fill="url(#coreUID)"/> <path d="M30 37.5 V54.5 M24 42.8 H36 M24 49 H36" stroke="#0b0e12" stroke-width="1.1" opacity="0.5"/> <path d="M21 61 C18.5 68 18.5 78 21 86 C23.5 88.5 27 87.5 28 84 C29.5 76 29.5 68 28.5 61.5 C26.5 59 23 59 21 61Z" fill="url(#legUID)"/> <path d="M39 61 C41.5 68 41.5 78 39 86 C36.5 88.5 33 87.5 32 84 C30.5 76 30.5 68 31.5 61.5 C33.5 59 37 59 39 61Z" fill="url(#legUID)"/> <path d="M20.5 92 C19 99 19.5 106 22 111 L26 111 C27 106 27.5 99 26.5 92 C24.5 90 22 90 20.5 92Z" fill="url(#legUID)"/> <path d="M39.5 92 C41 99 40.5 106 38 111 L34 111 C33 106 32.5 99 33.5 92 C35.5 90 38 90 39.5 92Z" fill="url(#legUID)"/> <g transform="translate(34 22) scale(1.75) translate(-4.3 -1)"><path d="M0 2 c0-2.2 3-3.3 4.3-1.1 c1.3-2.2 4.3-1.1 4.3 1.1 c0 2.8-4.3 5-4.3 6.1 c0-1.1-4.3-3.3-4.3-6.1z" fill="url(#htUID)" stroke="#0b0e12" stroke-width="0.40"/></g> </svg>';
-let bodyKeySeq = 0;
-function bodyKeySvg(h){ const u = 'bk' + (bodyKeySeq++); return BODY_KEY_SVG.replace(/UID/g, u).replace('WW', String(h/2)).replace('HH', String(h)); }
+// Body key: a bold, solid-colour figure coloured by category (shoulders/chest upper, arms, abs core,
+// hips and legs lower, heart cardio), with dark-blue pec and dark-yellow ab lines. viewBox 40x60.
+const BODY_KEY_SVG = '<svg viewBox="0 0 40 60" width="WW" height="HH" xmlns="http://www.w3.org/2000/svg"> <ellipse cx="20" cy="5.6" rx="4.4" ry="5.1" fill="#8b96a3"/><rect x="17.7" y="8" width="4.6" height="5" rx="1.2" fill="#8b96a3"/> <path d="M17.4 12.2 L22.6 12.2 C26 12.5 30.4 12.9 32.5 15.4 C33.9 17.1 33.4 19.6 31.6 20.6 L29.9 21.2 C27.6 22.80 24.4 22.80 22.4 21.80 C21 21.10 20.4 20.20 20 19.40 C19.6 20.20 19 21.10 17.6 21.80 C15.6 22.80 12.4 22.80 10.1 21.20 L10.1 21.2 L8.4 20.6 C6.6 19.6 6.1 17.1 7.5 15.4 C9.6 12.9 14 12.5 17.4 12.2 Z" fill="#3d7be2"/> <path d="M7.6 17.2 C4.4 17.4 2.6 19.6 2.5 22.6 C2.4 24.8 2.9 26 2.7 27.4 C2.4 29.4 2 30.8 2.3 32.6 C2.5 34 2.8 35.6 4.4 36 C6 36.3 6.8 35 7 33.6 C7.2 31.6 7.7 29.6 7.9 27.8 C8.1 26.6 8.5 25.6 8.9 24.4 C9.4 22.6 9.5 20.8 9.3 19.6 Z" fill="#7cd3ff"/><path d="M7.6 17.2 C4.4 17.4 2.6 19.6 2.5 22.6 C2.4 24.8 2.9 26 2.7 27.4 C2.4 29.4 2 30.8 2.3 32.6 C2.5 34 2.8 35.6 4.4 36 C6 36.3 6.8 35 7 33.6 C7.2 31.6 7.7 29.6 7.9 27.8 C8.1 26.6 8.5 25.6 8.9 24.4 C9.4 22.6 9.5 20.8 9.3 19.6 Z" fill="#7cd3ff" transform="matrix(-1 0 0 1 40 0)"/> <path d="M29.9 21.2 C27.6 22.80 24.4 22.80 22.4 21.80 C21 21.10 20.4 20.20 20 19.40 C19.6 20.20 19 21.10 17.6 21.80 C15.6 22.80 12.4 22.80 10.1 21.20 C10.6 24.5 12 27.5 12.6 29.6 C12.8 30.6 12.6 31.6 12.4 32.4 L27.6 32.4 C27.4 31.6 27.2 30.6 27.4 29.6 C28 27.5 29.4 24.5 29.9 21.2 Z" fill="#f2b632"/> <path d="M12.4 32.4 L27.6 32.4 C28.6 34.4 29.5 36.4 29.6 39.5 L10.4 39.5 C10.5 36.4 11.4 34.4 12.4 32.4 Z" fill="#2f7d45"/> <path d="M10.4 39 L19.4 39 L19.3 42 C19.3 44.6 19 46.8 18.9 48.6 C19.1 49.8 19.2 51.4 18.8 53 C18.4 54.6 18.6 56 18.4 57.8 Q18.2 59 16.6 59 L14.8 59 Q13.6 59 13.4 57.8 C13.3 56.6 13.2 55.6 12.6 54.4 C11.8 52.4 11.6 50.2 11.8 48.6 C11.1 46.6 10.2 44 10.2 41.6 Z" fill="#2f7d45"/><path d="M10.4 39 L19.4 39 L19.3 42 C19.3 44.6 19 46.8 18.9 48.6 C19.1 49.8 19.2 51.4 18.8 53 C18.4 54.6 18.6 56 18.4 57.8 Q18.2 59 16.6 59 L14.8 59 Q13.6 59 13.4 57.8 C13.3 56.6 13.2 55.6 12.6 54.4 C11.8 52.4 11.6 50.2 11.8 48.6 C11.1 46.6 10.2 44 10.2 41.6 Z" fill="#2f7d45" transform="matrix(-1 0 0 1 40 0)"/> <path d="M29.4 20.6 C27.6 21.90 24.4 21.90 22.4 20.90 C21 20.20 20.4 19.30 20 18.50 C19.6 19.30 19 20.20 17.6 20.90 C15.6 21.90 12.4 21.90 10.6 19.70" fill="none" stroke="#1d4594" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 14.4 L20 18.6" stroke="#1d4594" stroke-width="1.6" stroke-linecap="round"/> <g stroke="#a8740f" stroke-width="1.28" stroke-linecap="round" fill="none"><path d="M20 22.4 L20 31.4"/><path d="M14.6 25.6 Q17.3 26.2 19.4 25.8 M20.6 25.8 Q22.7 26.2 25.4 25.6"/><path d="M14.4 28.8 Q17.3 29.3 19.4 29 M20.6 29 Q22.7 29.3 25.6 28.8"/></g> <path d="M20 24 c-6-4-8.5-7-8.5-10 c0-2.6 2-4.4 4.3-4.4 c1.8 0 3.3 1 4.2 2.6 c0.9-1.6 2.4-2.6 4.2-2.6 c2.3 0 4.3 1.8 4.3 4.4 c0 3-2.5 6-8.5 10z" fill="#ff5252" transform="translate(20 18.4) scale(0.6) translate(-20 -16.5)"/> </svg>';
+function bodyKeySvg(h){ return BODY_KEY_SVG.replace('WW', String(Math.round(h*2/3*10)/10)).replace('HH', String(h)); }
 let homeCalFromEnd = 0; // how many months back from the newest the calendar was showing (kept across re-renders)
 function renderHomeCalendar(sorted, today){
   const dock = document.getElementById('homeCalDock');
