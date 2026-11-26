@@ -658,7 +658,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-26 · duration stats</div>
+  <div class="build-label">Build 2026-11-27 · warm-up ends at last warm-up set</div>
 </div>
 
 <!-- STATS -->
@@ -1210,20 +1210,28 @@ function inWorkoutSession(w, now){
 function bumpActiveUntil(w, now){
   if(inWorkoutSession(w, now) && !(w.activeUntil >= now)) w.activeUntil = now;
 }
-/* Optional workout.mainStartedAt (ms, Nov 2026): when the main part began, i.e. the first set checked in the
-   Workout section (Circuit workouts: the timer starting). Warm-up = createdAt→mainStartedAt, workout =
-   mainStartedAt→activeUntil. Only set once, and only during the workout's session. */
+/* Warm-up / workout split. Optional workout.warmupEndedAt (ms, Nov 27): the last warm-up set checked during the
+   session, so a main exercise done in the middle of the warm-up counts as warm-up. Without it (no warm-up sets
+   checked, or workouts from Nov 26) the split falls back to workout.mainStartedAt: the first set checked in the
+   Workout section, or the circuit timer starting. Warm-up = createdAt→split, workout = split→activeUntil.
+   Both are only recorded during the workout's session. */
 function markMainStarted(w){
   const now = Date.now();
   if(w && !w.mainStartedAt && inWorkoutSession(w, now)) w.mainStartedAt = now;
+}
+function markWarmupSet(w){
+  const now = Date.now();
+  if(w && inWorkoutSession(w, now) && !(w.warmupEndedAt >= now)) w.warmupEndedAt = now;
 }
 // Minutes a workout took, split into warm-up and workout when mainStartedAt is known; null if it wasn't timed.
 function workoutDuration(w){
   if(!w || !w.createdAt || !w.activeUntil) return null;
   const total = Math.round((w.activeUntil - w.createdAt) / 60000);
   if(total < 1) return null;
-  if(w.mainStartedAt && w.mainStartedAt >= w.createdAt && w.mainStartedAt <= w.activeUntil){
-    const warm = Math.round((w.mainStartedAt - w.createdAt) / 60000);
+  const ok = t=> t && t >= w.createdAt && t <= w.activeUntil;
+  const splitAt = ok(w.warmupEndedAt) ? w.warmupEndedAt : ok(w.mainStartedAt) ? w.mainStartedAt : null;
+  if(splitAt){
+    const warm = Math.round((splitAt - w.createdAt) / 60000);
     return {total, warm, main: total - warm};
   }
   return {total, warm:null, main:null};
@@ -2346,7 +2354,7 @@ function durationPanelHtml(){
     ${legend}
     <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Duration of the last ${timed.length} timed workouts">${o}</svg></div>
     <div class="chart-readout" id="durReadout">${escapeHtml(txt(timed[timed.length-1]))}</div>
-    <div style="font-size:12px;color:var(--muted)">Last ${timed.length} timed workout${timed.length===1?'':'s'}. Warm-up runs until your first checked set in the Workout section.</div>
+    <div style="font-size:12px;color:var(--muted)">Last ${timed.length} timed workout${timed.length===1?'':'s'}. Warm-up runs until your last checked warm-up set.</div>
   </div>`;
 }
 
@@ -3613,7 +3621,8 @@ function toggleSetDone(instId, idx){
     // checking it records what was on screen.
     if((inst.secondaryType||'weight')==='band' && !x.band) x.band = BAND_COLORS[0];
     if(!wasStarted) pendingMoveUp.add(inst.id); // moved up later, once you leave this exercise
-    if(findInstAndBucket(instId).key==='main') markMainStarted(getWorkout()); // warm-up ends at the first Workout set
+    if(findInstAndBucket(instId).key==='main') markMainStarted(getWorkout()); // fallback split if no warm-up set is checked
+    else markWarmupSet(getWorkout()); // warm-up ends at the last warm-up set checked
   }
   saveDB();
   if(turningOn){
