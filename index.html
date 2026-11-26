@@ -199,6 +199,14 @@
   .ch-bar{fill:var(--sage); opacity:.55;}
   .ch-bar.cur{opacity:1;}
   .ch-hit{fill:transparent; cursor:pointer;}
+  .dur-tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px;}
+  .dur-tiles>div{background:var(--panel, var(--bg)); border:1px solid var(--line); border-radius:10px; padding:8px;}
+  .dur-tiles .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:700;}
+  .dur-tiles .v{font-size:18px; font-weight:800; color:var(--ink); margin-top:2px; font-variant-numeric:tabular-nums;}
+  .dur-legend{display:flex; gap:14px; font-size:12px; color:var(--muted); margin:2px 0 6px;}
+  .dur-legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+  .dur-main{fill:var(--sage);} .dur-main-key{background:var(--sage);}
+  .dur-nosplit{fill:var(--muted); opacity:.45;} .dur-nosplit-key{background:var(--muted); opacity:.45;}
   .chart-readout{font-size:12.5px; color:var(--sage-dark); font-weight:600; min-height:18px; margin:2px 0 8px;}
   .rec-grid{display:grid; grid-template-columns:1fr 1fr; gap:8px; margin:6px 0 10px;}
   .rec-card{background:#fff; border:1px solid var(--line); border-radius:10px; padding:8px 10px;}
@@ -650,7 +658,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-26 · duration ignores late changes</div>
+  <div class="build-label">Build 2026-11-26 · duration stats</div>
 </div>
 
 <!-- STATS -->
@@ -1189,16 +1197,38 @@ function saveDB(){
    changed gets a new updatedAt, anything that vanished gets a deletion record. Inactive until addSyncFields has
    run (syncSnapshot stays null), so the startup migrations above it don't stamp anything. */
 let syncSnapshot = null;
-function syncKeyOf(o){ const { updatedAt, activeUntil, ...rest } = o; return JSON.stringify(rest); }
+function syncKeyOf(o){ const { updatedAt, ...rest } = o; return JSON.stringify(rest); }
 /* Workout duration (Nov 2026): optional workout.activeUntil (ms) is the end of the training session. Each edit
    moves it forward only if it comes within ACTIVE_GAP_MS of the previous activeUntil, so a set ticked hours later
    or the next day doesn't stretch the duration. The first edit starts it if it is within 6 h of createdAt.
    Workouts from before this have none and keep the createdAt→updatedAt footer. */
 const ACTIVE_GAP_MS = 25*60*1000;
-function bumpActiveUntil(w, now){
-  if(w.activeUntil){ if(now - w.activeUntil <= ACTIVE_GAP_MS && now > w.activeUntil) w.activeUntil = now; }
-  else if(w.createdAt && now >= w.createdAt && now - w.createdAt <= 6*60*60*1000) w.activeUntil = now;
+function inWorkoutSession(w, now){
+  if(w.activeUntil) return now - w.activeUntil <= ACTIVE_GAP_MS;
+  return !!w.createdAt && now >= w.createdAt && now - w.createdAt <= 6*60*60*1000;
 }
+function bumpActiveUntil(w, now){
+  if(inWorkoutSession(w, now) && !(w.activeUntil >= now)) w.activeUntil = now;
+}
+/* Optional workout.mainStartedAt (ms, Nov 2026): when the main part began, i.e. the first set checked in the
+   Workout section (Circuit workouts: the timer starting). Warm-up = createdAt→mainStartedAt, workout =
+   mainStartedAt→activeUntil. Only set once, and only during the workout's session. */
+function markMainStarted(w){
+  const now = Date.now();
+  if(w && !w.mainStartedAt && inWorkoutSession(w, now)) w.mainStartedAt = now;
+}
+// Minutes a workout took, split into warm-up and workout when mainStartedAt is known; null if it wasn't timed.
+function workoutDuration(w){
+  if(!w || !w.createdAt || !w.activeUntil) return null;
+  const total = Math.round((w.activeUntil - w.createdAt) / 60000);
+  if(total < 1) return null;
+  if(w.mainStartedAt && w.mainStartedAt >= w.createdAt && w.mainStartedAt <= w.activeUntil){
+    const warm = Math.round((w.mainStartedAt - w.createdAt) / 60000);
+    return {total, warm, main: total - warm};
+  }
+  return {total, warm:null, main:null};
+}
+const fmtMins = m=> m >= 60 ? `${Math.floor(m/60)} h ${String(m%60).padStart(2,'0')}` : `${m} min`;
 function takeSyncSnapshot(){
   syncSnapshot = new Map();
   (db.workouts||[]).forEach(w=> syncSnapshot.set('w:'+w.id, syncKeyOf(w)));
@@ -2201,13 +2231,17 @@ function renderStats(){
   const thisWeek = weekStartStr(localDateStr());
   const keys = [];
   { const d = new Date(thisWeek+'T00:00:00'); for(let i=11;i>=0;i--){ const x = new Date(d); x.setDate(x.getDate()-7*i); keys.push(localDateStr(x)); } }
-  const zero = {workouts:0, sets:0, vol:0};
+  // training time per week from timed workouts (any workout with a recorded duration)
+  db.workouts.forEach(w=>{ const d = workoutDuration(w); if(!d) return; const k = weekStartStr(w.date);
+    const o = byWeek[k] || (byWeek[k] = {workouts:0, sets:0, vol:0}); o.mins = (o.mins||0) + d.total; });
+  const zero = {workouts:0, sets:0, vol:0, mins:0};
   const cur = byWeek[keys[11]] || zero, prev = byWeek[keys[10]] || zero;
   const dlt = (a,b)=> b>0 ? ((a-b)>=0?'+':'')+Math.round((a-b)/b*100)+'% vs last wk' : 'last wk: 0';
   const mdef = {
     volume:{label:'Volume', get:o=>o.vol, fmt:v=>fmtVol(v)+' lb'},
     workouts:{label:'Workouts', get:o=>o.workouts, fmt:v=>v+(v===1?' workout':' workouts')},
-    sets:{label:'Sets', get:o=>o.sets, fmt:v=>v+(v===1?' set':' sets')}
+    sets:{label:'Sets', get:o=>o.sets, fmt:v=>v+(v===1?' set':' sets')},
+    time:{label:'Time', get:o=>o.mins||0, fmt:v=>fmtMins(v)+' training'}
   };
   const md = mdef[statsMetric];
   const bars = keys.map((k,i)=>{
@@ -2250,6 +2284,7 @@ function renderStats(){
       <div class="stat-card"><div class="k">Sets</div><div class="v">${cur.sets}</div><div class="d">${dlt(cur.sets, prev.sets)}</div></div>
       <div class="stat-card"><div class="k">Volume</div><div class="v">${fmtVol(cur.vol)}</div><div class="d">${dlt(cur.vol, prev.vol)}</div></div>
     </div>
+    ${durationPanelHtml()}
     <div class="stat-panel">
       <h3>Last 12 weeks</h3>
       <div class="metric-chips">${Object.keys(mdef).map(k=>`<span class="metric-chip ${k===statsMetric?'active':''}" onclick="setStatsMetric('${k}')">${mdef[k].label}</span>`).join('')}</div>
@@ -2265,6 +2300,54 @@ function renderStats(){
       <div style="font-size:14px">${counted.length} workouts${sorted.length?` since ${fmtDateY(sorted[0])}`:''}</div>
       <div style="font-size:12.5px;color:var(--muted);margin-top:4px">Volume counts checked working sets in the Workout section (warmup sets and the Warmup section are excluded).</div>
     </div>`;
+}
+
+/* Stats: workout duration. Tiles with the averages over the last 10 timed workouts, then one stacked bar per
+   workout (warm-up amber at the bottom, workout lime on top, 2px gap; grey when there is no split). Tap a bar
+   for its numbers. Only workouts with a recorded duration (activeUntil) appear. */
+const DUR_WARM = '#e08a2e';
+function durationPanelHtml(){
+  const timed = db.workouts.map(w=> ({w, d: workoutDuration(w)})).filter(x=> x.d)
+    .sort((a,b)=> a.w.date.localeCompare(b.w.date) || a.w.createdAt - b.w.createdAt).slice(-10);
+  if(!timed.length) return `<div class="stat-panel"><h3>Workout duration</h3><div style="font-size:13.5px;color:var(--muted)">No timed workouts yet. Workouts you log from now on show here, split into warm-up and workout.</div></div>`;
+  const split = timed.filter(x=> x.d.warm!=null);
+  const avg = a=> a.length ? Math.round(a.reduce((s,v)=> s+v, 0)/a.length) : null;
+  const aT = avg(timed.map(x=> x.d.total)), aW = avg(split.map(x=> x.d.warm)), aM = avg(split.map(x=> x.d.main));
+  const tile = (k,v)=> `<div><div class="k">${k}</div><div class="v">${v==null?'–':fmtMins(v)}</div></div>`;
+  const txt = x=> { const d = new Date(x.w.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+    const t = (x.w.types||[]).join(', ');
+    return `${d}${t?' · '+t:''} · ` + (x.d.warm!=null ? `${x.d.warm} min warm-up + ${x.d.main} min workout = ${fmtMins(x.d.total)}` : `${fmtMins(x.d.total)} (no warm-up split)`); };
+  // chart
+  const W=320, H=150, L=30, R=6, T=10, B=22;
+  const maxT = Math.max(...timed.map(x=> x.d.total));
+  const step = maxT > 150 ? 60 : 30, top = Math.max(60, Math.ceil(maxT/step)*step);
+  const y = m=> H-B-(H-T-B)*m/top;
+  const lab = m=> m%60===0 ? (m/60)+' h' : m<60 ? m+'m' : (m/60)+' h';
+  let o = '';
+  for(let m=step; m<=top; m+=step) o += `<line class="ch-grid" x1="${L}" x2="${W-R}" y1="${y(m).toFixed(1)}" y2="${y(m).toFixed(1)}"/><text class="ch-axis" x="${L-4}" y="${(y(m)+3).toFixed(1)}" text-anchor="end" style="font-size:8.5px">${lab(m)}</text>`;
+  const n = 10, slot = (W-L-R)/n, bw = Math.min(18, slot*0.6);
+  timed.forEach((x,i)=>{
+    const bx = L + slot*i + (slot-bw)/2;
+    if(x.d.warm!=null){
+      const yw = y(x.d.warm), yt = y(x.d.total);
+      if(x.d.warm > 0) o += `<rect x="${bx.toFixed(1)}" y="${yw.toFixed(1)}" width="${bw.toFixed(1)}" height="${(H-B-yw).toFixed(1)}" rx="2" fill="${DUR_WARM}"/>`;
+      const mh = (x.d.warm > 0 ? yw-2 : H-B) - yt;
+      if(mh > 0) o += `<rect x="${bx.toFixed(1)}" y="${yt.toFixed(1)}" width="${bw.toFixed(1)}" height="${mh.toFixed(1)}" rx="3" class="dur-main"/>`;
+    } else {
+      o += `<rect x="${bx.toFixed(1)}" y="${y(x.d.total).toFixed(1)}" width="${bw.toFixed(1)}" height="${(H-B-y(x.d.total)).toFixed(1)}" rx="3" class="dur-nosplit"/>`;
+    }
+    if(i===0 || i===timed.length-1 || i%3===0){ const d = new Date(x.w.date+'T00:00:00'); o += `<text class="ch-axis" x="${(bx+bw/2).toFixed(1)}" y="${H-7}" text-anchor="middle" style="font-size:8.5px">${d.getMonth()+1}/${d.getDate()}</text>`; }
+    o += `<rect class="ch-hit" x="${(L+slot*i).toFixed(1)}" y="0" width="${slot.toFixed(1)}" height="${H-B}" data-txt="${escapeHtml(txt(x))}" onclick="chartTap(this,'durReadout')"/>`;
+  });
+  o += `<line class="ch-grid" x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}"/>`;
+  const legend = `<div class="dur-legend"><span><i style="background:${DUR_WARM}"></i>Warm-up</span><span><i class="dur-main-key"></i>Workout</span>${timed.length>split.length?'<span><i class="dur-nosplit-key"></i>No split</span>':''}</div>`;
+  return `<div class="stat-panel"><h3>Workout duration</h3>
+    <div class="dur-tiles">${tile('Avg total', aT)}${tile('Avg warm-up', aW)}${tile('Avg workout', aM)}</div>
+    ${legend}
+    <div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Duration of the last ${timed.length} timed workouts">${o}</svg></div>
+    <div class="chart-readout" id="durReadout">${escapeHtml(txt(timed[timed.length-1]))}</div>
+    <div style="font-size:12px;color:var(--muted)">Last ${timed.length} timed workout${timed.length===1?'':'s'}. Warm-up runs until your first checked set in the Workout section.</div>
+  </div>`;
 }
 
 /* ---------------- New workout flow ---------------- */
@@ -3530,6 +3613,7 @@ function toggleSetDone(instId, idx){
     // checking it records what was on screen.
     if((inst.secondaryType||'weight')==='band' && !x.band) x.band = BAND_COLORS[0];
     if(!wasStarted) pendingMoveUp.add(inst.id); // moved up later, once you leave this exercise
+    if(findInstAndBucket(instId).key==='main') markMainStarted(getWorkout()); // warm-up ends at the first Workout set
   }
   saveDB();
   if(turningOn){
@@ -4184,7 +4268,8 @@ function ctBeginSessionNow(startCtxTime){
     rounds: ctConfig.rounds, workSeconds: ctConfig.workSeconds,
     restSeconds: ctConfig.restSeconds, exerciseCount: ctConfig.exercises.length
   });
-  ctSession = { schedule, startCtxTime, startWallTime: Date.now(), paused:false, pausedAtElapsed:0, beeps: ctBuildBeeps(schedule) };
+  ctSession = { schedule, startCtxTime, startWallTime: Date.now(), paused:false, pausedAtElapsed:0, beeps: ctBuildBeeps(schedule), workoutId: currentWorkoutId };
+  { const w = db.workouts.find(x=> x.id===currentWorkoutId); if(w && !w.mainStartedAt){ markMainStarted(w); saveDB(); } } // the circuit is the main part
   document.getElementById('ctRunningScreen').classList.remove('hidden');
   ctBuildProgressDots(schedule);
   ctRequestWakeLock();
@@ -4317,6 +4402,9 @@ function ctShowCompletion(){
   document.getElementById('ctCompletionSummary').textContent =
     `${ctConfig.rounds} rounds · ${ctConfig.exercises.length} exercises · ${totalMin} min total`;
   ctReleaseWakeLock();
+  // A finished circuit runs the workout's session up to now, even though the timer is longer than the 25 min gap.
+  const w = db.workouts.find(x=> x.id===ctSession.workoutId), now = Date.now();
+  if(w && w.activeUntil && now > w.activeUntil && now - w.activeUntil <= ctSession.schedule.totalSeconds*1000 + ACTIVE_GAP_MS){ w.activeUntil = now; saveDB(); }
   ctSession = null;
 }
 
