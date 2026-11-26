@@ -648,7 +648,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-24 · new body key colours</div>
+  <div class="build-label">Build 2026-11-26 · fix stuck drag card</div>
 </div>
 
 <!-- STATS -->
@@ -2607,6 +2607,7 @@ function formatLoadDelta(pct){
 
 let scrollToAfterRender = null; // exercise instance to bring into view after the next render (newly added)
 function renderWorkout(){
+  if(dragState || document.querySelector('.drag-ghost')) cancelDrag(); // a redraw replaces the dragged card; never leave its copy behind
   flushWheelSettles();
   if(scrollToAfterRender){ const id = scrollToAfterRender; scrollToAfterRender = null; setTimeout(()=> scrollCardIntoView(id), 0); }
   const w = getWorkout();
@@ -2769,7 +2770,11 @@ function wireUpExerciseDrag(){
       movedPastThreshold = false;
       startX = e.touches[0].clientX;
       startY = e.touches[0].clientY;
+      const startScroll = window.scrollY;
       pressTimer = setTimeout(()=>{
+        pressTimer = null;
+        // the card was redrawn, or the page is scrolling under the finger: not a drag
+        if(!cardEl.isConnected || Math.abs(window.scrollY - startScroll) > 2 || dragState) return;
         longPressFired = true;
         if(navigator.vibrate) navigator.vibrate(10);
         beginDrag(cardEl, instId, fromBucket, e.touches[0].clientY);
@@ -2795,6 +2800,9 @@ function wireUpExerciseDrag(){
         endDrag();
       }
     });
+    // iOS cancels a touch (rather than ending it) when something interrupts it; without this the
+    // floating copy stayed stuck on screen and the page stayed in drag mode.
+    cardEl.addEventListener('touchcancel', ()=>{ clearTimer(); cancelDrag(); });
   });
 }
 
@@ -2899,6 +2907,24 @@ function endDrag(){
   dragState = null;
   renderWorkout();
 }
+
+// Put a dragged card back where it was without changing the order, and clear every trace of the drag.
+// Also sweeps up a stray floating copy or placeholder left by an interrupted drag.
+function cancelDrag(){
+  if(dragState){
+    dragState.sourceEl.classList.remove('drag-source-hidden');
+    dragState = null;
+  }
+  document.querySelectorAll('.drag-ghost, .drag-placeholder').forEach(el=> el.remove());
+  document.querySelectorAll('.drag-source-hidden').forEach(el=> el.classList.remove('drag-source-hidden'));
+  document.documentElement.classList.remove('dragging');
+}
+// A drag only lives while a finger is down: end it on any finger-up the card itself didn't hear about,
+// and drop it if the touch is cancelled or the app goes to the background.
+document.addEventListener('touchend', e=>{ if(dragState && e.touches.length===0) endDrag(); }, true);
+document.addEventListener('touchcancel', ()=>{ if(dragState) cancelDrag(); }, true);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') cancelDrag(); });
+window.addEventListener('pagehide', cancelDrag);
 
 function renderExerciseBucket(containerId, bucket, bucketKey){
   const container = document.getElementById(containerId);
