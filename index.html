@@ -650,7 +650,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-26 · workout start time</div>
+  <div class="build-label">Build 2026-11-26 · duration ignores late changes</div>
 </div>
 
 <!-- STATS -->
@@ -1189,7 +1189,16 @@ function saveDB(){
    changed gets a new updatedAt, anything that vanished gets a deletion record. Inactive until addSyncFields has
    run (syncSnapshot stays null), so the startup migrations above it don't stamp anything. */
 let syncSnapshot = null;
-function syncKeyOf(o){ const { updatedAt, ...rest } = o; return JSON.stringify(rest); }
+function syncKeyOf(o){ const { updatedAt, activeUntil, ...rest } = o; return JSON.stringify(rest); }
+/* Workout duration (Nov 2026): optional workout.activeUntil (ms) is the end of the training session. Each edit
+   moves it forward only if it comes within ACTIVE_GAP_MS of the previous activeUntil, so a set ticked hours later
+   or the next day doesn't stretch the duration. The first edit starts it if it is within 6 h of createdAt.
+   Workouts from before this have none and keep the createdAt→updatedAt footer. */
+const ACTIVE_GAP_MS = 25*60*1000;
+function bumpActiveUntil(w, now){
+  if(w.activeUntil){ if(now - w.activeUntil <= ACTIVE_GAP_MS && now > w.activeUntil) w.activeUntil = now; }
+  else if(w.createdAt && now >= w.createdAt && now - w.createdAt <= 6*60*60*1000) w.activeUntil = now;
+}
 function takeSyncSnapshot(){
   syncSnapshot = new Map();
   (db.workouts||[]).forEach(w=> syncSnapshot.set('w:'+w.id, syncKeyOf(w)));
@@ -1202,7 +1211,7 @@ function stampEdits(){
   [['w', db.workouts, 'workouts'], ['e', db.exercises, 'exercises']].forEach(([k, list, dk])=>{
     (list||[]).forEach(o=>{
       const key = k+':'+o.id, j = syncKeyOf(o); seen.add(key);
-      if(syncSnapshot.get(key) !== j){ o.updatedAt = now; syncSnapshot.set(key, syncKeyOf(o)); changed = true; }
+      if(syncSnapshot.get(key) !== j){ o.updatedAt = now; if(k==='w') bumpActiveUntil(o, now); syncSnapshot.set(key, syncKeyOf(o)); changed = true; }
     });
     [...syncSnapshot.keys()].forEach(key=>{
       if(key.startsWith(k+':') && !seen.has(key)){ db.deleted[dk][key.slice(2)] = now; syncSnapshot.delete(key); changed = true; }
@@ -2930,22 +2939,25 @@ document.addEventListener('touchcancel', ()=>{ if(dragState) cancelDrag(); }, tr
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') cancelDrag(); });
 window.addEventListener('pagehide', cancelDrag);
 
-/* Footer at the bottom of a workout: when it was started (createdAt), its last change (updatedAt) and the
-   time between them. There is no finish time, so the duration is approximate; it is left out when the last
-   change came more than 6 hours later (e.g. a number fixed the next day), and the last change then shows its date. */
+/* Footer at the bottom of a workout: when it was started (createdAt), when the session ended and how long it took.
+   The end is activeUntil (see bumpActiveUntil: late edits more than 25 min after the last activity don't count).
+   Older workouts without activeUntil fall back to the last change (updatedAt); there the duration is left out
+   when the last change came more than 6 hours later, and the last change shows its date. */
 function renderWorkoutTimes(w){
   const el = document.getElementById('workoutTimes');
   if(!el) return;
   if(!w.createdAt){ el.textContent = ''; return; }
   const t = ms=> new Date(ms).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  const dur = m=> m >= 60 ? `${Math.floor(m/60)} h ${m%60} min` : `${m} min`;
   const parts = ['Started ' + t(w.createdAt)];
-  const last = w.updatedAt || 0, mins = Math.round((last - w.createdAt) / 60000);
-  if(mins >= 1){
-    if(mins <= 6*60){
-      parts.push('last change ' + t(last));
-      parts.push(mins >= 60 ? `${Math.floor(mins/60)} h ${mins%60} min` : `${mins} min`);
-    } else {
-      parts.push('last change ' + new Date(last).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ', ' + t(last));
+  if(w.activeUntil){
+    const mins = Math.round((w.activeUntil - w.createdAt) / 60000);
+    if(mins >= 1){ parts.push('ended ' + t(w.activeUntil)); parts.push(dur(mins)); }
+  } else {
+    const last = w.updatedAt || 0, mins = Math.round((last - w.createdAt) / 60000);
+    if(mins >= 1){
+      if(mins <= 6*60){ parts.push('last change ' + t(last)); parts.push(dur(mins)); }
+      else parts.push('last change ' + new Date(last).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ', ' + t(last));
     }
   }
   el.textContent = parts.join(' · ');
