@@ -235,6 +235,8 @@
     border-radius:var(--radius); opacity:0.95; transform:scale(1.02);
   }
   .drag-source-hidden{ visibility:hidden; }
+  .workout-times{text-align:center; color:var(--muted); font-size:13px; padding:18px 8px 8px; font-variant-numeric:tabular-nums; line-height:1.5;}
+  .workout-times:empty{display:none;}
   /* Long-press starts a drag on collapsed cards; stop iOS selecting text or showing the copy callout instead. */
   .exercise-head, .exercise-card.reorderable, html.dragging, html.dragging *{
     -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
@@ -648,7 +650,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-26 · fix stuck drag card</div>
+  <div class="build-label">Build 2026-11-26 · workout start time</div>
 </div>
 
 <!-- STATS -->
@@ -670,6 +672,7 @@ svg .eq{color:var(--muted)}
     <div id="mainExercises"></div>
     <button class="add-exercise-btn" id="mainAddBtn" onclick="openPicker('main')">+ Add exercise</button>
   </div>
+  <div id="workoutTimes" class="workout-times"></div>
 </div>
 
 <button class="fab" id="fabAdd" onclick="openNewWorkoutSheet()">+</button>
@@ -2617,6 +2620,7 @@ function renderWorkout(){
   renderExerciseBucket('mainExercises', w.main, 'main');
   renderCircuitPanel(w);
   renderSectionHeaders(w);
+  renderWorkoutTimes(w);
   initWheels();
   wireUpExerciseDrag();
 }
@@ -2925,6 +2929,27 @@ document.addEventListener('touchend', e=>{ if(dragState && e.touches.length===0)
 document.addEventListener('touchcancel', ()=>{ if(dragState) cancelDrag(); }, true);
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') cancelDrag(); });
 window.addEventListener('pagehide', cancelDrag);
+
+/* Footer at the bottom of a workout: when it was started (createdAt), its last change (updatedAt) and the
+   time between them. There is no finish time, so the duration is approximate; it is left out when the last
+   change came more than 6 hours later (e.g. a number fixed the next day), and the last change then shows its date. */
+function renderWorkoutTimes(w){
+  const el = document.getElementById('workoutTimes');
+  if(!el) return;
+  if(!w.createdAt){ el.textContent = ''; return; }
+  const t = ms=> new Date(ms).toLocaleTimeString('en-US', {hour:'numeric', minute:'2-digit'});
+  const parts = ['Started ' + t(w.createdAt)];
+  const last = w.updatedAt || 0, mins = Math.round((last - w.createdAt) / 60000);
+  if(mins >= 1){
+    if(mins <= 6*60){
+      parts.push('last change ' + t(last));
+      parts.push(mins >= 60 ? `${Math.floor(mins/60)} h ${mins%60} min` : `${mins} min`);
+    } else {
+      parts.push('last change ' + new Date(last).toLocaleDateString('en-US', {month:'short', day:'numeric'}) + ', ' + t(last));
+    }
+  }
+  el.textContent = parts.join(' · ');
+}
 
 function renderExerciseBucket(containerId, bucket, bucketKey){
   const container = document.getElementById(containerId);
