@@ -199,6 +199,20 @@
   .ch-bar{fill:var(--sage); opacity:.55;}
   .ch-bar.cur{opacity:1;}
   .ch-hit{fill:transparent; cursor:pointer;}
+  .mus-note{font-size:12px; color:var(--muted); line-height:1.4; margin-bottom:6px;}
+  .mus-legend{display:flex; gap:14px; font-size:12px; color:var(--muted); margin:2px 0 2px;}
+  .mus-legend i{display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:5px; vertical-align:-1px;}
+  .mus-group{display:flex; align-items:center; gap:6px; margin:12px 0 2px; font-size:11px; font-weight:700; letter-spacing:.4px; text-transform:uppercase; color:var(--muted);}
+  .mus-row{display:grid; grid-template-columns:118px 1fr 38px; align-items:center; gap:8px; width:100%; padding:6px 0; background:none; border:none; color:var(--ink); font:inherit; font-size:13.5px; text-align:left; cursor:pointer;}
+  .mus-name{white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+  .mus-track{position:relative; height:12px; background:var(--bg); border-radius:4px;}
+  .mus-band{position:absolute; top:-3px; bottom:-3px; border-left:1px dashed var(--muted); border-right:1px dashed var(--muted); background:rgba(184,240,62,.07);}
+  .mus-bar{position:absolute; left:0; top:0; bottom:0; border-radius:4px;}
+  .mus-bar.under{background:#e08a2e;} .mus-bar.in{background:var(--sage);} .mus-bar.over{background:#5aa9ff;}
+  .mus-val{text-align:right; font-weight:700; font-variant-numeric:tabular-nums;}
+  .mus-row.open .mus-name{color:var(--sage-dark);}
+  .mus-detail{font-size:12.5px; color:var(--muted); padding:0 0 6px; line-height:1.5;}
+  .mus-detail b{color:var(--ink); font-variant-numeric:tabular-nums;}
   .dur-tiles{display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:10px;}
   .dur-tiles>div{background:var(--panel, var(--bg)); border:1px solid var(--line); border-radius:10px; padding:8px;}
   .dur-tiles .k{font-size:10.5px; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); font-weight:700;}
@@ -658,7 +672,7 @@ svg .eq{color:var(--muted)}
 <div class="screen" id="landingScreen">
   <div id="dayList"></div>
   <div id="homeCalDock" class="home-cal-dock"></div>
-  <div class="build-label">Build 2026-11-27 · warm-up ends at last warm-up set</div>
+  <div class="build-label">Build 2026-11-27 · sets per muscle</div>
 </div>
 
 <!-- STATS -->
@@ -1022,6 +1036,82 @@ function getExerciseIcon(name){
    circuit-timer searches (e.g. "thoracic" finds Thread the needle). Keyed by
    lowercase exercise name, like EXERCISE_ICONS. Words already in the name are
    left out. Exercises you create yourself have no tags until added here. */
+/* Weekly sets per muscle (Nov 2026). Muscles each exercise trains, keyed by lowercase name like EXERCISE_TAGS
+   (lives in code, not saved data; renaming an exercise means renaming its key here too). p = primary (a set
+   counts 1), s = secondary (a set counts ½). Stretches, releases and mobility drills have none and never count. */
+const MUSCLES = [
+  ['chest','Chest','upper'], ['fdelt','Front delts','upper'], ['sdelt','Side delts','upper'], ['rdelt','Rear delts','upper'],
+  ['back','Lats & upper back','upper'], ['traps','Traps','upper'],
+  ['biceps','Biceps','arms'], ['triceps','Triceps','arms'], ['forearms','Forearms','arms'],
+  ['abs','Abs','core'], ['obliques','Obliques','core'], ['lowback','Lower back','core'],
+  ['glutes','Glutes','lower'], ['quads','Quads','lower'], ['hams','Hamstrings','lower'], ['calves','Calves','lower']
+];
+const EXERCISE_MUSCLES = {
+  "deadlift": {p:['glutes','hams'], s:['lowback','quads','back','traps','forearms']},
+  "bench press": {p:['chest'], s:['triceps','fdelt']},
+  "floor press": {p:['chest'], s:['triceps','fdelt']},
+  "standing chest press": {p:['chest'], s:['triceps','fdelt']},
+  "half-kneeling landmine press": {p:['fdelt'], s:['chest','triceps','abs']},
+  "seated cable row": {p:['back'], s:['biceps','rdelt','traps']},
+  "back squat": {p:['quads','glutes'], s:['lowback','hams']},
+  "split squat": {p:['quads','glutes'], s:['hams']},
+  "single-leg rdl": {p:['hams','glutes'], s:['lowback']},
+  "kickstand rdl": {p:['hams','glutes'], s:['lowback']},
+  "crossbody deadlift": {p:['hams','glutes'], s:['lowback','forearms']},
+  "wall sit with ball squeeze": {p:['quads'], s:[]},
+  "copenhagen plank": {p:['obliques'], s:['abs']},
+  "scapular retraction": {p:['traps'], s:['back','rdelt']},
+  "prone frog kick": {p:['glutes'], s:[]},
+  "tall-kneeling hip hinge": {p:['glutes'], s:['hams']},
+  "standing calf raise": {p:['calves'], s:[]},
+  "biceps curl": {p:['biceps'], s:['forearms']},
+  "reverse curl": {p:['forearms'], s:['biceps']},
+  "triceps pushdown": {p:['triceps'], s:[]},
+  "overhead triceps extension": {p:['triceps'], s:[]},
+  "reverse wrist curl": {p:['forearms'], s:[]},
+  "wrist curl": {p:['forearms'], s:[]},
+  "wrist pronation": {p:['forearms'], s:[]},
+  "wrist supination": {p:['forearms'], s:[]},
+  "ski pull": {p:['back'], s:['triceps','abs']},
+  "step up": {p:['quads','glutes'], s:['hams','calves']},
+  "kettlebell swing": {p:['glutes','hams'], s:['lowback']},
+  "single leg hip thrust": {p:['glutes'], s:['hams']},
+  "hip thrust": {p:['glutes'], s:['hams']},
+  "standing leg curl": {p:['hams'], s:[]},
+  "pull-through": {p:['glutes','hams'], s:[]},
+  "45° back extension": {p:['lowback','glutes'], s:['hams']},
+  "side-lying rear delt raise": {p:['rdelt'], s:['traps']},
+  "front raise": {p:['fdelt'], s:[]},
+  "prone y raise": {p:['traps'], s:['rdelt']},
+  "reverse fly": {p:['rdelt'], s:['traps','back']},
+  "scapular plank": {p:[], s:['abs']},
+  "kettlebell windmill": {p:['obliques'], s:['fdelt','hams']},
+  "eccentric sit-up": {p:['abs'], s:[]},
+  "leg raise": {p:['abs'], s:['obliques']}
+};
+function exerciseMuscles(name){ return EXERCISE_MUSCLES[(name||'').trim().toLowerCase()] || null; }
+// Sets per muscle over the last 7 days (today and the 6 days before), from checked non-W sets in the Workout
+// section; Circuit workouts are left out. Returns {m:{key:{total, by:{exerciseName:sets}}}, unmapped:[names]}.
+function weeklyMuscleSets(){
+  const today = localDateStr(), d0 = new Date(today+'T00:00:00'); d0.setDate(d0.getDate()-6);
+  const from = localDateStr(d0);
+  const m = {}; MUSCLES.forEach(([k])=> m[k] = {total:0, by:{}});
+  const unmapped = new Set();
+  db.workouts.forEach(w=>{
+    if(w.date < from || w.date > today || (w.types||[]).includes('Circuit')) return;
+    (w.main||[]).forEach(inst=>{
+      const n = (inst.sets||[]).filter(isCounted).length;
+      if(!n) return;
+      const ex = db.exercises.find(e=> e.id===inst.exerciseId); if(!ex) return;
+      const mm = exerciseMuscles(ex.name);
+      if(!mm || (!mm.p.length && !mm.s.length)){ if(!getExerciseTags(ex.name).includes('cardio')) unmapped.add(ex.name); return; } // cardio is simply not counted
+      const add = (k, v)=>{ if(!m[k]) return; m[k].total += v; m[k].by[ex.name] = (m[k].by[ex.name]||0) + v; };
+      mm.p.forEach(k=> add(k, n)); mm.s.forEach(k=> add(k, n/2));
+    });
+  });
+  return {m, unmapped:[...unmapped]};
+}
+
 const EXERCISE_TAGS = {
   "45\u00b0 back extension": ["lower back", "glutes", "hamstrings", "posterior chain", "hinge"],
   "back squat": ["quads", "glutes", "legs", "barbell"],
@@ -2292,6 +2382,7 @@ function renderStats(){
       <div class="stat-card"><div class="k">Sets</div><div class="v">${cur.sets}</div><div class="d">${dlt(cur.sets, prev.sets)}</div></div>
       <div class="stat-card"><div class="k">Volume</div><div class="v">${fmtVol(cur.vol)}</div><div class="d">${dlt(cur.vol, prev.vol)}</div></div>
     </div>
+    ${musclePanelHtml()}
     ${durationPanelHtml()}
     <div class="stat-panel">
       <h3>Last 12 weeks</h3>
@@ -2313,6 +2404,37 @@ function renderStats(){
 /* Stats: workout duration. Tiles with the averages over the last 10 timed workouts, then one stacked bar per
    workout (warm-up amber at the bottom, workout lime on top, 2px gap; grey when there is no split). Tap a bar
    for its numbers. Only workouts with a recorded duration (activeUntil) appear. */
+/* Stats: sets per muscle over the last 7 days. One row per muscle, grouped by body area, with a bar on a 0–24
+   scale, the 12–20 target band marked and the bar coloured by status (under amber, on target lime, over blue).
+   Tap a row to list the exercises that counted. */
+const MUS_UNDER = '#e08a2e', MUS_OVER = '#5aa9ff', MUS_LO = 12, MUS_HI = 20;
+let openMuscle = null;
+function toggleMuscleRow(k){ openMuscle = openMuscle===k ? null : k; const el = document.getElementById('musclePanel'); if(el) el.outerHTML = musclePanelHtml(); }
+function musclePanelHtml(){
+  const {m, unmapped} = weeklyMuscleSets();
+  const fmt = v=> Number.isInteger(v) ? String(v) : v.toFixed(1);
+  const SCALE = 24, pct = v=> Math.min(v, SCALE)/SCALE*100;
+  const groups = {upper:'Upper body', arms:'Arms', core:'Core', lower:'Lower body'};
+  let rows = '', g = '';
+  MUSCLES.forEach(([k, name, cat])=>{
+    if(cat!==g){ g = cat; rows += `<div class="mus-group"><i class="cat-dot" style="background:${CATEGORY_COLORS[cat]}"></i>${groups[cat]}</div>`; }
+    const v = m[k].total;
+    const [cls, label] = v < MUS_LO ? ['under', 'under target'] : v <= MUS_HI ? ['in', 'on target'] : ['over', 'over target'];
+    const by = Object.entries(m[k].by).sort((a,b)=> b[1]-a[1]);
+    rows += `<button class="mus-row ${openMuscle===k?'open':''}" onclick="toggleMuscleRow('${k}')" aria-label="${name}: ${fmt(v)} sets, ${label}">
+      <span class="mus-name">${name}</span>
+      <span class="mus-track"><span class="mus-band" style="left:${pct(MUS_LO)}%;width:${pct(MUS_HI)-pct(MUS_LO)}%"></span><span class="mus-bar ${cls}" style="width:${pct(v)}%"></span></span>
+      <span class="mus-val">${fmt(v)}</span></button>`;
+    if(openMuscle===k) rows += `<div class="mus-detail">${by.length ? by.map(([n,x])=> `${escapeHtml(n)} <b>${fmt(x)}</b>`).join(' · ') : 'No sets in the last 7 days'}</div>`;
+  });
+  return `<div class="stat-panel" id="musclePanel"><h3>Sets per muscle · last 7 days</h3>
+    <div class="mus-note">Target ${MUS_LO}–${MUS_HI} sets a week. Checked Workout-section sets only; secondary muscles count ½ set. Tap a muscle for its exercises.</div>
+    <div class="mus-legend"><span><i style="background:${MUS_UNDER}"></i>Under ${MUS_LO}</span><span><i style="background:var(--sage)"></i>${MUS_LO}–${MUS_HI}</span><span><i style="background:${MUS_OVER}"></i>Over ${MUS_HI}</span></div>
+    ${rows}
+    ${unmapped.length ? `<div class="mus-note" style="margin-top:8px">Not counted (no muscles listed): ${unmapped.map(escapeHtml).join(', ')}</div>` : ''}
+  </div>`;
+}
+
 const DUR_WARM = '#e08a2e';
 function durationPanelHtml(){
   const timed = db.workouts.map(w=> ({w, d: workoutDuration(w)})).filter(x=> x.d)
